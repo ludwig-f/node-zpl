@@ -1,0 +1,59 @@
+{
+  "name": "node-zpl",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "ZPL generator for TypeScript",
+  "types": "build/index.d.ts",
+  "module": "build/index.js",
+  "repository": "https://github.com/ludwig-f/node-zpl",
+  "license": "MIT",
+  "keywords": [
+    "zpl",
+    "zpl2",
+    "label",
+    "printer",
+    "zebra",
+    "typescript",
+    "ts",
+    "node",
+    "nodejs"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "fix": "prettier \"src/**/*.ts\" --write",
+    "lint": "eslint src --ext .ts",
+    "test": "vitest",
+    "watch": "tsc -w",
+    "version": "standard-version"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.2.0",
+    "@typescript-eslint/parser": "^7.2.0",
+    "cz-conventional-changelog": "^3.3.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^6.11.0",
+    "prettier": "^2.1.1",
+    "typescript": "^5.4.2",
+    "vite": "^5.1.5",
+    "vitest": "^1.3.1"
+  },
+  "files": [
+    "build/module",
+    "!**/*.spec.*",
+    "!**/*.json",
+    "CHANGELOG.md",
+    "LICENSE",
+    "README.md"
+  ],
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  },
+  "dependencies": {
+    "jimp": "^0.22.12"
+  }
+}
