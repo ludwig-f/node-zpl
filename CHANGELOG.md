@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/ludwig-f/node-zpl/compare/v1.0.1...v1.0.2) (2024-03-18)
+
+
+### Bug Fixes
+
+* actually build project before publishing it 🤦 ([54391c6](https://github.com/ludwig-f/node-zpl/commit/54391c62594b2935c6a43a7afeca771d3a4f466a))
+
 ## [1.0.1](https://github.com/ludwig-f/node-zpl/compare/v1.0.0...v1.0.1) (2024-03-18)
 
 
