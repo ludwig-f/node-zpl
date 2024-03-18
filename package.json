@@ -24,7 +24,8 @@
     "lint": "eslint src --ext .ts",
     "test": "vitest",
     "watch": "tsc -w",
-    "version": "standard-version"
+    "version": "standard-version",
+    "prepare": "husky"
   },
   "engines": {
     "node": ">=16"
@@ -35,6 +36,7 @@
     "cz-conventional-changelog": "^3.3.0",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^6.11.0",
+    "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
     "prettier": "^2.1.1",
     "typescript": "^5.4.2",
