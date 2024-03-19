@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/ludwig-f/node-zpl/compare/v1.0.2...v1.0.3) (2024-03-19)
+
+
+### Bug Fixes
+
+* fix broken default imports (hopefully) ([b2aede8](https://github.com/ludwig-f/node-zpl/commit/b2aede82a3487c76d74c8daa51bc7fc8414259c3))
+
 ## [1.0.2](https://github.com/ludwig-f/node-zpl/compare/v1.0.1...v1.0.2) (2024-03-18)
 
 
