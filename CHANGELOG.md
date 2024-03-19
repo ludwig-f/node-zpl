@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.4](https://github.com/ludwig-f/node-zpl/compare/v1.0.3...v1.0.4) (2024-03-19)
+
+
+### Bug Fixes
+
+* fix broken esm config ([119cb9a](https://github.com/ludwig-f/node-zpl/commit/119cb9a145f72044e6fc5b7d64e45d888fe096da))
+
 ## [1.0.3](https://github.com/ludwig-f/node-zpl/compare/v1.0.2...v1.0.3) (2024-03-19)
 
 
