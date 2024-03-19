@@ -27,7 +27,7 @@ suite("ImageConverter", () => {
   describe("toZPL", () => {
     test("should convert the given image to ZPL", async () => {
       const imageBuffer = await readFile(
-        join(__dirname, "../assets/test-image.png")
+        join(import.meta.dirname, "../assets/test-image.png")
       );
       const result: ZplImage = await converter.toZPL(imageBuffer);
 

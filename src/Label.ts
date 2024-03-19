@@ -1,7 +1,7 @@
-import ZplContent from "./ZplContent";
-import ZplError from "./ZplError";
-import { ZebraFontFamily, Orientation } from "./types";
-import type { StoreGraphicsOptions, Position } from "./types";
+import ZplContent from "./ZplContent.js";
+import ZplError from "./ZplError.js";
+import { ZebraFontFamily, Orientation } from "./types.js";
+import type { StoreGraphicsOptions, Position } from "./types.js";
 
 class Label extends ZplContent {
   protected width: number;

@@ -6,6 +6,12 @@
   "types": "build/index.d.ts",
   "module": "build/index.js",
   "main": "build/index.js",
+  "exports": {
+    ".": {
+      "import": "./build/index.js",
+      "require": "./build/index.js"
+    }
+  },
   "repository": "https://github.com/ludwig-f/node-zpl",
   "license": "MIT",
   "keywords": [

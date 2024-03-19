@@ -157,7 +157,9 @@ suite("Label", () => {
   describe("drawGraphic", () => {
     test("should draw a graphic on the label", async () => {
       const converter = new ImageConverter();
-      const buffer = readFileSync(join(__dirname, "../assets/test-image.png"));
+      const buffer = readFileSync(
+        join(import.meta.dirname, "../assets/test-image.png")
+      );
       const image = await converter.toZPL(buffer);
 
       const label = new Label(57, 19, 12).drawImage({

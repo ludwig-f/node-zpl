@@ -1,5 +1,5 @@
-import ZplError from "./ZplError";
-import commands from "./commands";
+import ZplError from "./ZplError.js";
+import commands from "./commands.js";
 
 /**
  * Base class for all ZPL content

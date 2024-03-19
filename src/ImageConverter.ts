@@ -1,5 +1,5 @@
 import Jimp from "jimp";
-import ZplError from "./ZplError";
+import ZplError from "./ZplError.js";
 
 const zplMapCodes = {
   1: "G",

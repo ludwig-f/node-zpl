@@ -1,6 +1,6 @@
-import ZplContent from "./ZplContent";
-import ZplError from "./ZplError";
-import type { StoreGraphicsOptions } from "./types";
+import ZplContent from "./ZplContent.js";
+import ZplError from "./ZplError.js";
+import type { StoreGraphicsOptions } from "./types.js";
 
 class PrinterSetup extends ZplContent {
   public zpl = "";
