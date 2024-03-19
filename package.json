@@ -1,7 +1,7 @@
 {
   "name": "node-zpl",
   "type": "module",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "ZPL generator for TypeScript",
   "types": "build/index.d.ts",
   "module": "build/index.js",
