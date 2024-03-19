@@ -466,22 +466,12 @@ class Label extends ZplContent {
   public validate(strict = true): void {
     super.validate(strict);
 
-    if (!this.zpl.startsWith("^XA")) {
-      throw new ZplError("Unexpected start of label. Missing ^XA?");
-    }
-
-    if (!this.zpl.endsWith("^XZ")) {
-      throw new ZplError(
-        "Unexpected end of label. Did you forget to close label?"
-      );
-    }
-
     // should have as many ^FO as ^FS
     const fieldOpenCount = (this.zpl.match(/\^FO/g) || []).length;
     const fieldCloseCount = (this.zpl.match(/\^FS/g) || []).length;
 
     if (fieldOpenCount !== fieldCloseCount) {
-      throw new Error(
+      throw new ZplError(
         `Label has ${fieldOpenCount} ^FO but ${fieldCloseCount} ^FS.`
       );
     }

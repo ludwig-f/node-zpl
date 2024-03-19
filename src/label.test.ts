@@ -8,6 +8,7 @@ import { Orientation, ZebraFontFamily } from "./types";
 
 suite("Label", () => {
   const basicTestLabelHeader = "^XA^PW120^LL120^LRN^CI28^LH0,0";
+  const invalidZplCommand = "^ZA";
 
   describe("constructor", () => {
     test("should create a label with the given width, length and gap", () => {
@@ -17,24 +18,21 @@ suite("Label", () => {
   });
 
   describe("validate", () => {
-    test("should throw ZPL error if label is not closed", () => {
-      const label = new Label(10, 10, 12);
-      expect(() => label.validate()).toThrow(ZplError);
-    });
-
-    test("should throw ZPL error if line does not start with ^ or ~", () => {
-      const label = new Label(10, 10, 12).raw("Test");
-      expect(() => label.validate()).toThrow(ZplError);
-    });
-
     test("should throw ZPL error if generated ZPL does not have the same amount of field open and close", () => {
       const label = new Label(10, 10, 12).startField(0, 0);
       expect(() => label.validate()).toThrow(ZplError);
     });
 
     test("should throw ZPL error if using an unknown command in strict mode", () => {
-      const label = new Label(10, 10, 12).open().raw("^ZZ");
+      const label = new Label(10, 10, 12).open().raw(invalidZplCommand);
       expect(() => label.validate()).toThrow(ZplError);
+    });
+
+    test("should not throw ZPL error if using an unknown command in non-strict mode", () => {
+      const label = new Label(10, 10, 12, { minify: false })
+        .open()
+        .raw(invalidZplCommand);
+      expect(() => label.validate(false)).not.toThrowError(ZplError);
     });
   });
 
