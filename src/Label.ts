@@ -19,8 +19,9 @@ class Label extends ZplContent {
    * @param height Label height in millimeters
    * @param dpmm Dots per millimeter
    * @param options Additional options
-   * @param options.reverse Reverse label (invert colors)
-   * @param options.characterSet Character set, defaulting to "28" (UTF-8)
+   * @param options.reverse Reverse label (invert colors) - defaults to false
+   * @param options.characterSet Character set, defaults to "28" (UTF-8)
+   * @param options.minify Whether to minify the ZPL output - defaults to true
    */
   constructor(
     width: number,
