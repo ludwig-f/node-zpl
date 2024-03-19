@@ -5,7 +5,7 @@
 This library provides a thin (but typed!) wrapper around the ZPL commands as described by Zebra.
 
 > [!NOTE]
-> This library is under active development and does not yet support every single ZPL command. Please check the API documentation to see the currently supported commands. Contributions are welcome!
+> This library is under active development and does not yet support every single ZPL command. Please check the table below to see the currently supported commands. Contributions are welcome!
 
 ## Installation
 
