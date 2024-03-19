@@ -162,7 +162,7 @@ suite("Label", () => {
       );
       const image = await converter.toZPL(buffer);
 
-      const label = new Label(57, 19, 12).drawImage({
+      const label = new Label(57, 19, 12).drawGraphic({
         position: { x: 20, y: 20 },
         totalBytes: image.totalBytes,
         bytesPerRow: image.bytesPerRow,

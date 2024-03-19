@@ -216,7 +216,7 @@ class Label extends ZplContent {
    * @param options.bytesPerRow Bytes per row of the image
    * @param options.data Data of the image
    */
-  public drawImage(options: {
+  public drawGraphic(options: {
     position: Position;
     totalBytes: number;
     bytesPerRow: number;
