@@ -1,175 +1,329 @@
 import { suite, describe, test, expect } from "vitest";
 import { readFileSync } from "fs";
 import { join } from "path";
-import Label from "./Label";
-import ZplError from "./ZplError";
-import ImageConverter from "./ImageConverter";
-import { Orientation, ZebraFontFamily } from "./types";
+import Label from "./Label.js";
+import ZplError from "./ZplError.js";
+import ImageConverter from "./ImageConverter.js";
+import { Orientation, ZebraFontFamily } from "./types.js";
+import { dots, mm } from "./units.js";
 
 suite("Label", () => {
-  const basicTestLabelHeader = "^XA^PW120^LL120^LRN^CI28^LH0,0";
-  const invalidZplCommand = "^ZA";
+  const header = "^XA^PW120^LL120^LRN^CI28^LH0,0";
+  const wideHeader = header.replace("^PW120^LL120", "^PW684^LL228");
+  const smallLabel = () =>
+    new Label({ width: mm(10), height: mm(10), dpmm: 12 });
+  const wideLabel = () =>
+    new Label({ width: mm(57), height: mm(19), dpmm: 12 });
+  const at20 = { x: dots(20), y: dots(20) };
 
   describe("constructor", () => {
-    test("should create a label with the given width, length and gap", () => {
-      const label = new Label(10, 10, 12);
-      expect(label.toZPL()).toStrictEqual(basicTestLabelHeader + "^XZ");
-    });
-  });
-
-  describe("validate", () => {
-    test("should throw ZPL error if generated ZPL does not have the same amount of field open and close", () => {
-      const label = new Label(10, 10, 12).startField(0, 0);
-      expect(() => label.validate()).toThrow(ZplError);
+    test("should create a label with the given width and height", () => {
+      expect(smallLabel().toZPL()).toStrictEqual(header + "^XZ");
     });
 
-    test("should throw ZPL error if using an unknown command in strict mode", () => {
-      const label = new Label(10, 10, 12).open().raw(invalidZplCommand);
-      expect(() => label.validate()).toThrow(ZplError);
+    test("should accept the size in dots", () => {
+      const label = new Label({
+        width: dots(120),
+        height: dots(120),
+        dpmm: 12,
+      });
+      expect(label.toZPL()).toStrictEqual(header + "^XZ");
     });
 
-    test("should not throw ZPL error if using an unknown command in non-strict mode", () => {
-      const label = new Label(10, 10, 12, { minify: false })
-        .open()
-        .raw(invalidZplCommand);
-      expect(() => label.validate(false)).not.toThrowError(ZplError);
-    });
-  });
-
-  describe("setCharacterSet", () => {
-    test("should set the character set of the label", () => {
-      const label = new Label(10, 10, 12, { characterSet: "26" });
+    test("should set the character set", () => {
+      const label = new Label({
+        width: mm(10),
+        height: mm(10),
+        dpmm: 12,
+        characterSet: 26,
+      });
       expect(label.toZPL()).toStrictEqual(
-        basicTestLabelHeader.replace(`^CI28`, "^CI26") + "^XZ"
+        header.replace("^CI28", "^CI26") + "^XZ"
+      );
+    });
+
+    test("should set the home position", () => {
+      const label = new Label({
+        width: mm(10),
+        height: mm(10),
+        dpmm: 12,
+        home: { x: dots(5), y: mm(1) },
+      });
+      expect(label.toZPL()).toStrictEqual(
+        header.replace("^LH0,0", "^LH5,12") + "^XZ"
+      );
+    });
+
+    test("should fill a reversed label with a solid black box", () => {
+      const label = new Label({
+        width: mm(57),
+        height: mm(19),
+        dpmm: 12,
+        reverse: true,
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader.replace("^LRN", "^LRY") + "^FO0,0^GB684,228,228,B,0^FS^XZ"
       );
     });
   });
 
-  describe("setHome", () => {
-    test("should set the home position of the label", () => {
-      const label = new Label(10, 10, 12, { home: { x: 5, y: 5 } });
-      expect(label.toZPL()).toStrictEqual(
-        basicTestLabelHeader.replace("^LH0,0", "^LH5,5") + "^XZ"
+  describe("toZPL", () => {
+    test("should only close the label once when not minified", () => {
+      const label = new Label({
+        width: mm(10),
+        height: mm(10),
+        dpmm: 12,
+        minify: false,
+      });
+      const zpl = label.toZPL();
+      expect(zpl.match(/\^XZ/g)).toHaveLength(1);
+      expect(zpl.endsWith("^XZ\n")).toBe(true);
+    });
+
+    test("should not add another ^XZ when called twice", () => {
+      const label = smallLabel();
+      label.toZPL();
+      expect(label.toZPL()).toStrictEqual(header + "^XZ");
+    });
+
+    test("should not modify the label", () => {
+      const label = smallLabel();
+      label.toZPL();
+      label.raw("^PQ2");
+      expect(label.toZPL()).toStrictEqual(header + "^PQ2^XZ");
+    });
+
+    test("should not close a label that was closed explicitly", () => {
+      expect(smallLabel().close().toZPL()).toStrictEqual(header + "^XZ");
+    });
+  });
+
+  describe("validate", () => {
+    test("should throw if fields are opened but not closed", () => {
+      const label = smallLabel().add({ type: "FieldOrigin", x: 0, y: 0 });
+      expect(() => label.validate()).toThrow(ZplError);
+    });
+
+    test("should count ^FT as opening a field", () => {
+      const label = smallLabel().add({ type: "FieldTypeset", x: 0, y: 0 });
+      expect(() => label.validate()).toThrow(ZplError);
+    });
+
+    test("should throw if using an unknown command in strict mode", () => {
+      const label = smallLabel().raw("^ZA");
+      expect(() => label.validate()).toThrow(ZplError);
+    });
+
+    test("should not throw for an unknown command in non-strict mode", () => {
+      const label = smallLabel().raw("^ZA");
+      expect(() => label.validate(false)).not.toThrow();
+    });
+
+    test("should accept known raw commands", () => {
+      const label = smallLabel().raw("^PQ2^A0N,30,30");
+      expect(() => label.validate()).not.toThrow();
+    });
+  });
+
+  describe("raw", () => {
+    test("should append the ZPL verbatim", () => {
+      expect(smallLabel().raw("^PQ2").toZPL()).toStrictEqual(
+        header + "^PQ2^XZ"
       );
     });
   });
 
   describe("setDefaultFont", () => {
     test("should set the default font of the label", () => {
-      const label = new Label(10, 10, 12).setDefaultFont(
-        20,
-        20,
-        ZebraFontFamily.C
-      );
+      const label = smallLabel().setDefaultFont({
+        font: ZebraFontFamily.C,
+        height: dots(20),
+        width: dots(20),
+      });
+      expect(label.toZPL()).toStrictEqual(header + "^CFC,20,20^XZ");
+    });
+  });
+
+  describe("drawBox", () => {
+    test("should draw a black box on a normal label", () => {
+      const label = wideLabel().drawBox({
+        position: at20,
+        width: mm(10),
+        height: mm(5),
+        thickness: dots(3),
+      });
       expect(label.toZPL()).toStrictEqual(
-        basicTestLabelHeader + "^CFC,20,20^XZ"
+        wideHeader + "^FO20,20^GB120,60,3,B,0^FS^XZ"
+      );
+    });
+
+    test("should draw a white box when asked to", () => {
+      const label = wideLabel().drawBox({
+        position: at20,
+        width: dots(100),
+        height: dots(50),
+        thickness: dots(3),
+        color: "W",
+        rounding: 2,
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^GB100,50,3,W,2^FS^XZ"
       );
     });
   });
 
-  describe("setLabelReverse", () => {
-    test("should set the label reverse", () => {
-      const label = new Label(10, 10, 12, { reverse: true });
+  describe("drawText", () => {
+    test("should draw text with the given font", () => {
+      const label = wideLabel().drawText({
+        position: at20,
+        text: "Hello",
+        font: {
+          name: ZebraFontFamily.ZERO,
+          height: dots(30),
+          width: dots(25),
+          orientation: Orientation.Normal,
+        },
+      });
       expect(label.toZPL()).toStrictEqual(
-        basicTestLabelHeader.replace("^LRN", "^LRY") +
-          "^FO0,0^GB120,120,120,B,0^FS^XZ"
+        wideHeader + "^FO20,20^A0N,30,25^FDHello^FS^XZ"
+      );
+    });
+
+    test("should use the default font when no font is given", () => {
+      const label = wideLabel().drawText({ position: at20, text: "Hello" });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^FDHello^FS^XZ"
+      );
+    });
+
+    test("should default to font 0 when only a size is given", () => {
+      const label = wideLabel().drawText({
+        position: at20,
+        text: "Hello",
+        font: { height: mm(3) },
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^A0,36^FDHello^FS^XZ"
+      );
+    });
+
+    test("should escape characters that would break the label", () => {
+      const label = wideLabel().drawText({
+        position: at20,
+        text: "50% off ^ 2~3_4",
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^FH^FD50% off _5E 2_7E3_5F4^FS^XZ"
       );
     });
   });
 
   describe("drawEAN13", () => {
     test("should draw an EAN13 barcode on the label", () => {
-      const label = new Label(57, 19, 12).drawEAN13({
-        position: { x: 20, y: 20 },
-        height: 9,
+      const label = wideLabel().drawEAN13({
+        position: at20,
+        height: mm(9),
         data: "123456789012",
         printHri: true,
         printHriAbove: false,
         orientation: Orientation.Normal,
       });
-
-      const expectedZPL =
-        basicTestLabelHeader.replace("^PW120^LL120", "^PW684^LL228") +
-        `^FO20,20^BEN,108,Y,N^FD123456789012^FS^XZ`;
-
-      expect(label.toZPL()).toStrictEqual(expectedZPL);
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^BEN,108,Y,N^FD123456789012^FS^XZ"
+      );
     });
   });
 
   describe("drawCode11", () => {
     test("should draw a Code 11 barcode on the label", () => {
-      const label = new Label(57, 19, 12).drawCode11({
-        position: { x: 20, y: 20 },
+      const label = wideLabel().drawCode11({
+        position: at20,
         data: "1234567890",
-        charHeight: 9,
+        height: mm(9),
         checkDigits: 1,
         orientation: Orientation.Normal,
         printHri: true,
         printHriAbove: false,
       });
-
-      const expectedZpl =
-        basicTestLabelHeader.replace("^PW120^LL120", "^PW684^LL228") +
-        "^FO20,20^B1N,Y,108,Y,N^FD1234567890^FS^XZ";
-
-      expect(label.toZPL()).toStrictEqual(expectedZpl);
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^B1N,Y,108,Y,N^FD1234567890^FS^XZ"
+      );
     });
   });
 
   describe("drawCode128", () => {
     test("should draw a Code 128 barcode on the label", () => {
-      const label = new Label(57, 19, 12).drawCode128({
-        position: { x: 20, y: 20 },
+      const label = wideLabel().drawCode128({
+        position: at20,
         data: "1234567890",
-        charHeight: 9,
+        height: mm(9),
         orientation: Orientation.Normal,
         printHri: true,
         printHriAbove: false,
         useUcc: false,
         mode: "N",
       });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^BCN,108,Y,N,N,N^FD1234567890^FS^XZ"
+      );
+    });
 
-      const expectedZpl =
-        basicTestLabelHeader.replace("^PW120^LL120", "^PW684^LL228") +
-        "^FO20,20^BCN,108,Y,N,N,N^FD1234567890^FS^XZ";
-
-      expect(label.toZPL()).toStrictEqual(expectedZpl);
+    test("should leave unset parameters to the printer defaults", () => {
+      const label = wideLabel().drawCode128({ position: at20, data: "ABC" });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^BC^FDABC^FS^XZ"
+      );
     });
   });
 
-  describe("drawDataMatrixCode", () => {
+  describe("drawDataMatrix", () => {
     test("should draw a DataMatrix code on the label", () => {
-      const label = new Label(57, 19, 12).drawDataMatrix({
-        position: { x: 20, y: 20 },
-        height: 9,
+      const label = wideLabel().drawDataMatrix({
+        position: at20,
+        moduleSize: dots(9),
         data: "1234567890",
       });
-
       expect(label.toZPL()).toStrictEqual(
-        basicTestLabelHeader.replace("^PW120^LL120", "^PW684^LL228") +
-          `^FO20,20^BXN,9,200^FD1234567890^FS^XZ`
+        wideHeader + "^FO20,20^BXN,9,200^FD1234567890^FS^XZ"
+      );
+    });
+  });
+
+  describe("drawStoredGraphic", () => {
+    test("should recall a stored graphic", () => {
+      const label = wideLabel().drawStoredGraphic({
+        position: at20,
+        name: "LOGO",
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^XGR:LOGO.GRF,1,1^FS^XZ"
       );
     });
   });
 
   describe("drawGraphic", () => {
-    test("should draw a graphic on the label", async () => {
+    test("should draw a converted image on the label", async () => {
       const converter = new ImageConverter();
       const buffer = readFileSync(
         join(import.meta.dirname, "../assets/test-image.png")
       );
-      const image = await converter.toZPL(buffer);
+      const graphic = await converter.toZPL(buffer);
 
-      const label = new Label(57, 19, 12).drawGraphic({
-        position: { x: 20, y: 20 },
-        totalBytes: image.totalBytes,
-        bytesPerRow: image.bytesPerRow,
-        data: image.data,
-      });
-      const zpl = label.toZPL();
+      const zpl = wideLabel().drawGraphic({ position: at20, graphic }).toZPL();
 
-      expect(zpl).toBeTypeOf("string");
-      expect(zpl.length).toBeGreaterThan(0);
+      expect(zpl).toContain(
+        `^FO20,20^GFA,${graphic.totalBytes},${graphic.totalBytes},${graphic.bytesPerRow},`
+      );
+      expect(zpl.endsWith("^FS^XZ")).toBe(true);
+    });
+  });
+
+  describe("commands", () => {
+    test("should expose the label as AST nodes", () => {
+      expect(smallLabel().commands.slice(0, 2)).toStrictEqual([
+        { type: "StartFormat" },
+        { type: "PrintWidth", width: 120 },
+      ]);
     });
   });
 });

@@ -1,7 +1,7 @@
 import { suite, describe, test, expect } from "vitest";
 import { readFile } from "fs/promises";
 import { join } from "path";
-import ImageConverter, { ZplImage, zplMapCodes } from "./ImageConverter";
+import ImageConverter, { ZplImage, zplMapCodes } from "./ImageConverter.js";
 
 suite("ImageConverter", () => {
   const converter = new ImageConverter();
