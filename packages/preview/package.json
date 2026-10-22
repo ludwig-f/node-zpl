@@ -1,0 +1,64 @@
+{
+  "name": "@node-zpl/preview",
+  "version": "0.0.0",
+  "description": "<zpl-preview>, a web component that shows ZPL labels as images in any framework",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ludwig-f/node-zpl.git",
+    "directory": "packages/preview"
+  },
+  "keywords": [
+    "zpl",
+    "zebra",
+    "label",
+    "preview",
+    "web-component",
+    "custom-element"
+  ],
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "import": "./build/index.js"
+    },
+    "./react": {
+      "types": "./build/react.d.ts",
+      "import": "./build/react.js"
+    }
+  },
+  "files": [
+    "build",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "sideEffects": true,
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest --run"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "zpl-renderer-js": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "@types/react": "19.1.8",
+    "@types/react-dom": "19.1.6",
+    "happy-dom": "^14.12.3",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "typescript": "^5.9.3",
+    "vitest": "^1.6.1"
+  },
+  "peerDependencies": {
+    "@types/react": ">=19"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    }
+  }
+}
