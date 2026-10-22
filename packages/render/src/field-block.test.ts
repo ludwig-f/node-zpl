@@ -324,8 +324,14 @@ describe("rotated blocks", () => {
     ]);
   });
 
-  test("match Labelary upside down", () => {
-    // Labelary: y 70..99 and 120..149, x 96..296
+  test("match Labelary", () => {
+    // Labelary: upside down, lines at y 70..99 and 120..149
     expect(field("^FO400,400", "I").slice(2)).toStrictEqual([70, 149]);
+    // Labelary: bottom up, x 0..79 from ^FO and -130..-51 from ^FT
+    expect(field("^FO400,400", "B").slice(0, 2)).toStrictEqual([0, 79]);
+    expect(field("^FT400,400", "B").slice(0, 2)).toStrictEqual([-130, -51]);
+    expect(bounds("^FO400,400^ADB^FB100,3^FDHHHH HHHH^FS")).toStrictEqual([
+      0, 31, 55, 99,
+    ]);
   });
 });

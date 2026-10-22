@@ -36,6 +36,7 @@ suite("entry points", () => {
       "DefaultFont",
       "EAN13",
       "Field",
+      "FieldOrientation",
       "Fragment",
       "Graphic",
       "Label",

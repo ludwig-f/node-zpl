@@ -221,7 +221,7 @@ const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 - [ ] `^BT` - TLC39 bar code
 - [ ] `^BU` - UPC-A bar code
 - [x] `^BX` - Data Matrix bar code
-- [ ] `^BY` - Bar code field default
+- [x] `^BY` - Bar code field default
 - [ ] `^BZ` - POSTNET bar code
 - [ ] `^CC` - Change Caret
 - [ ] `~CC` - Change Caret
@@ -245,7 +245,7 @@ const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 - [ ] `~DU` - Download Unbounded TrueType font
 - [ ] `~DY` - Download Graphics / Native TrueType or OpenType font
 - [ ] `~EG` - Erase Download Graphics
-- [ ] `^FB` - Field Block
+- [x] `^FB` - Field Block
 - [ ] `^FC` - Field Clock (or Real Time Clock)
 - [x] `^FD` - Field Data
 - [x] `^FH` - Field Hexadecimal Indicator
@@ -253,15 +253,15 @@ const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 - [ ] `^FN` - Field Number
 - [x] `^FO` - Field Origin
 - [ ] `^FP` - Field Parameter
-- [ ] `^FR` - Field Reverse Print
+- [x] `^FR` - Field Reverse Print
 - [x] `^FS` - Field Separator
-- [ ] `^FT` - Field Typeset
+- [x] `^FT` - Field Typeset
 - [ ] `^FV` - Field Variable
-- [ ] `^FW` - Field Orientation
-- [ ] `^FX` - Comment
+- [x] `^FW` - Field Orientation
+- [x] `^FX` - Comment
 - [x] `^GB` - Graphic Box
-- [ ] `^GC` - Graphic Circle
-- [ ] `^GD` - Graphic Diagonal Line
+- [x] `^GC` - Graphic Circle
+- [x] `^GD` - Graphic Diagonal Line
 - [ ] `^GE` - Graphic Ellipse
 - [x] `^GF` - Graphic Field
 - [ ] `^GS` - Graphic Symbol

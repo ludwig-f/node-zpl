@@ -138,6 +138,12 @@ const DefaultFont = primitive(
   ) => label.setDefaultFont(props)
 );
 
+/** Set the orientation (^FW) of the fields that follow and don't give one */
+const FieldOrientation = primitive(
+  (label, props: { orientation: Orientation }) =>
+    label.setFieldOrientation(props.orientation)
+);
+
 /** Text. Without font props it uses the label's default font. */
 const Text = primitive(
   (
@@ -313,6 +319,7 @@ export {
   Label,
   build,
   DefaultFont,
+  FieldOrientation,
   Text,
   Box,
   Code11,

@@ -10,6 +10,7 @@ import {
   Graphic,
   StoredGraphic,
   DefaultFont,
+  FieldOrientation,
   Raw,
   QrCode,
   Field,
@@ -31,6 +32,7 @@ suite("jsx", () => {
       const label = build(
         <Label width={mm(57)} height={mm(19)} dpmm={12}>
           <DefaultFont font="0" height={dots(30)} />
+          <FieldOrientation orientation={Orientation.BottomUp270Degrees} />
           <Text x={dots(20)} y={dots(20)} font="0" height={mm(4)}>
             Hello
           </Text>
@@ -66,6 +68,7 @@ suite("jsx", () => {
 
       const expected = builder()
         .setDefaultFont({ font: "0", height: dots(30) })
+        .setFieldOrientation(Orientation.BottomUp270Degrees)
         .drawText({
           position: at(20, 20),
           text: "Hello",

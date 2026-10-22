@@ -151,6 +151,15 @@ suite("Label", () => {
     });
   });
 
+  describe("setFieldOrientation", () => {
+    test("should set the orientation of the fields that follow", () => {
+      const label = smallLabel().setFieldOrientation(
+        Orientation.Rotated90Degrees
+      );
+      expect(label.toZPL()).toStrictEqual(header + "^FWR^XZ");
+    });
+  });
+
   describe("drawBox", () => {
     test("should draw a black box on a normal label", () => {
       const label = wideLabel().drawBox({

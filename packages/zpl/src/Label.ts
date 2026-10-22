@@ -138,6 +138,14 @@ class Label extends ZplContent {
   }
 
   /**
+   * Set the orientation (^FW) of the fields that follow and don't give one
+   * @param orientation Orientation of text and barcodes
+   */
+  public setFieldOrientation(orientation: Orientation): this {
+    return this.add({ type: "FieldOrientation", orientation });
+  }
+
+  /**
    * Draw a box or line on the label
    * @param options.position Position (x, y) of the box
    * @param options.width Width of the box
