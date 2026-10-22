@@ -211,7 +211,7 @@ type Face = {
   glyph: (char: string) => Glyph | undefined;
 };
 
-const font0Face = (options: TextOptions): Face => {
+const font0Face = (options: Pick<TextOptions, "height" | "width">): Face => {
   const font = load("0", font0Data);
   const advances = font0AdvanceTable();
   // A missing dimension takes the other's value
@@ -241,16 +241,10 @@ const magnification = (dots: number | undefined, base: number) =>
     ? undefined
     : Math.min(10, Math.max(1, Math.round(dots / base)));
 
-const bitmapFace = (cell: Cell, options: TextOptions): Face => {
+const bitmapFace = (cell: Cell, magX: number, magY: number): Face => {
   const font = cell.bold
     ? load("mono-bold", dejavuMonoBoldData)
     : load("mono", dejavuMonoData);
-
-  // A missing dimension takes the other's magnification
-  const givenY = magnification(options.height, cell.height);
-  const givenX = magnification(options.width, cell.width);
-  const magY = givenY ?? givenX ?? 1;
-  const magX = givenX ?? givenY ?? 1;
 
   // Map the stand-in font's H onto where the printer's H sits in the cell
   const h = font.glyphIndex(0x48);
@@ -443,9 +437,9 @@ const layoutBlock = (
  * at the origin, ^FT turns it about the start of the last baseline.
  */
 const placement = (
-  block: TextBlock,
-  options: TextOptions
-): ((u: number, v: number) => readonly [number, number]) => {
+  block: Pick<TextBlock, "width" | "height" | "ascent" | "lastBaseline">,
+  options: Pick<TextOptions, "x" | "y" | "fromBottom" | "orientation">
+): Place => {
   const { x, y } = options;
   if (options.fromBottom) {
     const last = block.lastBaseline;
@@ -474,6 +468,24 @@ const placement = (
   }
 };
 
+/** A built-in font at the size given in ^A or ^CF */
+const faceFor = (
+  options: Pick<TextOptions, "font" | "height" | "width" | "dpmm">
+): Face => {
+  const cell = cellFor(options.font, options.dpmm);
+  // Font 0 stands in for fonts we don't have yet
+  if (!cell) return font0Face(options);
+
+  // A missing dimension takes the other's magnification
+  const givenY = magnification(options.height, cell.height);
+  const givenX = magnification(options.width, cell.width);
+  return bitmapFace(cell, givenX ?? givenY ?? 1, givenY ?? givenX ?? 1);
+};
+
+/** A bitmap font scaled freely, as for barcode interpretation lines */
+const scaledFace = (font: string, scale: number, dpmm: number): Face =>
+  bitmapFace(cellFor(font, dpmm)!, scale, scale);
+
 /** Draw text in one of the built-in fonts, on one line or wrapped in a block */
 const drawText = (
   raster: Raster,
@@ -481,15 +493,23 @@ const drawText = (
   options: TextOptions,
   color: Color
 ): void => {
-  const cell = cellFor(options.font, options.dpmm);
-  // Font 0 stands in for fonts we don't have yet
-  const face = cell ? bitmapFace(cell, options) : font0Face(options);
+  const face = faceFor(options);
   const block = options.block
     ? layoutBlock(face, text, options.block)
     : layoutLine(face, text);
-  const place = placement(block, options);
+  drawGlyphs(raster, block.glyphs, placement(block, options), color);
+};
 
-  for (const { font, glyph, pen, baseline, scaleX, scaleY } of block.glyphs) {
+type Place = (u: number, v: number) => readonly [number, number];
+
+/** Fill placed glyphs, mapping text coordinates onto the label with `place` */
+const drawGlyphs = (
+  raster: Raster,
+  glyphs: PlacedGlyph[],
+  place: Place,
+  color: Color
+): void => {
+  for (const { font, glyph, pen, baseline, scaleX, scaleY } of glyphs) {
     const contours = flattenGlyph(font, glyph, 0.1 / scaleY).map((contour) =>
       contour.map(([gx, gy]) =>
         place(pen + gx * scaleX, baseline - gy * scaleY)
@@ -499,5 +519,5 @@ const drawText = (
   }
 };
 
-export type { Orientation, TextBlockOptions };
-export { drawText };
+export type { Face, Orientation, Place, PlacedGlyph, TextBlockOptions };
+export { drawText, drawGlyphs, faceFor, scaledFace, placeLine, placement };

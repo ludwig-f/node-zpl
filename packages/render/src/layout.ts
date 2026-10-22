@@ -51,6 +51,20 @@ type Element = Common &
         block?: TextBlockOptions;
       }
     | {
+        kind: "barcode";
+        /** The barcode command, with its own parameters */
+        symbology: BarcodeCommand;
+        data: string;
+        /** From ^BY: narrowest bar in dots, wide to narrow ratio, height */
+        moduleWidth: number;
+        ratio: number;
+        height: number;
+        orientation: Orientation;
+        fromBottom: boolean;
+        /** Set when ^A came before the barcode: the interpretation line's font */
+        font?: FontSetting;
+      }
+    | {
         kind: "bitmap";
         /** Packed rows of bits, most significant bit first */
         bytes: Uint8Array;
@@ -67,6 +81,11 @@ type LabelLayout = {
   /** Commands that were understood but aren't drawn yet */
   unsupported: number[];
 };
+
+type BarcodeCommand = Extract<
+  Command,
+  { type: "Code11" | "Code128" | "Ean13" | "DataMatrix" | "QrCode" }
+>;
 
 type StoredGraphic = { bytes: Uint8Array; bytesPerRow: number; rows: number };
 
@@ -93,6 +112,8 @@ type Field = {
   /** ^FH: the character that starts a hex escape in the field data */
   hexIndicator?: string;
   block?: TextBlockOptions;
+  /** The barcode the field data goes into */
+  barcode?: BarcodeCommand;
   commands: number[];
 };
 
@@ -136,14 +157,11 @@ const decodeFieldData = (
     : String.fromCharCode(...bytes);
 };
 
-/** Commands that draw something we don't render yet */
-const notYetDrawn = new Set<Command["type"]>([
-  "Code11",
-  "Code128",
-  "Ean13",
-  "DataMatrix",
-  "QrCode",
-]);
+/** Barcodes we can draw */
+const drawn = new Set<Command["type"]>(["Code128"]);
+
+/** ^BY settings at power-up */
+const initialBarcodeDefaults = { moduleWidth: 2, ratio: 3, height: 10 };
 
 const layout = (commands: readonly Command[]): LabelLayout[] => {
   const labels: LabelLayout[] = [];
@@ -156,7 +174,7 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
   let defaultFont = initialFont;
   let orientation: Orientation = "N";
   let utf8 = false;
-  let barcode = false;
+  let barcodeDefaults = initialBarcodeDefaults;
 
   const add = (element: Element, height: number) => {
     if (field.fromBottom) element.y -= height;
@@ -186,7 +204,7 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
       orientation = "N";
       utf8 = false;
       field = newField();
-      barcode = false;
+      barcodeDefaults = initialBarcodeDefaults;
       return;
     }
     if (!label) return;
@@ -234,7 +252,6 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
         break;
       case "FieldSeparator":
         field = newField();
-        barcode = false;
         break;
       case "ChangeEncoding":
         utf8 = command.charset >= 28 && command.charset <= 30;
@@ -279,16 +296,33 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
         field.hexIndicator = command.indicator ?? "_";
         break;
       case "FieldData": {
-        // Field data under a barcode is drawn by the barcode
+        const data = decodeFieldData(command.data, field.hexIndicator, utf8);
+        const { barcode } = field;
         if (barcode) {
-          label.unsupported.push(index);
+          // Field data under a barcode we can't draw yet isn't drawn either
+          if (!drawn.has(barcode.type)) {
+            label.unsupported.push(index);
+            break;
+          }
+          label.elements.push({
+            ...common(),
+            kind: "barcode",
+            symbology: barcode,
+            data,
+            moduleWidth: barcodeDefaults.moduleWidth,
+            ratio: barcodeDefaults.ratio,
+            height: barcodeDefaults.height,
+            orientation: barcode.orientation ?? orientation,
+            fromBottom: field.fromBottom,
+            font: field.font,
+          });
           break;
         }
         const font = field.font ?? defaultFont;
         label.elements.push({
           ...common(),
           kind: "text",
-          text: decodeFieldData(command.data, field.hexIndicator, utf8),
+          text: data,
           font: font.font,
           height: font.height,
           width: font.width,
@@ -383,16 +417,27 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
         );
         break;
       }
-      default:
-        if (notYetDrawn.has(command.type)) {
-          label.unsupported.push(index);
-          barcode = true;
-        }
+      case "BarcodeDefaults":
+        // Values that aren't given keep their previous ones
+        barcodeDefaults = {
+          moduleWidth: command.moduleWidth ?? barcodeDefaults.moduleWidth,
+          ratio: command.ratio ?? barcodeDefaults.ratio,
+          height: command.height ?? barcodeDefaults.height,
+        };
+        break;
+      case "Code11":
+      case "Code128":
+      case "Ean13":
+      case "DataMatrix":
+      case "QrCode":
+        field.barcode = command;
+        if (!drawn.has(command.type)) label.unsupported.push(index);
+        break;
     }
   });
 
   return labels;
 };
 
-export type { Element, LabelLayout };
+export type { BarcodeCommand, Element, FontSetting, LabelLayout };
 export { layout };
