@@ -1,0 +1,9 @@
+/node_modules
+/.source
+/.next/
+/out/
+*.tsbuildinfo
+next-env.d.ts
+.vercel
+# Copied from zpl-renderer-js by scripts/copy-wasm.mjs
+/public/zebrash.wasm

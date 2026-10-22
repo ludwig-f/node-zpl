@@ -1,0 +1,291 @@
+/*
+ * A workbench for thermal labels: quiet workshop grays around one physical
+ * object, the label on its backing paper under a millimeter ruler.
+ * Everything is scoped to .playground so it doesn't affect the docs.
+ */
+.playground {
+  --panel: #f7f8f9;
+  --ink: #15171a;
+  --muted: #5b626c;
+  --line: #d3d8de;
+  --accent: #2f45c9;
+  --selection: #d6dcfa;
+  --active-line: #eef0f3;
+  --warn: #a15800;
+  --error: #b3261e;
+  --syntax-command: #2f45c9;
+  --syntax-data: #15171a;
+  --syntax-comment: #6f7681;
+  --syntax-number: #8a3a9e;
+
+  --font-ui: var(--font-archivo), system-ui, sans-serif;
+  --font-code: var(--font-spline-mono), ui-monospace, "SF Mono", Menlo,
+    monospace;
+
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: calc(100dvh - var(--fd-header-height, 56px));
+  min-height: 560px;
+  background: var(--color-fd-background);
+  color: var(--ink);
+  font: 15px/1.45 var(--font-ui);
+}
+
+.dark .playground {
+  --panel: #1b1e22;
+  --ink: #e5e7ea;
+  --muted: #98a0aa;
+  --line: #2d3238;
+  --accent: #93a3ff;
+  --selection: #2c3566;
+  --active-line: #20242a;
+  --warn: #e6a245;
+  --error: #ff8a7e;
+  --syntax-command: #93a3ff;
+  --syntax-data: #e5e7ea;
+  --syntax-comment: #8a919b;
+  --syntax-number: #e0a0f0;
+}
+
+.playground :focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.playground button,
+.playground select,
+.playground input:not([type="range"]) {
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  color: inherit;
+  font: inherit;
+}
+
+.playground button {
+  cursor: pointer;
+  font-weight: 550;
+}
+
+.playground button:hover:not(:disabled) {
+  border-color: var(--muted);
+}
+
+.playground button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Toolbar */
+
+.playground .topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding: 10px max(16px, env(safe-area-inset-right, 0px)) 10px
+    max(16px, env(safe-area-inset-left, 0px));
+  border-bottom: 1px solid var(--line);
+}
+
+.playground .topbar h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  font-stretch: 85%;
+}
+
+.playground .actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 8px;
+}
+
+.playground .field {
+  display: grid;
+  gap: 2px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.playground .topbar .field {
+  grid-template-columns: auto auto;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Workspace: editor on the left, bench on the right */
+
+.playground .workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: 0;
+}
+
+.playground .code {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-height: 0;
+  border-right: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.playground .editor {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.playground .problems {
+  max-height: 30vh;
+  min-height: 0;
+  overflow: auto;
+  border-top: 1px solid var(--line);
+}
+
+.playground .problems h2 {
+  position: sticky;
+  top: 0;
+  margin: 0;
+  padding: 10px 16px;
+  background: var(--panel);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.playground .problems ul {
+  margin: 0;
+  padding: 0 8px 8px;
+  list-style: none;
+}
+
+.playground .problem {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 12px;
+  width: 100%;
+  height: auto;
+  padding: 6px 8px 6px 10px;
+  border: none;
+  border-left: 3px solid var(--warn);
+  border-radius: 0;
+  background: none;
+  text-align: left;
+  font-weight: 400;
+}
+
+.playground .problem.error {
+  border-left-color: var(--error);
+}
+
+.playground .problem:hover:not(:disabled) {
+  background: var(--active-line);
+}
+
+.playground .problem .where {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Bench */
+
+.playground .bench-panel {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 0;
+  overflow: auto;
+}
+
+.playground .settings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px 16px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.playground .settings .field {
+  grid-template-columns: auto auto;
+  grid-template-areas: "label label" "input unit";
+  column-gap: 6px;
+}
+
+.playground .settings .field > span:first-child {
+  grid-area: label;
+}
+
+.playground .settings input:not([type="range"]) {
+  width: 84px;
+  font-variant-numeric: tabular-nums;
+}
+
+.playground .settings .unit {
+  align-self: center;
+}
+
+.playground .settings .smoothing {
+  grid-template-columns: 140px auto;
+}
+
+.playground .settings input[type="range"] {
+  width: 140px;
+  height: 34px;
+  accent-color: var(--accent);
+}
+
+.playground .settings output {
+  align-self: center;
+  min-width: 7ch;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.playground .bench {
+  padding: 28px 20px 40px;
+}
+
+.playground .notice {
+  position: fixed;
+  left: 50%;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  padding: 8px 14px;
+  border-radius: 6px;
+  background: var(--ink);
+  color: var(--panel);
+  font-size: 14px;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.playground .notice:empty {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .playground {
+    height: auto;
+  }
+
+  .playground .workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .playground .code {
+    grid-template-rows: 55vh auto;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .playground .problems {
+    max-height: none;
+  }
+
+  .playground .bench-panel {
+    overflow: visible;
+  }
+}

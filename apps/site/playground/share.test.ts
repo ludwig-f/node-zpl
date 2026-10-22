@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { decodeShare, encodeShare } from "./share.js";
+import { decodeShare, encodeShare } from "./share";
 
 const state = {
   zpl: "^XA^FO50,50^A0,40^FDHello, wörld ^ _ ~^FS^XZ",

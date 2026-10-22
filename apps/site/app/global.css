@@ -1,0 +1,46 @@
+@import "tailwindcss";
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
+
+/*
+ * Workshop grays with one cobalt accent, shared by the docs and the
+ * playground's label bench.
+ */
+@theme {
+  --font-sans: var(--font-archivo), system-ui, sans-serif;
+  --font-mono: var(--font-spline-mono), ui-monospace, "SF Mono", Menlo,
+    monospace;
+
+  --color-fd-background: #eef0f2;
+  --color-fd-foreground: #15171a;
+  --color-fd-muted: #e4e7ea;
+  --color-fd-muted-foreground: #5b626c;
+  --color-fd-card: #f7f8f9;
+  --color-fd-popover: #f7f8f9;
+  --color-fd-border: #d3d8de;
+  --color-fd-primary: #2f45c9;
+  --color-fd-primary-foreground: #ffffff;
+  --color-fd-ring: #2f45c9;
+}
+
+.dark {
+  --color-fd-background: #131518;
+  --color-fd-foreground: #e5e7ea;
+  --color-fd-muted: #1d2024;
+  --color-fd-muted-foreground: #98a0aa;
+  --color-fd-card: #1b1e22;
+  --color-fd-popover: #1b1e22;
+  --color-fd-border: #2d3238;
+  --color-fd-primary: #93a3ff;
+  --color-fd-primary-foreground: #0d1033;
+  --color-fd-ring: #93a3ff;
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+html > body[data-scroll-locked] {
+  margin-right: 0px !important;
+  --removed-body-scroll-bar-size: 0px !important;
+}

@@ -1,12 +1,15 @@
+"use client";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import "@node-zpl/preview/react";
-import Editor from "./Editor.js";
-import Bench from "./Bench.js";
-import examples from "./examples.js";
-import { analyze } from "./analyze.js";
-import { decodeShare, encodeShare } from "./share.js";
-import type { EditorHandle } from "./Editor.js";
-import type { ShareState } from "./share.js";
+import "./styles.css";
+import Editor from "./Editor";
+import Bench from "./Bench";
+import examples from "./examples";
+import { analyze } from "./analyze";
+import { decodeShare, encodeShare } from "./share";
+import type { EditorHandle } from "./Editor";
+import type { ShareState } from "./share";
 
 const STORAGE_KEY = "node-zpl-playground";
 
@@ -36,7 +39,7 @@ const parseMm = (text: string): number | undefined => {
   return text.trim() && Number.isFinite(value) && value > 0 ? value : undefined;
 };
 
-export default function App() {
+export default function Playground() {
   const [state, setState] = useState<ShareState>(
     () => loadSaved() ?? fromExample(0)
   );
@@ -109,11 +112,9 @@ export default function App() {
   const warnings = problems.length - errors;
 
   return (
-    <div className="app">
+    <div className="playground">
       <header className="topbar">
-        <h1>
-          <a href="https://github.com/ludwig-f/node-zpl">node-zpl</a> playground
-        </h1>
+        <h1>Playground</h1>
         <div className="actions">
           <label className="field">
             <span>Example</span>

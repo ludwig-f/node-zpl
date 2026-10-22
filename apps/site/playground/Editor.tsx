@@ -1,3 +1,5 @@
+"use client";
+
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import { EditorState } from "@codemirror/state";
 import {
@@ -8,8 +10,8 @@ import {
 } from "@codemirror/view";
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 import { lintGutter, setDiagnostics } from "@codemirror/lint";
-import { zplHighlighting, zplLanguage } from "./zpl-language.js";
-import type { Problem } from "./analyze.js";
+import { zplHighlighting, zplLanguage } from "./zpl-language";
+import type { Problem } from "./analyze";
 
 type EditorHandle = {
   /** Select a range and scroll it into view */

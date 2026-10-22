@@ -1,0 +1,94 @@
+/*
+ * The label bench: labels on their backing paper under a millimeter ruler.
+ * Self-contained so it works in the playground and on other pages.
+ */
+.bench {
+  --liner: #e8dfc1;
+  --liner-edge: #d6caa2;
+  --bench-muted: #5b626c;
+
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 10px;
+}
+
+.dark .bench {
+  --liner: #3b3627;
+  --liner-edge: #4a4430;
+  --bench-muted: #98a0aa;
+}
+
+.bench .liner {
+  max-width: 100%;
+  padding: 10px 10px 14px;
+  border: 1px solid var(--liner-edge);
+  border-radius: 3px;
+  background: var(--liner);
+}
+
+.bench .ruler {
+  position: relative;
+  height: 22px;
+  margin: 0 0 6px;
+  border-bottom: 1px solid var(--bench-muted);
+  color: var(--bench-muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.bench .tick {
+  position: absolute;
+  bottom: 0;
+  width: 1px;
+  height: 4px;
+  background: currentColor;
+}
+
+.bench .tick.mid {
+  height: 7px;
+}
+
+.bench .tick.major {
+  height: 11px;
+}
+
+.bench .tick-label {
+  position: absolute;
+  bottom: 11px;
+  left: 0;
+  transform: translateX(-50%);
+  line-height: 1;
+}
+
+.bench zpl-preview {
+  display: block;
+  width: 100%;
+}
+
+.bench zpl-preview::part(labels) {
+  gap: 14px;
+}
+
+/* Die-cut labels: slightly rounded corners on white stock */
+.bench zpl-preview::part(label),
+.bench .label-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.08), 0 1px 2px rgb(0 0 0 / 0.12);
+}
+
+.bench zpl-preview::part(error) {
+  padding: 12px;
+  border-radius: 6px;
+}
+
+.bench .size {
+  margin: 0;
+  color: var(--bench-muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}

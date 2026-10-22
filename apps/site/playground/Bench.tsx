@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import "./bench.css";
 
 /** Screen pixels per millimeter at most, so small labels aren't blown up */
 const MAX_PX_PER_MM = 6;
