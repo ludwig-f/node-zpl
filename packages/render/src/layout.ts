@@ -40,9 +40,9 @@ type Element = Common &
         text: string;
         /** Font name: 0, A to Z or 1 to 9 */
         font: string;
-        /** Character height and width in dots */
-        height: number;
-        width: number;
+        /** Character height and width in dots, as given (see FontSetting) */
+        height?: number;
+        width?: number;
         orientation: "N" | "R" | "I" | "B";
         /** ^FT positions the baseline instead of the top */
         fromBottom: boolean;
@@ -69,8 +69,12 @@ type StoredGraphic = { bytes: Uint8Array; bytesPerRow: number; rows: number };
 
 type FontSetting = {
   font: string;
-  height: number;
-  width: number;
+  /**
+   * Height and width as given, in dots. Either may be missing: how a missing
+   * one is filled in depends on the font, so it's resolved when drawing.
+   */
+  height?: number;
+  width?: number;
   orientation: "N" | "R" | "I" | "B";
 };
 
@@ -234,24 +238,25 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
         utf8 = command.charset >= 28 && command.charset <= 30;
         break;
       case "DefaultFont": {
-        const height = command.height ?? defaultFont.height;
+        // Sizes that aren't given keep their previous values
+        const sized =
+          command.height !== undefined || command.width !== undefined;
         defaultFont = {
           ...defaultFont,
           font: command.font,
-          height,
-          width:
-            command.width ??
-            (command.height !== undefined ? height : defaultFont.width),
+          height: sized ? command.height : defaultFont.height,
+          width: sized ? command.width : defaultFont.width,
         };
         break;
       }
       case "Font": {
-        // A height without a width keeps the font's proportions
-        const height = command.height ?? defaultFont.height;
+        // Without a size, the field uses the default font's size
+        const sized =
+          command.height !== undefined || command.width !== undefined;
         field.font = {
           font: command.font,
-          height,
-          width: command.width ?? height,
+          height: sized ? command.height : defaultFont.height,
+          width: sized ? command.width : defaultFont.width,
           orientation: command.orientation ?? defaultFont.orientation,
         };
         break;

@@ -48,10 +48,10 @@ const parseFont = (bytes: Uint8Array): Font => {
   const loca = table("loca");
   const glyf = table("glyf");
   const os2 = tables.get("OS/2");
-  const capHeight =
-    os2 !== undefined && u16(os2) >= 2
-      ? i16(os2 + 88)
-      : Math.round(unitsPerEm * 0.7);
+  // Read once the glyphs are available: fonts with an older OS/2 table don't
+  // state the capital height, so it's measured from H instead
+  let capHeight: number | undefined =
+    os2 !== undefined && u16(os2) >= 2 ? i16(os2 + 88) : undefined;
 
   // Character to glyph mapping: prefer the full Unicode table (format 12)
   const cmap = table("cmap");
@@ -221,6 +221,12 @@ const parseFont = (bytes: Uint8Array): Font => {
     }
     return contours;
   };
+
+  if (capHeight === undefined) {
+    const h = outline(glyphIndex(0x48));
+    const ys = h.flatMap((contour) => contour.map((pt) => pt.y));
+    capHeight = ys.length ? Math.max(...ys) : Math.round(unitsPerEm * 0.7);
+  }
 
   return {
     unitsPerEm,

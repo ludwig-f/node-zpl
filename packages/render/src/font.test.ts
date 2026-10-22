@@ -37,6 +37,12 @@ describe("parseFont", () => {
     ]);
   });
 
+  test("measures the capital height from H when the font doesn't say", () => {
+    // DejaVu's OS/2 table predates the capital height field
+    const dejavu = load("../fonts/DejaVuSansMono.ttf");
+    expect([dejavu.unitsPerEm, dejavu.capHeight]).toStrictEqual([2048, 1493]);
+  });
+
   test("maps characters to glyphs", () => {
     expect(font0.glyphIndex("H".codePointAt(0)!)).toBe(30);
     expect(font0.glyphIndex("Å".codePointAt(0)!)).toBe(8);

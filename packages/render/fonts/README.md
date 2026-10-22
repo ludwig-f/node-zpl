@@ -16,3 +16,9 @@ pyftsubset archivo.ttf --unicodes=<the characters in font0-advances.json> --no-h
 ```
 
 `scripts/generate-fonts.mjs` embeds it in `src/fonts/font0.ts`.
+
+## Fonts A to H
+
+ZPL's bitmap fonts A to H have fixed character cells and can only be magnified in whole steps. Their letter shapes come from [DejaVu Sans Mono](https://dejavu-fonts.github.io/) (bold for font B), licensed under the Bitstream Vera and DejaVu license (`LICENSE-DejaVu.txt`). Each font's cell, gap and baseline come from Zebra's ZPL II Programming Guide; where the letters sit in the cell was measured from Labelary. The table is in `src/text.ts`.
+
+`scripts/generate-fonts.mjs` embeds them in `src/fonts/dejavu.ts`.

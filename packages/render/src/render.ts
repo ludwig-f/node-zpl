@@ -21,7 +21,12 @@ type RenderOptions = {
 };
 
 /** Draw an element in the given color, ignoring reverse printing */
-const draw = (raster: Raster, element: Element, color: Color = "B"): void => {
+const draw = (
+  raster: Raster,
+  element: Element,
+  dpmm: number,
+  color: Color = "B"
+): void => {
   const { x, y } = element;
 
   switch (element.kind) {
@@ -68,8 +73,10 @@ const draw = (raster: Raster, element: Element, color: Color = "B"): void => {
           x,
           y,
           fromBottom: element.fromBottom,
+          font: element.font,
           height: element.height,
           width: element.width,
+          dpmm,
         },
         color
       );
@@ -104,9 +111,9 @@ const draw = (raster: Raster, element: Element, color: Color = "B"): void => {
 };
 
 /** Draw a reversed element: wherever it has ink, invert what's underneath */
-const drawReversed = (raster: Raster, element: Element): void => {
+const drawReversed = (raster: Raster, element: Element, dpmm: number): void => {
   const mask = new Raster(raster.width, raster.height, raster.sampling);
-  draw(mask, element);
+  draw(mask, element, dpmm);
   for (let i = 0; i < raster.ink.length; i++) {
     const m = mask.ink[i];
     if (m > 0) raster.ink[i] = raster.ink[i] + m * (1 - 2 * raster.ink[i]);
@@ -132,8 +139,8 @@ const renderLabels = (
     const printed = new Raster(printWidth, height, sampling);
 
     for (const element of label.elements) {
-      if (element.reverse) drawReversed(printed, element);
-      else draw(printed, element);
+      if (element.reverse) drawReversed(printed, element, options.dpmm);
+      else draw(printed, element, options.dpmm);
     }
 
     if (printWidth === width) return printed;
