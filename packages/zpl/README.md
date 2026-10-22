@@ -104,6 +104,14 @@ Every length takes an explicit unit: `mm(10)` for millimeters or `dots(80)` for 
 
 Field data such as text and bar code contents is escaped automatically. Characters that ZPL would otherwise read as commands (`^` and `~`) are hex-encoded using `^FH`, so user input can't break the label.
 
+### Fields with any command
+
+Elements without their own method can be drawn with `drawField`, which wraps any command in a field and escapes its data:
+
+```typescript
+label.drawField({ position: { x: mm(2), y: mm(2) }, command: "^B3N,N,100,Y,N", data: "ABC-123" });
+```
+
 ### Commands as data
 
 Labels are built from typed command nodes, which you can inspect with `label.commands`. Commands that have no builder method yet can be added as nodes with `label.add(...)`, or as raw ZPL with `label.raw(...)`:
@@ -207,7 +215,7 @@ const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 - [ ] `^BM` - MSI bar code
 - [ ] `^BO` - Aztec bar code
 - [ ] `^BP` - Plessey bar code
-- [ ] `^BQ` - QR Code bar code
+- [x] `^BQ` - QR Code bar code
 - [ ] `^BR` - RSS (Reduced Space Symbology) bar code
 - [ ] `^BS` - UPC/EAN bar code
 - [ ] `^BT` - TLC39 bar code

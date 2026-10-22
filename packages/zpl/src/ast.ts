@@ -181,6 +181,20 @@ type DataMatrix = Node<
   }
 >;
 
+/** `^BQa,b,c,d,e` */
+type QrCode = Node<
+  "QrCode",
+  {
+    /** QR codes can't be rotated, so this is always N */
+    orientation?: "N";
+    model?: 1 | 2;
+    /** Size of each square module in dots, 1 to 100 */
+    magnification?: number;
+    errorCorrection?: "H" | "Q" | "M" | "L";
+    mask?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+  }
+>;
+
 /** `~SDa` */
 type SetDarkness = Node<"SetDarkness", { darkness: number }>;
 /** `~DGd:o.x,t,w,data` */
@@ -233,6 +247,7 @@ type Command =
   | Code128
   | Ean13
   | DataMatrix
+  | QrCode
   | SetDarkness
   | DownloadGraphic
   | DeleteObject
@@ -272,6 +287,7 @@ export type {
   Code128,
   Ean13,
   DataMatrix,
+  QrCode,
   SetDarkness,
   DownloadGraphic,
   DeleteObject,

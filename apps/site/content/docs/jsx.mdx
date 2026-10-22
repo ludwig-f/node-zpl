@@ -30,7 +30,7 @@ const label = build(
 label.toZPL();
 ```
 
-Text and barcode data go in children. `false`, `null` and `undefined` children are skipped, and lists from `.map()` work. Elements can be reused in labels with different resolutions, since millimeters are converted when the label is built.
+Text and barcode data go in children. The elements are `Text`, `Box`, `Code11`, `Code128`, `EAN13`, `DataMatrix`, `QrCode`, `Graphic`, `StoredGraphic` and `DefaultFont`, plus `<Field command="…">` for any other command and `<Raw zpl="…" />` for plain ZPL. `false`, `null` and `undefined` children are skipped, and lists from `.map()` work. Elements can be reused in labels with different resolutions, since millimeters are converted when the label is built.
 
 ## Your own components
 

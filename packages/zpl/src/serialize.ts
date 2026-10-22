@@ -151,6 +151,14 @@ const serializeCommand = (command: Command): string => {
         command.formatId,
         command.escapeCharacter
       )}`;
+    case "QrCode":
+      return `^BQ${params(
+        command.orientation,
+        command.model,
+        command.magnification,
+        command.errorCorrection,
+        command.mask
+      )}`;
     case "SetDarkness":
       return `~SD${String(command.darkness).padStart(2, "0")}`;
     case "DownloadGraphic":

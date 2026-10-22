@@ -296,6 +296,70 @@ suite("Label", () => {
     });
   });
 
+  describe("drawQrCode", () => {
+    test("should draw a QR code with standard error correction", () => {
+      const label = wideLabel().drawQrCode({
+        position: at20,
+        data: "https://example.com",
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^BQN,2^FDMA,https://example.com^FS^XZ"
+      );
+    });
+
+    test("should set the module size and error correction", () => {
+      const label = wideLabel().drawQrCode({
+        position: at20,
+        data: "ABC",
+        moduleSize: mm(0.5),
+        errorCorrection: "H",
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^BQN,2,6^FDHA,ABC^FS^XZ"
+      );
+    });
+
+    test("should escape the data", () => {
+      const label = wideLabel().drawQrCode({ position: at20, data: "a^b" });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^BQN,2^FH^FDMA,a_5Eb^FS^XZ"
+      );
+    });
+  });
+
+  describe("drawField", () => {
+    test("should wrap any command in a field with escaped data", () => {
+      const label = wideLabel().drawField({
+        position: at20,
+        command: "^B3N,N,100,Y,N",
+        data: "ABC^1",
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^B3N,N,100,Y,N^FH^FDABC_5E1^FS^XZ"
+      );
+    });
+
+    test("should work without data", () => {
+      const label = wideLabel().drawField({
+        position: at20,
+        command: "^GE100,50,3",
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^GE100,50,3^FS^XZ"
+      );
+    });
+
+    test("should reject a command that doesn't start with ^ or ~", () => {
+      expect(() =>
+        wideLabel().drawField({
+          position: at20,
+          // @ts-expect-error - commands start with ^ or ~
+          command: "B3N",
+        })
+      ).toThrow(ZplError);
+    });
+  });
+
   describe("drawStoredGraphic", () => {
     test("should recall a stored graphic", () => {
       const label = wideLabel().drawStoredGraphic({

@@ -34,9 +34,24 @@ Every length takes an explicit unit: `mm(10)` for millimeters or `dots(80)` for 
 | `drawBox` | Boxes and lines, optionally rounded or white |
 | `drawCode11`, `drawCode128`, `drawEAN13` | Linear barcodes |
 | `drawDataMatrix` | Data Matrix codes |
+| `drawQrCode` | QR codes |
+| `drawField` | A field with any command, for elements without a method |
 | `drawGraphic` | An image, converted with `ImageConverter` |
 | `drawStoredGraphic` | An image stored on the printer |
 | `setDefaultFont` | The font for text that doesn't set one |
+
+## QR codes
+
+```ts
+label.drawQrCode({
+  position: { x: mm(2), y: mm(2) },
+  data: "https://example.com/orders/10442",
+  moduleSize: dots(5),
+  errorCorrection: "Q",
+});
+```
+
+`moduleSize` is the size of each square, and `errorCorrection` how much of the code can be damaged and still scan: L (7%), M (15%, the default), Q (25%) or H (30%).
 
 ## Escaping
 
@@ -64,7 +79,18 @@ new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 
 ## Commands without a method
 
-Labels are built from typed command nodes, which you can read with `label.commands`. Commands that don't have a method yet can be added as nodes with `add()`, or as plain ZPL with `raw()`:
+For elements without their own method, `drawField` wraps any command in a field and escapes its data, so user input is still safe. For example, a Code 39 barcode:
+
+```ts
+label.drawField({
+  position: { x: mm(2), y: mm(2) },
+  command: "^B3N,N,100,Y,N",
+  data: "ABC-123",
+});
+// ^FO24,24^B3N,N,100,Y,N^FDABC-123^FS
+```
+
+Labels are built from typed command nodes, which you can read with `label.commands`. Commands with a typed node but no method can be added with `add()`, and anything else as plain ZPL with `raw()`. Neither escapes anything, so keep user input out of `raw()`:
 
 ```ts
 label.add({ type: "GraphicCircle", diameter: 80, thickness: 4 });
