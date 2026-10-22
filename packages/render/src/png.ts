@@ -27,15 +27,32 @@ const chunk = (type: string, data: Uint8Array): Uint8Array => {
   return out;
 };
 
-/** zlib-compress bytes, as PNG's image data requires */
-const deflate = async (bytes: Uint8Array): Promise<Uint8Array> =>
-  new Uint8Array(
-    await new Response(
-      new Blob([bytes as BlobPart])
-        .stream()
-        .pipeThrough(new CompressionStream("deflate"))
-    ).arrayBuffer()
-  );
+/**
+ * zlib-compress bytes, as PNG's image data requires. The stream is read by
+ * hand rather than through Blob or Response, which some DOM shims lack.
+ */
+const deflate = async (bytes: Uint8Array): Promise<Uint8Array> => {
+  const stream = new CompressionStream("deflate");
+  const writer = stream.writable.getWriter();
+  void writer.write(bytes as Uint8Array<ArrayBuffer>);
+  void writer.close();
+
+  const chunks: Uint8Array[] = [];
+  const reader = stream.readable.getReader();
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+  }
+
+  const out = new Uint8Array(chunks.reduce((n, c) => n + c.length, 0));
+  let offset = 0;
+  for (const c of chunks) {
+    out.set(c, offset);
+    offset += c.length;
+  }
+  return out;
+};
 
 /** Encode a raster as a PNG: ink is black, no ink is white */
 const encodePng = async (raster: Raster): Promise<Uint8Array> => {

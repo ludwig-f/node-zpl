@@ -1,3 +1,5 @@
 {
-  "packages/zpl": "1.0.5"
+  "packages/zpl": "1.0.5",
+  "packages/render": "0.0.0",
+  "packages/preview": "0.0.0"
 }

@@ -2,8 +2,14 @@
 
 Renders ZPL labels to images in pure TypeScript, in Node and the browser. No WebAssembly, no native dependencies.
 
-> [!NOTE]
-> Work in progress. Boxes, circles, diagonal lines, images (`^GF`, `~DG`/`^XG`) and reverse printing are supported; text and barcodes are next. Until then, [`@node-zpl/preview`](../preview) uses zpl-renderer-js.
+It draws:
+
+- Boxes, circles and diagonal lines (`^GB`, `^GC`, `^GD`) and images (`^GF`, `~DG` with `^XG`)
+- Text in font 0 and the bitmap fonts A to H (`^A`, `^CF`), rotated (`^FW`) and wrapped in blocks (`^FB`)
+- Code 128, EAN-13, Code 11, QR codes and Data Matrix (`^BC`, `^BE`, `^B1`, `^BQ`, `^BX`, `^BY`)
+- Reverse printing (`^FR`, `^LR`), label home (`^LH`), print width (`^PW`) and UTF-8 text (`^CI28`)
+
+Commands it understands but doesn't draw yet are listed in each label's `layout().unsupported`.
 
 ```ts
 import { renderZpl } from "@node-zpl/render";
@@ -30,6 +36,8 @@ pnpm --filter @node-zpl/render build
 node packages/render/scripts/compare.mjs --diff 4 6 8 label.zpl
 ```
 
-Boxes, circles, diagonals and images match Labelary dot for dot, except large rounded corners, where we match zebrash instead.
+Boxes, circles, diagonals, images and barcode bars match Labelary dot for dot, except large rounded corners, where we match zebrash instead. Data Matrix symbols have the same size but can encode data differently, which scanners read the same.
+
+Zebra's fonts can't be redistributed, so open-licensed fonts stand in for them (see [fonts/README.md](fonts/README.md)): text takes the same space as on a printer, but letters look slightly different.
 
 Parts of the design and the graphic decoding are based on [zebrash](https://github.com/ingridhq/zebrash) (MIT).

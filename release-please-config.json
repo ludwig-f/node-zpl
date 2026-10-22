@@ -5,6 +5,16 @@
       "release-type": "node",
       "package-name": "node-zpl",
       "include-component-in-tag": false
+    },
+    "packages/render": {
+      "release-type": "node",
+      "package-name": "@node-zpl/render",
+      "initial-version": "0.1.0"
+    },
+    "packages/preview": {
+      "release-type": "node",
+      "package-name": "@node-zpl/preview",
+      "initial-version": "0.1.0"
     }
   }
 }

@@ -3,7 +3,7 @@ title: Preview
 description: Show ZPL as images in the browser with the <zpl-preview> web component.
 ---
 
-`<zpl-preview>` renders ZPL to images in the browser, using [zpl-renderer-js](https://github.com/Fabrizz/zpl-renderer-js) (the [zebrash](https://github.com/ingridhq/zebrash) renderer compiled to WebAssembly). Label data never leaves the page. Because it's a standard web component, it works in plain HTML and every framework.
+`<zpl-preview>` renders ZPL to images in the browser with [`@node-zpl/render`](/docs/rendering). Label data never leaves the page. Because it's a standard web component, it works in plain HTML and every framework.
 
 ```bash
 npm install @node-zpl/preview
@@ -21,12 +21,12 @@ The `zpl` property also accepts a `Label` from node-zpl, or anything with a `toZ
 
 ## Attributes
 
-| Attribute | Default | Description |
-| --- | --- | --- |
-| `zpl` | | ZPL to show |
-| `width`, `height` | `^PW`/`^LL`, else 4 × 6 in | Label size in millimeters |
-| `dpmm` | 8 | Dots per millimeter: 6, 8, 12 or 24 |
-| `smoothing` | 0.4 | Edge smoothing, from 0 (the printer's exact dots) to 1 (fully anti-aliased) |
+| Attribute         | Default                    | Description                                                                 |
+| ----------------- | -------------------------- | --------------------------------------------------------------------------- |
+| `zpl`             |                            | ZPL to show                                                                 |
+| `width`, `height` | `^PW`/`^LL`, else 4 × 6 in | Label size in millimeters                                                   |
+| `dpmm`            | 8                          | Dots per millimeter: 6, 8, 12 or 24                                         |
+| `smoothing`       | 0.4                        | Edge smoothing, from 0 (the printer's exact dots) to 1 (fully anti-aliased) |
 
 ZPL with several labels shows one image per label. It fires `zpl-render` with `event.detail.images` (PNG data URLs) and `zpl-error` with `event.detail.error`.
 
@@ -39,7 +39,11 @@ React 19 sets props on custom elements as properties, so `zpl` can be a `Label`.
 ```tsx
 import "@node-zpl/preview/react";
 
-<zpl-preview zpl={label} dpmm={8} onzpl-render={(event) => console.log(event.detail.images)} />;
+<zpl-preview
+  zpl={label}
+  dpmm={8}
+  onzpl-render={(event) => console.log(event.detail.images)}
+/>;
 ```
 
 ### Vue
@@ -61,20 +65,28 @@ Tell Vue that `zpl-preview` is a custom element (`compilerOptions.isCustomElemen
 Add `CUSTOM_ELEMENTS_SCHEMA` to the component's `schemas`:
 
 ```html
-<zpl-preview [zpl]="label" dpmm="8" (zpl-render)="onRender($event)"></zpl-preview>
+<zpl-preview
+  [zpl]="label"
+  dpmm="8"
+  (zpl-render)="onRender($event)"
+></zpl-preview>
 ```
 
 ## Loading the renderer
 
-The renderer is about 7 MB of WebAssembly. It's loaded the first time a preview renders, so bundlers put it in a separate chunk. To serve the `.wasm` file yourself, which lets browsers compile it while it downloads, copy `zpl-renderer-js/dist/zebrash.wasm` to your server:
+The renderer, with its fonts and barcode encoders, loads the first time a preview renders, so bundlers put it in a separate chunk.
+
+`configure({ render })` replaces it, for example with one that calls your own service:
 
 ```ts
 import { configure } from "@node-zpl/preview";
 
-configure({ wasmUrl: "/zebrash.wasm" });
+configure({
+  render: async (zpl, { widthMm, heightMm, dpmm, grayscale }) => {
+    // Return one base64-encoded PNG per label
+  },
+});
 ```
-
-`configure({ render })` replaces the renderer entirely, for example with one that calls your own service.
 
 ## Styling
 

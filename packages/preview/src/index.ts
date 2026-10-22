@@ -1,7 +1,6 @@
 /**
  * <zpl-preview>: shows ZPL as images, rendered locally in the browser by
- * zpl-renderer-js (zebrash compiled to WebAssembly). Importing this module
- * registers the element.
+ * @node-zpl/render. Importing this module registers the element.
  */
 
 /** What the element asks a renderer for */
@@ -19,57 +18,21 @@ type Render = (zpl: string, options: RenderOptions) => Promise<string[]>;
 /** Anything with a toZPL() method, such as a node-zpl Label */
 type ZplSource = string | { toZPL(): string };
 
-type ZplRendererModule = {
-  zplToBase64MultipleAsync: (
-    zpl: string,
-    widthMm: number,
-    heightMm: number,
-    dpmm: number,
-    options: { grayscaleOutput: boolean }
-  ) => Promise<string[]>;
-};
-
-const fromZplRendererJs =
-  (module: ZplRendererModule): Render =>
-  (zpl, { widthMm, heightMm, dpmm, grayscale }) =>
-    module.zplToBase64MultipleAsync(zpl, widthMm, heightMm, dpmm, {
-      grayscaleOutput: grayscale,
-    });
-
-let wasmUrl: string | undefined;
 let renderer: Promise<Render> | undefined;
 
 /**
- * Change how previews are rendered. Call it before the first preview renders.
- * @param options.wasmUrl Load zpl-renderer-js's WebAssembly (zebrash.wasm) from this URL instead of the copy bundled into the JavaScript
+ * Change how previews are rendered
  * @param options.render Use your own renderer, e.g. one that calls an API
  */
-const configure = (options: {
-  wasmUrl?: string | URL;
-  render?: Render;
-}): void => {
-  if (options.wasmUrl !== undefined) {
-    if (renderer) {
-      throw new Error(
-        "configure({ wasmUrl }) has to be called before the first <zpl-preview> renders"
-      );
-    }
-    wasmUrl = String(options.wasmUrl);
-  }
-
+const configure = (options: { render?: Render }): void => {
   if (options.render) {
     renderer = Promise.resolve(options.render);
   }
 };
 
-// The renderer is about 7 MB, so it's only loaded once something is rendered
+// The renderer is only loaded once something is rendered
 const loadRenderer = (): Promise<Render> =>
-  (renderer ??= wasmUrl
-    ? import("zpl-renderer-js/external").then(async (module) => {
-        await module.init({ wasmUrl: wasmUrl as string });
-        return fromZplRendererJs(module);
-      })
-    : import("zpl-renderer-js").then(fromZplRendererJs));
+  (renderer ??= import("@node-zpl/render").then((module) => module.renderZpl));
 
 const DEFAULT_SMOOTHING = 0.4;
 
@@ -245,6 +208,11 @@ class ZplPreview extends Base {
         dpmm,
         grayscale: smoothing > 0,
       });
+      if (!pngs.length) {
+        throw new Error(
+          "No labels parsed: labels start with ^XA and end with ^XZ"
+        );
+      }
       const images = await Promise.all(
         pngs.map((png) =>
           smoothing > 0 && smoothing < 1
