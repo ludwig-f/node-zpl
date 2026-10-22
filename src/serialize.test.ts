@@ -169,6 +169,13 @@ suite("serialize", () => {
       });
     });
 
+    test("leaves underscores untouched when nothing needs escaping", () => {
+      expect(escapeFieldData("a_b")).toStrictEqual({
+        data: "a_b",
+        needsHexIndicator: false,
+      });
+    });
+
     test("hex-escapes prefixes and the indicator itself", () => {
       expect(escapeFieldData("a^b~c_d")).toStrictEqual({
         data: "a_5Eb_7Ec_5Fd",

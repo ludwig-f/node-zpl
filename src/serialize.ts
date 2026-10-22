@@ -188,15 +188,18 @@ const hex = (char: string): string =>
 
 /**
  * Escape field data so it can be written in a ^FD command. Characters that
- * would otherwise be read as commands (^ and ~) and the default ^FH indicator
- * (_) are hex-encoded, which requires a ^FH command before the ^FD.
+ * would otherwise be read as commands (^ and ~) are hex-encoded, which
+ * requires a ^FH command before the ^FD. Once ^FH is used, the indicator (_)
+ * has to be encoded as well.
  */
 const escapeFieldData = (
   data: string
 ): { data: string; needsHexIndicator: boolean } => {
-  const escaped = data.replace(/[\^~_]/g, hex);
+  if (!/[\^~]/.test(data)) {
+    return { data, needsHexIndicator: false };
+  }
 
-  return { data: escaped, needsHexIndicator: escaped !== data };
+  return { data: data.replace(/[\^~_]/g, hex), needsHexIndicator: true };
 };
 
 export { serialize, serializeCommand, escapeFieldData };

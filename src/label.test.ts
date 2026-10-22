@@ -109,6 +109,13 @@ suite("Label", () => {
       expect(() => label.validate()).toThrow(ZplError);
     });
 
+    test("should count fields opened and closed in raw ZPL", () => {
+      const label = smallLabel()
+        .raw("^FO10,10")
+        .add({ type: "FieldSeparator" });
+      expect(() => label.validate()).not.toThrow();
+    });
+
     test("should throw if using an unknown command in strict mode", () => {
       const label = smallLabel().raw("^ZA");
       expect(() => label.validate()).toThrow(ZplError);

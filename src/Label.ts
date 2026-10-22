@@ -406,12 +406,20 @@ class Label extends ZplContent {
   public validate(strict = true): void {
     super.validate(strict);
 
-    const opened = this.nodes.filter(
-      (node) => node.type === "FieldOrigin" || node.type === "FieldTypeset"
-    ).length;
-    const closed = this.nodes.filter(
-      (node) => node.type === "FieldSeparator"
-    ).length;
+    const count = (type: Command["type"], pattern: RegExp): number =>
+      this.nodes.reduce(
+        (total, node) =>
+          total +
+          (node.type === type
+            ? 1
+            : node.type === "Raw"
+            ? (node.zpl.match(pattern) ?? []).length
+            : 0),
+        0
+      );
+    const opened =
+      count("FieldOrigin", /\^FO/g) + count("FieldTypeset", /\^FT/g);
+    const closed = count("FieldSeparator", /\^FS/g);
 
     if (opened !== closed) {
       throw new ZplError(
