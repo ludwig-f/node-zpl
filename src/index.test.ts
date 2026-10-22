@@ -13,6 +13,7 @@ suite("entry points", () => {
       "dots",
       "escapeFieldData",
       "mm",
+      "parse",
       "serialize",
       "serializeCommand",
     ]);
