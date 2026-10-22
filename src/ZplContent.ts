@@ -1,19 +1,8 @@
 import ZplError from "./ZplError.js";
-import commandCatalog from "./commands.js";
+import { unknownCommands } from "./commands.js";
 import { serialize } from "./serialize.js";
 import { compact } from "./compact.js";
 import type { Command } from "./ast.js";
-
-/**
- * The catalog key for a raw command, e.g. "^A0N,30,30" -> "^A"
- */
-const commandCode = (zpl: string): string => {
-  if (zpl.startsWith("^A")) {
-    return zpl.startsWith("^A@") ? "^A@" : "^A";
-  }
-
-  return zpl.slice(0, 3);
-};
 
 /**
  * Base class for all ZPL content
@@ -76,13 +65,10 @@ abstract class ZplContent {
         continue;
       }
 
-      // A raw node may hold several commands
-      for (const zpl of node.zpl.split(/(?=[\^~])/)) {
-        const code = commandCode(zpl.trim());
+      const [unknown] = unknownCommands(node.zpl);
 
-        if (code && !(code in commandCatalog)) {
-          throw new ZplError(`Invalid ZPL command: ${zpl}`);
-        }
+      if (unknown) {
+        throw new ZplError(`Invalid ZPL command: ${unknown}`);
       }
     }
   }

@@ -129,6 +129,38 @@ serialize(commands); // "^XA^FO50,50^A0N,30^FDHello^FS^XZ"
 - Commands with invalid parameters are kept as `Raw` nodes and reported in `diagnostics`.
 - Prefix and delimiter changes (`^CC`, `^CT`, `^CD`) are applied while parsing, so `serialize` always writes standard `^`, `~` and `,`.
 
+### Linting
+
+Printers don't report mistakes. They quietly clamp values, ignore commands or never print a label. `lint` finds these problems before you print:
+
+```typescript
+import { parse, lint } from "node-zpl";
+
+lint(parse("^XA^FO10,10^GB1,64,2^FS^FO40,40^BE^FD123^FS").commands);
+// [
+//   { rule: "box-smaller-than-line", severity: "warning", index: 2, span: { start: 11, end: 20 },
+//     message: "The box is 1 dot wide but its line is 2 dots thick, so the printer widens it to 2 dots." },
+//   { rule: "ean13-data", severity: "warning", ... },
+//   { rule: "missing-end-format", severity: "error", ... },
+// ]
+```
+
+Labels built with `Label` or JSX can be checked with `label.lint()`. Pass the media size in dots, `lint(commands, { width: 812, length: 406 })`, to also check labels that don't set `^PW` and `^LL`.
+
+| Rule | Severity | Finds |
+| --- | --- | --- |
+| `missing-start-format` | error | Commands before the first `^XA` |
+| `missing-end-format` | error | A label that never ends with `^XZ` |
+| `unclosed-field` | error | A field without `^FS` |
+| `command-outside-format` | warning | Commands between `^XZ` and the next `^XA` |
+| `separator-without-field` | warning | `^FS` without `^FO` or `^FT` |
+| `field-outside-label` | warning | Fields that start outside the label |
+| `box-smaller-than-line` | warning | Boxes narrower or shorter than their line |
+| `value-out-of-range` | warning | Values outside what the printer accepts |
+| `ean13-data` | warning | EAN-13 data that isn't 12 digits |
+| `barcode-without-data` | warning | Barcodes without `^FD` |
+| `unknown-command` | warning | Commands that don't exist in ZPL |
+
 ### Images
 
 You can convert an image to a ZPL graphic using `ImageConverter`. It depends on [jimp](https://github.com/jimp-dev/jimp) and only runs in Node, so it has its own entry point:
