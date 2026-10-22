@@ -57,6 +57,24 @@ label.add({ type: "GraphicCircle", diameter: 80, thickness: 4 });
 label.raw("^PQ2"); // print two copies
 ```
 
+### Parsing ZPL
+
+`parse` reads existing ZPL into the same command nodes, so you can inspect, check or modify labels you didn't build with `node-zpl`:
+
+```typescript
+import { parse, serialize } from "node-zpl";
+
+const { commands, diagnostics } = parse("^XA^FO50,50^A0N,30^FDHello^FS^XZ");
+// commands: [{ type: "StartFormat", span: { start: 0, end: 3 } }, { type: "FieldOrigin", x: 50, y: 50, ... }, ...]
+
+serialize(commands); // "^XA^FO50,50^A0N,30^FDHello^FS^XZ"
+```
+
+- Every node has a `span` with its position in the input.
+- Commands without a typed node yet are kept as `Raw` nodes, so nothing is lost.
+- Commands with invalid parameters are kept as `Raw` nodes and reported in `diagnostics`.
+- Prefix and delimiter changes (`^CC`, `^CT`, `^CD`) are applied while parsing, so `serialize` always writes standard `^`, `~` and `,`.
+
 ### Images
 
 You can convert an image to a ZPL graphic using `ImageConverter`. It depends on [jimp](https://github.com/jimp-dev/jimp) and only runs in Node, so it has its own entry point:

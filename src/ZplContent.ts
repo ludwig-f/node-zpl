@@ -1,6 +1,7 @@
 import ZplError from "./ZplError.js";
 import commandCatalog from "./commands.js";
 import { serialize } from "./serialize.js";
+import { compact } from "./compact.js";
 import type { Command } from "./ast.js";
 
 /**
@@ -33,11 +34,11 @@ abstract class ZplContent {
   }
 
   /**
-   * Add command nodes
+   * Add command nodes. Undefined parameters are dropped.
    * @param commands Commands to add
    */
   public add(...commands: Command[]): this {
-    this.nodes.push(...commands);
+    this.nodes.push(...commands.map(compact));
 
     return this;
   }

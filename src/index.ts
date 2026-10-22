@@ -7,3 +7,5 @@ export { Orientation, ZebraFontFamily } from "./types.js";
 export type { Length } from "./units.js";
 export type { Graphic, Position } from "./types.js";
 export type * from "./ast.js";
+export { parse } from "./parse.js";
+export type { Diagnostic, ParseResult } from "./parse.js";

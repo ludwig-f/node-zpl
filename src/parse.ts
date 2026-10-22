@@ -1,0 +1,447 @@
+import { compact } from "./compact.js";
+import type { Command, Span } from "./ast.js";
+
+type Diagnostic = {
+  severity: "warning";
+  message: string;
+  span: Span;
+};
+
+type ParseResult = {
+  commands: Command[];
+  diagnostics: Diagnostic[];
+};
+
+/** Thrown by parameter readers, turned into a diagnostic and a Raw node */
+class ParamError extends Error {}
+
+/**
+ * Reads the parameters of one command
+ */
+class Params {
+  constructor(
+    private readonly code: string,
+    private readonly values: string[]
+  ) {}
+
+  get length(): number {
+    return this.values.filter((value) => value !== "").length;
+  }
+
+  string(index: number): string | undefined {
+    const value = this.values[index];
+    return value === undefined || value === "" ? undefined : value;
+  }
+
+  requiredString(index: number, name: string): string {
+    const value = this.string(index);
+
+    if (value === undefined) {
+      throw new ParamError(`${this.code}: ${name} is required`);
+    }
+
+    return value;
+  }
+
+  number(index: number, name: string, float = false): number | undefined {
+    const value = this.string(index);
+
+    if (value === undefined) {
+      return undefined;
+    }
+
+    const pattern = float ? /^-?\d+(\.\d+)?$/ : /^-?\d+$/;
+
+    if (!pattern.test(value)) {
+      throw new ParamError(
+        `${this.code}: ${name} must be a number, got '${value}'`
+      );
+    }
+
+    return Number(value);
+  }
+
+  requiredNumber(index: number, name: string, fallback?: number): number {
+    const value = this.number(index, name) ?? fallback;
+
+    if (value === undefined) {
+      throw new ParamError(`${this.code}: ${name} is required`);
+    }
+
+    return value;
+  }
+
+  oneOf<T extends string | number>(
+    index: number,
+    name: string,
+    options: readonly T[]
+  ): T | undefined {
+    const value = this.string(index);
+
+    if (value === undefined) {
+      return undefined;
+    }
+
+    const option = options.find((option) => String(option) === value);
+
+    if (option === undefined) {
+      throw new ParamError(
+        `${this.code}: ${name} must be one of ${options.join(
+          ", "
+        )}, got '${value}'`
+      );
+    }
+
+    return option;
+  }
+
+  yesNo(index: number, name: string): boolean | undefined {
+    const value = this.oneOf(index, name, ["Y", "N"] as const);
+    return value === undefined ? undefined : value === "Y";
+  }
+}
+
+const orientations = ["N", "R", "I", "B"] as const;
+const colors = ["B", "W"] as const;
+const devices = ["R", "E", "B", "A"] as const;
+
+const storedObject = (code: string, value: string) => {
+  const match = /^([REBA]):([^.]+)\.(\w+)$/.exec(value);
+
+  if (!match) {
+    throw new ParamError(
+      `${code}: expected an object like R:NAME.GRF, got '${value}'`
+    );
+  }
+
+  return {
+    device: match[1] as (typeof devices)[number],
+    name: match[2],
+    extension: match[3],
+  };
+};
+
+/**
+ * Split on the delimiter, keeping everything after the first `count - 1`
+ * delimiters in the last part. Used for commands that end in free-form data.
+ */
+const splitN = (body: string, delimiter: string, count: number): string[] => {
+  const parts = body.split(delimiter);
+  return [
+    ...parts.slice(0, count - 1),
+    ...(parts.length >= count ? [parts.slice(count - 1).join(delimiter)] : []),
+  ];
+};
+
+type CommandParser = (body: string, delimiter: string) => Command | null;
+
+/** Builds a parser for a command whose body is a plain parameter list */
+const withParams =
+  (code: string, build: (params: Params) => Command | null) =>
+  (body: string, delimiter: string) =>
+    build(new Params(code, body.split(delimiter)));
+
+/**
+ * Parsers keyed by prefix kind and command code. Returning null means the
+ * command is valid but uses a feature without a typed node, so it is kept as
+ * Raw without a diagnostic.
+ */
+const parsers: Record<string, CommandParser> = {
+  "^XA": () => ({ type: "StartFormat" }),
+  "^XZ": () => ({ type: "EndFormat" }),
+  "^PW": withParams("^PW", (p) => ({
+    type: "PrintWidth",
+    width: p.requiredNumber(0, "width"),
+  })),
+  "^LL": withParams("^LL", (p) => ({
+    type: "LabelLength",
+    length: p.requiredNumber(0, "length"),
+  })),
+  "^LH": withParams("^LH", (p) => ({
+    type: "LabelHome",
+    x: p.requiredNumber(0, "x", 0),
+    y: p.requiredNumber(1, "y", 0),
+  })),
+  "^LR": withParams("^LR", (p) => {
+    const reverse = p.yesNo(0, "reverse");
+    return reverse === undefined ? null : { type: "LabelReverse", reverse };
+  }),
+  "^CI": withParams("^CI", (p) =>
+    // Character remapping (^CIa,s1,d1,...) has no typed node
+    p.length > 1
+      ? null
+      : { type: "ChangeEncoding", charset: p.requiredNumber(0, "charset") }
+  ),
+  "^CF": withParams("^CF", (p) => ({
+    type: "DefaultFont",
+    font: p.requiredString(0, "font"),
+    height: p.number(1, "height"),
+    width: p.number(2, "width"),
+  })),
+  "^FO": withParams("^FO", (p) => ({
+    type: "FieldOrigin",
+    x: p.requiredNumber(0, "x", 0),
+    y: p.requiredNumber(1, "y", 0),
+    justification: p.oneOf(2, "justification", [0, 1, 2] as const),
+  })),
+  "^FT": withParams("^FT", (p) => ({
+    type: "FieldTypeset",
+    x: p.number(0, "x"),
+    y: p.number(1, "y"),
+    justification: p.oneOf(2, "justification", [0, 1, 2] as const),
+  })),
+  // The font name is a single character directly after ^A, followed by the
+  // orientation without a delimiter: ^A0N,30,30
+  "^A": (body, delimiter) => {
+    const p = new Params("^A", body.slice(1).split(delimiter));
+    const font = body.charAt(0);
+
+    if (!font) {
+      throw new ParamError("^A: font is required");
+    }
+
+    return {
+      type: "Font",
+      font,
+      orientation: p.oneOf(0, "orientation", orientations),
+      height: p.number(1, "height"),
+      width: p.number(2, "width"),
+    };
+  },
+  "^FB": withParams("^FB", (p) => ({
+    type: "FieldBlock",
+    width: p.requiredNumber(0, "width", 0),
+    maxLines: p.number(1, "maxLines"),
+    lineSpacing: p.number(2, "lineSpacing"),
+    justification: p.oneOf(3, "justification", ["L", "C", "R", "J"] as const),
+    hangingIndent: p.number(4, "hangingIndent"),
+  })),
+  "^FR": () => ({ type: "FieldReverse" }),
+  "^FH": (body) => ({
+    type: "FieldHexIndicator",
+    indicator: body || undefined,
+  }),
+  "^FD": (body) => ({ type: "FieldData", data: body }),
+  "^FS": () => ({ type: "FieldSeparator" }),
+  "^FX": (body) => ({ type: "Comment", text: body }),
+  "^GB": withParams("^GB", (p) => ({
+    type: "GraphicBox",
+    width: p.number(0, "width"),
+    height: p.number(1, "height"),
+    thickness: p.number(2, "thickness"),
+    color: p.oneOf(3, "color", colors),
+    rounding: p.oneOf(4, "rounding", [0, 1, 2, 3, 4, 5, 6, 7, 8] as const),
+  })),
+  "^GC": withParams("^GC", (p) => ({
+    type: "GraphicCircle",
+    diameter: p.number(0, "diameter"),
+    thickness: p.number(1, "thickness"),
+    color: p.oneOf(2, "color", colors),
+  })),
+  "^GD": withParams("^GD", (p) => ({
+    type: "GraphicDiagonal",
+    width: p.number(0, "width"),
+    height: p.number(1, "height"),
+    thickness: p.number(2, "thickness"),
+    color: p.oneOf(3, "color", colors),
+    direction: p.oneOf(4, "direction", ["R", "L"] as const),
+  })),
+  "^GF": (body, delimiter) => {
+    const p = new Params("^GF", splitN(body, delimiter, 5));
+
+    // Binary and compressed binary graphics have no typed node
+    if (p.string(0) !== "A") {
+      return null;
+    }
+
+    return {
+      type: "GraphicField",
+      byteCount: p.requiredNumber(1, "byteCount"),
+      fieldCount: p.requiredNumber(2, "fieldCount"),
+      bytesPerRow: p.requiredNumber(3, "bytesPerRow"),
+      data: p.string(4) ?? "",
+    };
+  },
+  "^XG": withParams("^XG", (p) => {
+    const object = storedObject("^XG", p.requiredString(0, "object"));
+
+    if (object.extension !== "GRF") {
+      return null;
+    }
+
+    return {
+      type: "RecallGraphic",
+      device: object.device,
+      name: object.name,
+      magnificationX: p.number(1, "magnificationX"),
+      magnificationY: p.number(2, "magnificationY"),
+    };
+  }),
+  "^BY": withParams("^BY", (p) => ({
+    type: "BarcodeDefaults",
+    moduleWidth: p.number(0, "moduleWidth"),
+    ratio: p.number(1, "ratio", true),
+    height: p.number(2, "height"),
+  })),
+  "^B1": withParams("^B1", (p) => {
+    const checkDigit = p.yesNo(1, "checkDigit");
+
+    return {
+      type: "Code11",
+      orientation: p.oneOf(0, "orientation", orientations),
+      checkDigits:
+        checkDigit === undefined ? undefined : checkDigit ? 1 : (2 as const),
+      height: p.number(2, "height"),
+      interpretationLine: p.yesNo(3, "interpretationLine"),
+      interpretationLineAbove: p.yesNo(4, "interpretationLineAbove"),
+    };
+  }),
+  "^BC": withParams("^BC", (p) => ({
+    type: "Code128",
+    orientation: p.oneOf(0, "orientation", orientations),
+    height: p.number(1, "height"),
+    interpretationLine: p.yesNo(2, "interpretationLine"),
+    interpretationLineAbove: p.yesNo(3, "interpretationLineAbove"),
+    uccCheckDigit: p.yesNo(4, "uccCheckDigit"),
+    mode: p.oneOf(5, "mode", ["N", "U", "A", "D"] as const),
+  })),
+  "^BE": withParams("^BE", (p) => ({
+    type: "Ean13",
+    orientation: p.oneOf(0, "orientation", orientations),
+    height: p.number(1, "height"),
+    interpretationLine: p.yesNo(2, "interpretationLine"),
+    interpretationLineAbove: p.yesNo(3, "interpretationLineAbove"),
+  })),
+  "^BX": withParams("^BX", (p) =>
+    // The aspect ratio parameter has no typed node
+    p.string(7) !== undefined
+      ? null
+      : {
+          type: "DataMatrix",
+          orientation: p.oneOf(0, "orientation", orientations),
+          height: p.number(1, "height"),
+          quality: p.oneOf(2, "quality", [0, 50, 80, 100, 140, 200] as const),
+          columns: p.number(3, "columns"),
+          rows: p.number(4, "rows"),
+          formatId: p.oneOf(5, "formatId", [1, 2, 3, 4, 5, 6] as const),
+          escapeCharacter: p.string(6),
+        }
+  ),
+  "~SD": withParams("~SD", (p) => ({
+    type: "SetDarkness",
+    darkness: p.requiredNumber(0, "darkness"),
+  })),
+  "~DG": (body, delimiter) => {
+    const p = new Params("~DG", splitN(body, delimiter, 4));
+    const object = storedObject("~DG", p.requiredString(0, "object"));
+
+    return {
+      type: "DownloadGraphic",
+      device: object.device,
+      name: object.name,
+      totalBytes: p.requiredNumber(1, "totalBytes"),
+      bytesPerRow: p.requiredNumber(2, "bytesPerRow"),
+      data: p.string(3) ?? "",
+    };
+  },
+  "^ID": withParams("^ID", (p) => ({
+    type: "DeleteObject",
+    ...storedObject("^ID", p.requiredString(0, "object")),
+  })),
+};
+
+const isLineBreak = (char: string): boolean => char === "\r" || char === "\n";
+
+/**
+ * Parse ZPL into command nodes.
+ *
+ * Supported commands become typed nodes; everything else, including commands
+ * with invalid parameters, is kept as a Raw node so no input is lost. Invalid
+ * parameters are also reported as diagnostics. Prefix and delimiter changes
+ * (^CC, ^CT, ^CD) are applied while parsing and left out of the result, so
+ * the commands always serialize with the default ^, ~ and ,.
+ */
+const parse = (zpl: string): ParseResult => {
+  const commands: Command[] = [];
+  const diagnostics: Diagnostic[] = [];
+  let caret = "^";
+  let tilde = "~";
+  let delimiter = ",";
+
+  const isPrefix = (char: string) => char === caret || char === tilde;
+
+  // Skip line breaks, which ZPL ignores
+  const next = (index: number): number => {
+    while (index < zpl.length && isLineBreak(zpl.charAt(index))) index++;
+    return index;
+  };
+
+  let i = 0;
+  while (i < zpl.length && !isPrefix(zpl.charAt(i))) i++;
+
+  while (i < zpl.length) {
+    const start = i;
+    const kind = zpl.charAt(i) === caret ? "^" : "~";
+
+    // Read the two-character command code
+    let cursor = next(i + 1);
+    let code = zpl.charAt(cursor);
+    cursor = next(cursor + 1);
+
+    // ^A takes a single-character font name as its first parameter, except
+    // for ^A@ which takes a font file name
+    if (!(kind === "^" && code === "A" && zpl.charAt(cursor) !== "@")) {
+      code += zpl.charAt(cursor);
+      cursor = next(cursor + 1);
+    }
+
+    const key = kind + code;
+
+    if (["CC", "CT", "CD"].includes(code)) {
+      const char = zpl.charAt(cursor);
+      if (code === "CC") caret = char;
+      if (code === "CT") tilde = char;
+      if (code === "CD") delimiter = char;
+
+      i = cursor + 1;
+      while (i < zpl.length && !isPrefix(zpl.charAt(i))) i++;
+      continue;
+    }
+
+    // The body runs until the next command, minus line breaks
+    let end = cursor;
+    let body = "";
+    while (end < zpl.length && !isPrefix(zpl.charAt(end))) {
+      if (!isLineBreak(zpl.charAt(end))) body += zpl.charAt(end);
+      end++;
+    }
+
+    const span = { start, end };
+    while (span.end > start && isLineBreak(zpl.charAt(span.end - 1))) {
+      span.end--;
+    }
+
+    const raw: Command = { type: "Raw", zpl: key + body, span };
+    const parser = parsers[key];
+
+    if (!parser) {
+      commands.push(raw);
+    } else {
+      try {
+        const command = parser(body, delimiter);
+        commands.push(command ? { ...compact(command), span } : raw);
+      } catch (error) {
+        if (!(error instanceof ParamError)) throw error;
+        diagnostics.push({ severity: "warning", message: error.message, span });
+        commands.push(raw);
+      }
+    }
+
+    i = end;
+  }
+
+  return { commands, diagnostics };
+};
+
+export type { Diagnostic, ParseResult };
+export { parse };
