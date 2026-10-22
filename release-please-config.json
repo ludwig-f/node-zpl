@@ -5,6 +5,7 @@
       "release-type": "node",
       "package-name": "node-zpl",
       "include-component-in-tag": false
+<<<<<<< HEAD
     },
     "packages/preview": {
       "release-type": "node",
@@ -19,6 +20,8 @@
       "component": "render",
       "initial-version": "0.1.0",
       "bump-minor-pre-major": true
+=======
+>>>>>>> release/2.0
     }
   }
 }
