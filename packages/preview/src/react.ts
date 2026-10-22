@@ -12,7 +12,7 @@ type ZplPreviewProps = HTMLAttributes<ZplPreview> &
     width?: number;
     height?: number;
     dpmm?: number;
-    grayscale?: boolean;
+    smoothing?: number;
     "onzpl-render"?: (event: CustomEvent<{ images: string[] }>) => void;
     "onzpl-error"?: (event: CustomEvent<{ error: Error }>) => void;
   };

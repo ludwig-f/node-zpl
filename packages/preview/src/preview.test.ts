@@ -180,12 +180,21 @@ suite("<zpl-preview>", () => {
       expect(element.height).toBeUndefined();
     });
 
-    test("grayscale reflects as a boolean attribute", () => {
+    test("smoothing defaults to 0.4 and reflects", () => {
       const element = create();
-      element.grayscale = true;
-      expect(element.hasAttribute("grayscale")).toBe(true);
-      element.grayscale = false;
-      expect(element.hasAttribute("grayscale")).toBe(false);
+      expect(element.smoothing).toBe(0.4);
+
+      element.smoothing = 0;
+      expect(element.getAttribute("smoothing")).toBe("0");
+      expect(element.smoothing).toBe(0);
+    });
+
+    test("smoothing is kept between 0 and 1", () => {
+      const element = create();
+      element.setAttribute("smoothing", "3");
+      expect(element.smoothing).toBe(1);
+      element.setAttribute("smoothing", "-1");
+      expect(element.smoothing).toBe(0);
     });
 
     test("the zpl property returns what was set", () => {

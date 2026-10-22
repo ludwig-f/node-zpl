@@ -26,7 +26,7 @@ test("React sets props as properties and listens to the element's events", async
       <zpl-preview
         zpl={label}
         dpmm={12}
-        grayscale
+        smoothing={0}
         onzpl-render={(event) => {
           images = event.detail.images;
         }}
@@ -39,6 +39,6 @@ test("React sets props as properties and listens to the element's events", async
   expect(element.zpl).toBe(label);
   expect(element.dpmm).toBe(12);
   expect(images).toStrictEqual([
-    `data:image/png;base64,${btoa("^XA^XZ|12|true")}`,
+    `data:image/png;base64,${btoa("^XA^XZ|12|false")}`,
   ]);
 });

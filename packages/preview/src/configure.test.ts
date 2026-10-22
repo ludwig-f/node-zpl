@@ -42,19 +42,31 @@ suite("configure({ render })", () => {
     expect(calls.map((call) => call.zpl)).toStrictEqual(["^XA^PW240^LL100^XZ"]);
   });
 
-  test("passes the label size, resolution and grayscale setting", async () => {
+  test("passes the label size and resolution", async () => {
     const element = create();
-    element.setAttribute("grayscale", "");
     element.dpmm = 12;
     element.zpl = "^XA^PW240^LL120^XZ";
     await tick();
 
-    expect(calls[0].options).toStrictEqual({
+    expect(calls[0].options).toMatchObject({
       widthMm: 20,
       heightMm: 10,
       dpmm: 12,
-      grayscale: true,
     });
+  });
+
+  test("asks for grayscale output unless smoothing is 0", async () => {
+    const smoothed = create();
+    smoothed.zpl = "^XA^XZ";
+    const crisp = create();
+    crisp.smoothing = 0;
+    crisp.zpl = "^XA^XZ";
+    await tick();
+
+    expect(calls.map((call) => call.options.grayscale)).toStrictEqual([
+      true,
+      false,
+    ]);
   });
 
   test("ignores a result that arrives after a newer render started", async () => {

@@ -36,7 +36,9 @@ document.querySelector("zpl-preview").zpl = new Label({ width: mm(50), height: m
 | `width` | `width` | `^PW`, else 101.6 | Label width in millimeters |
 | `height` | `height` | `^LL`, else 152.4 | Label height in millimeters |
 | `dpmm` | `dpmm` | 8 | Dots per millimeter: 6, 8, 12 or 24 for 152, 203, 300 or 600 dpi |
-| `grayscale` | `grayscale` | off | Smooth 8-bit output instead of the printer's 1-bit dots |
+| `smoothing` | `smoothing` | 0.4 | How much to smooth edges, from 0 (the printer's exact dots) to 1 (fully anti-aliased) |
+
+Thermal printers print hard-edged dots, which look rough on screen. `smoothing` softens the edges by blending the printer's dots with an anti-aliased render. Set it to 0 to see exactly what the printer prints.
 
 ZPL with several labels shows one image per label. Changes made together, like setting `dpmm` and `zpl` one after the other, render once.
 
@@ -61,7 +63,7 @@ import { configure } from "@node-zpl/preview";
 configure({ wasmUrl: "/assets/zebrash.wasm" });
 ```
 
-You can also use a different renderer entirely. It receives the ZPL and size and returns one base64 PNG per label:
+You can also use a different renderer entirely. It receives the ZPL, the size and whether anti-aliased output is wanted (`grayscale`), and returns one base64 PNG per label:
 
 ```ts
 configure({

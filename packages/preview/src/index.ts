@@ -9,7 +9,7 @@ type RenderOptions = {
   widthMm: number;
   heightMm: number;
   dpmm: number;
-  /** Smooth 8-bit output instead of the printer's 1-bit dots */
+  /** Anti-aliased 8-bit output instead of the printer's 1-bit dots */
   grayscale: boolean;
 };
 
@@ -71,6 +71,8 @@ const loadRenderer = (): Promise<Render> =>
       })
     : import("zpl-renderer-js").then(fromZplRendererJs));
 
+const DEFAULT_SMOOTHING = 0.4;
+
 /** Default size when neither attributes nor ^PW/^LL give one: 4 × 6 inches */
 const DEFAULT_SIZE_MM = { width: 101.6, height: 152.4 };
 
@@ -92,6 +94,8 @@ const template = `
 <div part="error" role="alert" hidden></div>
 `;
 
+import { smoothPng } from "./smooth.js";
+
 // Lets the module load where there is no DOM, e.g. during server rendering
 const Base = (
   typeof HTMLElement === "undefined" ? class {} : HTMLElement
@@ -102,13 +106,14 @@ const Base = (
  *
  * Attributes: `zpl`, `width` and `height` (label size in millimeters, taken
  * from ^PW and ^LL when left out), `dpmm` (dots per millimeter, default 8)
- * and `grayscale` (smooth instead of 1-bit output).
+ * and `smoothing` (0 for the printer's exact dots to 1 for fully
+ * anti-aliased edges, default 0.4).
  *
  * Events: `zpl-render` with `detail.images` (PNG data URLs) and
  * `zpl-error` with `detail.error`.
  */
 class ZplPreview extends Base {
-  static observedAttributes = ["zpl", "width", "height", "dpmm", "grayscale"];
+  static observedAttributes = ["zpl", "width", "height", "dpmm", "smoothing"];
 
   #zpl: ZplSource = "";
   #renderId = 0;
@@ -161,13 +166,19 @@ class ZplPreview extends Base {
     this.#setNumber("dpmm", value);
   }
 
-  /** Smooth 8-bit output instead of the printer's 1-bit dots */
-  get grayscale(): boolean {
-    return this.hasAttribute("grayscale");
+  /**
+   * How much to smooth edges: 0 shows the printer's dots exactly, 1 is fully
+   * anti-aliased. Defaults to 0.4, which takes off the roughest edges.
+   */
+  get smoothing(): number {
+    const value = this.#number("smoothing");
+    return value === undefined || Number.isNaN(value)
+      ? DEFAULT_SMOOTHING
+      : Math.min(1, Math.max(0, value));
   }
 
-  set grayscale(value: boolean) {
-    this.toggleAttribute("grayscale", value);
+  set smoothing(value: number) {
+    this.#setNumber("smoothing", value);
   }
 
   connectedCallback(): void {
@@ -218,6 +229,7 @@ class ZplPreview extends Base {
     }
 
     const dpmm = this.dpmm ?? 8;
+    const smoothing = this.smoothing;
     const width =
       this.width ??
       (lastValue(zpl, "PW") ?? DEFAULT_SIZE_MM.width * dpmm) / dpmm;
@@ -231,13 +243,19 @@ class ZplPreview extends Base {
         widthMm: width,
         heightMm: height,
         dpmm,
-        grayscale: this.grayscale,
+        grayscale: smoothing > 0,
       });
+      const images = await Promise.all(
+        pngs.map((png) =>
+          smoothing > 0 && smoothing < 1
+            ? smoothPng(png, smoothing)
+            : `data:image/png;base64,${png}`
+        )
+      );
 
       // A newer render started while this one was running
       if (id !== this.#renderId) return;
 
-      const images = pngs.map((png) => `data:image/png;base64,${png}`);
       this.#show(images, undefined);
       this.dispatchEvent(new CustomEvent("zpl-render", { detail: { images } }));
     } catch (thrown) {
