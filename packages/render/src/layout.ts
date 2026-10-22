@@ -6,7 +6,7 @@
  */
 import { decodeGraphicData } from "./graphics.js";
 import type { Command } from "node-zpl";
-import type { Orientation } from "./text.js";
+import type { Orientation, TextBlockOptions } from "./text.js";
 
 type Common = {
   x: number;
@@ -47,6 +47,8 @@ type Element = Common &
         orientation: Orientation;
         /** ^FT positions the baseline instead of the top */
         fromBottom: boolean;
+        /** ^FB wraps the text in a block */
+        block?: TextBlockOptions;
       }
     | {
         kind: "bitmap";
@@ -90,6 +92,7 @@ type Field = {
   font?: FontSetting;
   /** ^FH: the character that starts a hex escape in the field data */
   hexIndicator?: string;
+  block?: TextBlockOptions;
   commands: number[];
 };
 
@@ -263,6 +266,15 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
       case "FieldOrientation":
         orientation = command.orientation;
         break;
+      case "FieldBlock":
+        field.block = {
+          width: command.width,
+          maxLines: Math.max(1, command.maxLines ?? 1),
+          lineSpacing: command.lineSpacing ?? 0,
+          justification: command.justification ?? "L",
+          hangingIndent: command.hangingIndent ?? 0,
+        };
+        break;
       case "FieldHexIndicator":
         field.hexIndicator = command.indicator ?? "_";
         break;
@@ -282,6 +294,7 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
           width: font.width,
           orientation: font.orientation ?? orientation,
           fromBottom: field.fromBottom,
+          block: field.block,
         });
         break;
       }

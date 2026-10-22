@@ -77,6 +77,7 @@ const draw = (
           height: element.height,
           width: element.width,
           orientation: element.orientation,
+          block: element.block,
           dpmm,
         },
         color

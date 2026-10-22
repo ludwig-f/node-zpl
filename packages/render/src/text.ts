@@ -47,13 +47,14 @@ const font0AdvanceTable = () =>
 /**
  * A bitmap font's character cell at magnification 1, in dots: from Zebra's
  * ZPL II Programming Guide (cell, gap, baseline) and Labelary (where H's
- * ink sits in the cell).
+ * ink sits in the cell). Magnified letters are scaled, not their dots, so
+ * the ink positions were measured at 10x and are fractions of a dot.
  */
 type Cell = {
   width: number;
   height: number;
   gap: number;
-  /** Rows from the top of the cell to the baseline */
+  /** Rows from the top of the cell to the baseline (font E's is off the grid) */
   baseline: number;
   /** H's printed dots: first column, width, and first row */
   inkLeft: number;
@@ -70,8 +71,8 @@ const cells: Record<string, Cell> = {
     height: 9,
     gap: 1,
     baseline: 7,
-    inkLeft: 0,
-    inkWidth: 5,
+    inkLeft: 0.3,
+    inkWidth: 4.46,
     capTop: 0,
   },
   B: {
@@ -80,7 +81,7 @@ const cells: Record<string, Cell> = {
     gap: 2,
     baseline: 11,
     inkLeft: 0,
-    inkWidth: 7,
+    inkWidth: 7.1,
     capTop: 0,
     bold: true,
     letters: "upper",
@@ -90,7 +91,7 @@ const cells: Record<string, Cell> = {
     height: 18,
     gap: 2,
     baseline: 14,
-    inkLeft: 0,
+    inkLeft: 0.4,
     inkWidth: 9,
     capTop: 0,
   },
@@ -99,7 +100,7 @@ const cells: Record<string, Cell> = {
     height: 18,
     gap: 2,
     baseline: 14,
-    inkLeft: 0,
+    inkLeft: 0.4,
     inkWidth: 9,
     capTop: 0,
   },
@@ -107,10 +108,10 @@ const cells: Record<string, Cell> = {
     width: 15,
     height: 28,
     gap: 5,
-    baseline: 23,
-    inkLeft: 1,
-    inkWidth: 12,
-    capTop: 3,
+    baseline: 23.3,
+    inkLeft: 0.8,
+    inkWidth: 12.3,
+    capTop: 3.26,
   },
   F: {
     width: 13,
@@ -118,7 +119,7 @@ const cells: Record<string, Cell> = {
     gap: 3,
     baseline: 21,
     inkLeft: 0,
-    inkWidth: 14,
+    inkWidth: 13.52,
     capTop: 0,
   },
   G: {
@@ -126,8 +127,8 @@ const cells: Record<string, Cell> = {
     height: 60,
     gap: 8,
     baseline: 48,
-    inkLeft: 4,
-    inkWidth: 31,
+    inkLeft: 4.5,
+    inkWidth: 30.8,
     capTop: 0,
   },
   H: {
@@ -136,7 +137,7 @@ const cells: Record<string, Cell> = {
     gap: 6,
     baseline: 21,
     inkLeft: 0,
-    inkWidth: 13,
+    inkWidth: 13.5,
     capTop: 0,
     letters: "no-lower",
   },
@@ -159,14 +160,23 @@ const cellFor = (name: string, dpmm: number): Cell | undefined => {
     width,
     height,
     gap: Math.round(cell.gap * sx),
-    baseline: Math.round(cell.baseline * sy),
-    inkLeft: Math.round(cell.inkLeft * sx),
-    inkWidth: Math.round(cell.inkWidth * sx),
-    capTop: Math.round(cell.capTop * sy),
+    baseline: cell.baseline * sy,
+    inkLeft: cell.inkLeft * sx,
+    inkWidth: cell.inkWidth * sx,
+    capTop: cell.capTop * sy,
   };
 };
 
 type Orientation = "N" | "R" | "I" | "B";
+
+/** ^FB: wrap the text into lines within a block */
+type TextBlockOptions = {
+  width: number;
+  maxLines: number;
+  lineSpacing: number;
+  justification: "L" | "C" | "R" | "J";
+  hangingIndent: number;
+};
 
 type TextOptions = {
   x: number;
@@ -178,59 +188,51 @@ type TextOptions = {
   height?: number;
   width?: number;
   orientation: Orientation;
+  block?: TextBlockOptions;
   dpmm: number;
 };
 
-/** A glyph placed on the baseline, scaled from font units to dots */
-type PlacedGlyph = {
+/** A glyph scaled from font units to dots, and where it sits from its pen position */
+type Glyph = {
   font: Font;
   glyph: number;
-  /** Distance along the baseline from the start of the text */
-  pen: number;
+  offset: number;
   scaleX: number;
   scaleY: number;
 };
 
-/** A line of text laid out unrotated, with the baseline at y = 0 */
-type TextBlock = {
-  glyphs: PlacedGlyph[];
-  /** How far the text advances along the baseline */
-  advance: number;
-  /** Height of the block and how far its top is above the baseline */
+/** A font at a given size: how far each character advances, and its glyph */
+type Face = {
+  /** Height of a line and how far its top is above the baseline */
   height: number;
   ascent: number;
+  advance: (char: string) => number;
+  /** Undefined for characters that print nothing */
+  glyph: (char: string) => Glyph | undefined;
 };
 
-const layoutFont0 = (text: string, options: TextOptions): TextBlock => {
+const font0Face = (options: TextOptions): Face => {
   const font = load("0", font0Data);
   const advances = font0AdvanceTable();
   // A missing dimension takes the other's value
   const height = options.height ?? options.width ?? 9;
   const width = options.width ?? height;
   const scaleY = (CAP_HEIGHT * height) / font.capHeight;
-  const glyphs: PlacedGlyph[] = [];
-  let pen = 0;
 
-  for (const char of text) {
-    const code = char.codePointAt(0)!;
-    const advance = advances.get(code);
-    if (advance === undefined) {
-      pen += (MISSING_ADVANCE * width) / 100;
-      continue;
-    }
-    const target = (advance * width) / 100;
-    const glyph = font.glyphIndex(code);
-    glyphs.push({
-      font,
-      glyph,
-      pen,
-      scaleX: target / font.advance(glyph),
-      scaleY,
-    });
-    pen += target;
-  }
-
-  return { glyphs, advance: pen, height, ascent: CAP_HEIGHT * height };
+  return {
+    height,
+    ascent: CAP_HEIGHT * height,
+    advance: (char) =>
+      ((advances.get(char.codePointAt(0)!) ?? MISSING_ADVANCE) * width) / 100,
+    glyph: (char) => {
+      const code = char.codePointAt(0)!;
+      const advance = advances.get(code);
+      if (advance === undefined) return undefined;
+      const glyph = font.glyphIndex(code);
+      const scaleX = (advance * width) / 100 / font.advance(glyph);
+      return { font, glyph, offset: 0, scaleX, scaleY };
+    },
+  };
 };
 
 /** Whole-step magnification from 1 to 10 for a size in dots */
@@ -239,11 +241,7 @@ const magnification = (dots: number | undefined, base: number) =>
     ? undefined
     : Math.min(10, Math.max(1, Math.round(dots / base)));
 
-const layoutBitmapFont = (
-  text: string,
-  cell: Cell,
-  options: TextOptions
-): TextBlock => {
+const bitmapFace = (cell: Cell, options: TextOptions): Face => {
   const font = cell.bold
     ? load("mono-bold", dejavuMonoBoldData)
     : load("mono", dejavuMonoData);
@@ -261,39 +259,188 @@ const layoutBitmapFont = (
   const hRight = Math.max(...hPoints.map((p) => p.x));
   const scaleX = (cell.inkWidth * magX) / (hRight - hLeft);
   const scaleY = ((cell.baseline - cell.capTop) * magY) / font.capHeight;
+  const offset = cell.inkLeft * magX - hLeft * scaleX;
 
-  const advance = (cell.width + cell.gap) * magX;
+  return {
+    height: cell.height * magY,
+    ascent: cell.baseline * magY,
+    advance: () => (cell.width + cell.gap) * magX,
+    glyph: (char) => {
+      if (cell.letters === "upper") char = char.toUpperCase();
+      if (cell.letters === "no-lower" && char !== char.toUpperCase()) {
+        return undefined;
+      }
+      const glyph = font.glyphIndex(char.codePointAt(0)!);
+      return { font, glyph, offset, scaleX, scaleY };
+    },
+  };
+};
+
+/** A glyph placed in the text block: along the baseline, and which baseline */
+type PlacedGlyph = Glyph & { pen: number; baseline: number };
+
+/** Text laid out unrotated, with the first baseline at 0 */
+type TextBlock = {
+  glyphs: PlacedGlyph[];
+  /** Size of the block, and how far its top is above the first baseline */
+  width: number;
+  height: number;
+  ascent: number;
+  /** The baseline ^FT positions */
+  lastBaseline: number;
+};
+
+const advanceOf = (face: Face, text: string) => {
+  let advance = 0;
+  for (const char of text) advance += face.advance(char);
+  return advance;
+};
+
+/** Place a line's glyphs from pen position `start`, widening its spaces by `extra` */
+const placeLine = (
+  face: Face,
+  text: string,
+  start: number,
+  baseline: number,
+  extra = 0
+): PlacedGlyph[] => {
   const glyphs: PlacedGlyph[] = [];
-  let pen = 0;
-
-  for (let char of text) {
-    if (cell.letters === "upper") char = char.toUpperCase();
-    const blank = cell.letters === "no-lower" && char !== char.toUpperCase();
-    if (!blank) {
-      glyphs.push({
-        font,
-        glyph: font.glyphIndex(char.codePointAt(0)!),
-        pen: pen + cell.inkLeft * magX - hLeft * scaleX,
-        scaleX,
-        scaleY,
-      });
-    }
-    pen += advance;
+  let pen = start;
+  for (const char of text) {
+    const glyph = face.glyph(char);
+    if (glyph) glyphs.push({ ...glyph, pen: pen + glyph.offset, baseline });
+    pen += face.advance(char);
+    if (char === " ") pen += extra;
   }
+  return glyphs;
+};
+
+const layoutLine = (face: Face, text: string): TextBlock => ({
+  glyphs: placeLine(face, text, 0, 0),
+  // Printers turn the line as a block one dot short of its advance
+  width: Math.ceil(advanceOf(face, text) - 1e-9) - 1,
+  height: face.height,
+  ascent: face.ascent,
+  lastBaseline: 0,
+});
+
+type Line = {
+  text: string;
+  /** Whether the line ended at a space, which counts when aligning it */
+  trailingSpace: boolean;
+  /** Whether \& ended the line */
+  broken: boolean;
+};
+
+/**
+ * Wrap text into lines no wider than the block: at spaces, or between
+ * letters for words that don't fit on a line of their own. \& breaks a line.
+ */
+const wrap = (face: Face, text: string, block: TextBlockOptions): Line[] => {
+  const lines: Line[] = [];
+  const paragraphs = text.split("\\&");
+
+  paragraphs.forEach((paragraph, p) => {
+    const broken = p < paragraphs.length - 1;
+    const room = () =>
+      block.width - (lines.length > 0 ? block.hangingIndent : 0);
+    let line = "";
+    let pending = "";
+
+    const finish = (trailingSpace: boolean, lineBroken: boolean) => {
+      lines.push({ text: line, trailingSpace, broken: lineBroken });
+      line = "";
+      pending = "";
+    };
+
+    for (const token of paragraph.split(/( +)/)) {
+      if (token === "") continue;
+      if (token.startsWith(" ")) {
+        // Spaces at the start of a line don't print
+        if (line) pending = token;
+        continue;
+      }
+      if (line && advanceOf(face, line + pending + token) <= room()) {
+        line += pending + token;
+        pending = "";
+        continue;
+      }
+      if (line) finish(true, false);
+      // A word that doesn't fit on a line of its own breaks between letters
+      for (const char of token) {
+        if (line && advanceOf(face, line + char) > room()) {
+          finish(false, false);
+        }
+        line += char;
+      }
+    }
+    lines.push({ text: line, trailingSpace: pending !== "", broken });
+  });
+
+  return lines;
+};
+
+const layoutBlock = (
+  face: Face,
+  text: string,
+  block: TextBlockOptions
+): TextBlock => {
+  const pitch = face.height + block.lineSpacing;
+  const lines = wrap(face, text, block);
+  const space = face.advance(" ");
+  const glyphs: PlacedGlyph[] = [];
+
+  lines.forEach((line, i) => {
+    // Lines past the last print over it
+    const baseline = Math.min(i, block.maxLines - 1) * pitch;
+    const advance = advanceOf(face, line.text);
+    const indent = i > 0 ? block.hangingIndent : 0;
+    const last = i === lines.length - 1;
+
+    let start = 0;
+    let extra = 0;
+    switch (block.justification) {
+      case "L":
+        start = indent;
+        break;
+      case "J": {
+        start = indent;
+        const gaps = line.text.split(" ").length - 1;
+        if (!last && gaps > 0) {
+          extra = (block.width - indent - advance) / gaps;
+        }
+        break;
+      }
+      case "R":
+        // Right-aligned lines round up, centered ones to the nearest dot
+        start = Math.ceil(
+          block.width - advance - (line.trailingSpace ? space : 0) - 1e-9
+        );
+        break;
+      case "C": {
+        // Centering counts a space after the line, unless \& ended it
+        const counted = line.trailingSpace || (last && !line.broken);
+        start = Math.round((block.width - advance - (counted ? space : 0)) / 2);
+        break;
+      }
+    }
+    glyphs.push(...placeLine(face, line.text, start, baseline, extra));
+  });
 
   return {
     glyphs,
-    advance: pen,
-    height: cell.height * magY,
-    ascent: cell.baseline * magY,
+    width: block.width,
+    height: block.maxLines * pitch,
+    ascent: face.ascent,
+    lastBaseline: (block.maxLines - 1) * pitch,
   };
 };
 
 /**
  * Where a point of the text block lands on the label, given its distance u
- * along the baseline and v below it. Printers turn the laid-out block in
- * whole dots: ^FO puts the turned block's top-left corner at the origin,
- * ^FT turns it about the start of the baseline.
+ * along the baseline and v below the first baseline. Printers turn the
+ * laid-out block in whole dots: ^FO puts the turned block's top-left corner
+ * at the origin, ^FT turns it about the start of the last baseline.
  */
 const placement = (
   block: TextBlock,
@@ -301,21 +448,20 @@ const placement = (
 ): ((u: number, v: number) => readonly [number, number]) => {
   const { x, y } = options;
   if (options.fromBottom) {
+    const last = block.lastBaseline;
     switch (options.orientation) {
       case "R":
-        return (u, v) => [x - v, y + u];
+        return (u, v) => [x - v + last, y + u];
       case "I":
-        return (u, v) => [x - u, y - v];
+        return (u, v) => [x - u, y - v + last];
       case "B":
-        return (u, v) => [x + v, y - u];
+        return (u, v) => [x + v - last, y - u];
       default:
-        return (u, v) => [x + u, y + v];
+        return (u, v) => [x + u, y + v - last];
     }
   }
 
-  // The turned block is one dot short of the text's advance
-  const width = Math.ceil(block.advance - 1e-9) - 1;
-  const { height, ascent } = block;
+  const { width, height, ascent } = block;
   switch (options.orientation) {
     case "R":
       return (u, v) => [x + height - ascent - v, y + u];
@@ -328,7 +474,7 @@ const placement = (
   }
 };
 
-/** Draw a line of text in one of the built-in fonts */
+/** Draw text in one of the built-in fonts, on one line or wrapped in a block */
 const drawText = (
   raster: Raster,
   text: string,
@@ -336,19 +482,22 @@ const drawText = (
   color: Color
 ): void => {
   const cell = cellFor(options.font, options.dpmm);
-  const block = cell
-    ? layoutBitmapFont(text, cell, options)
-    : // Font 0 stands in for fonts we don't have yet
-      layoutFont0(text, options);
+  // Font 0 stands in for fonts we don't have yet
+  const face = cell ? bitmapFace(cell, options) : font0Face(options);
+  const block = options.block
+    ? layoutBlock(face, text, options.block)
+    : layoutLine(face, text);
   const place = placement(block, options);
 
-  for (const { font, glyph, pen, scaleX, scaleY } of block.glyphs) {
+  for (const { font, glyph, pen, baseline, scaleX, scaleY } of block.glyphs) {
     const contours = flattenGlyph(font, glyph, 0.1 / scaleY).map((contour) =>
-      contour.map(([gx, gy]) => place(pen + gx * scaleX, -gy * scaleY))
+      contour.map(([gx, gy]) =>
+        place(pen + gx * scaleX, baseline - gy * scaleY)
+      )
     );
     if (contours.length) fillPath(raster, contours, color);
   }
 };
 
-export type { Orientation };
+export type { Orientation, TextBlockOptions };
 export { drawText };

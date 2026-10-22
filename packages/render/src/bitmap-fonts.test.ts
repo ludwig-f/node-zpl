@@ -71,6 +71,19 @@ describe("bitmap fonts", () => {
       expect(ink(`^FO100,100${font}^FDH^FS`).height).toBe(height);
     });
 
+    test.each([
+      // ^A size, H spans x, H spans y
+      ["^ADN,36,20", [1, 18], [0, 27]],
+      ["^ADN,54,30", [1, 27], [0, 41]],
+      ["^ADN,72,40", [2, 37], [0, 55]],
+      ["^AAN,18,10", [1, 9], [0, 13]],
+      ["^AAN,27,15", [1, 13], [0, 20]],
+      ["^AEN,56,30", [2, 25], [7, 46]],
+      ["^AFN,52,26", [0, 26], [0, 41]],
+    ])("%s scales the letters, not the dots", (font, x, y) => {
+      expect(ink(`^FO100,100${font}^FDH^FS`)).toMatchObject({ x, y });
+    });
+
     test("^CF magnifies the default font the same way", () => {
       expect(advance("^CFA,30")).toBe(18);
       expect(ink("^CFA,30^FO100,100^FDH^FS").height).toBe(21);
