@@ -61,6 +61,7 @@ const ranges: {
     ["ratio", "ratio", 2, 3],
   ],
   SetDarkness: [["darkness", "darkness", 0, 30]],
+  QrCode: [["magnification", "magnification", 1, 100]],
 };
 
 const codes: { [T in Command["type"]]?: string } = {
@@ -71,6 +72,7 @@ const codes: { [T in Command["type"]]?: string } = {
   GraphicDiagonal: "^GD",
   BarcodeDefaults: "^BY",
   SetDarkness: "~SD",
+  QrCode: "^BQ",
 };
 
 const barcodes = new Set<Command["type"]>([
@@ -78,6 +80,7 @@ const barcodes = new Set<Command["type"]>([
   "Code128",
   "Ean13",
   "DataMatrix",
+  "QrCode",
 ]);
 
 /** Commands that act immediately, outside of ^XA … ^XZ */

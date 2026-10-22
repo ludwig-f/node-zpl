@@ -102,6 +102,21 @@ const commandCases: [Command, string][] = [
     { type: "DataMatrix", orientation: "N", height: 9, quality: 200 },
     "^BXN,9,200",
   ],
+  [
+    { type: "QrCode", orientation: "N", model: 2, magnification: 6 },
+    "^BQN,2,6",
+  ],
+  [
+    {
+      type: "QrCode",
+      orientation: "N",
+      model: 2,
+      magnification: 4,
+      errorCorrection: "H",
+      mask: 7,
+    },
+    "^BQN,2,4,H,7",
+  ],
   [{ type: "SetDarkness", darkness: 5 }, "~SD05"],
   [
     {

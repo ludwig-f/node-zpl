@@ -389,6 +389,58 @@ class Label extends ZplContent {
   }
 
   /**
+   * Draw a QR code on the label. The data is escaped, and the error
+   * correction level is added to it as ZPL requires.
+   * @param options.position Position (x, y) of the code
+   * @param options.data Data to encode
+   * @param options.moduleSize Size of each square module - defaults to the printer's default for its resolution
+   * @param options.errorCorrection H (highest), Q, M (standard) or L (densest) - defaults to M
+   */
+  public drawQrCode(options: {
+    position: Position;
+    data: string;
+    moduleSize?: Length;
+    errorCorrection?: "H" | "Q" | "M" | "L";
+  }): this {
+    const { errorCorrection = "M" } = options;
+
+    return this.field(options.position, [
+      {
+        type: "QrCode",
+        orientation: "N",
+        model: 2,
+        magnification: this.optionalDots(options.moduleSize),
+      },
+      // A for automatic input: the printer picks the encoding
+      ...this.fieldData(`${errorCorrection}A,${options.data}`),
+    ]);
+  }
+
+  /**
+   * Draw a field with any command, for elements without their own method.
+   * The command is added as written; the data is escaped.
+   * @param options.position Position (x, y) of the field
+   * @param options.command ZPL command(s) for the field, e.g. "^B3N,N,100,Y,N"
+   * @param options.data Field data, if the command needs any
+   */
+  public drawField(options: {
+    position: Position;
+    command: `${"^" | "~"}${string}`;
+    data?: string;
+  }): this {
+    const { position, command, data } = options;
+
+    if (!/^[\^~]/.test(command)) {
+      throw new ZplError(`Commands start with ^ or ~, got: ${command}`);
+    }
+
+    return this.field(position, [
+      { type: "Raw", zpl: command },
+      ...(data === undefined ? [] : this.fieldData(data)),
+    ]);
+  }
+
+  /**
    * @returns The generated ZPL, closed with ^XZ if it is not already
    */
   public toZPL(): string {

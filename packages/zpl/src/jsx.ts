@@ -247,6 +247,48 @@ const DataMatrix = primitive(
     })
 );
 
+/** QR code, with the data as children */
+const QrCode = primitive(
+  (
+    label,
+    {
+      children,
+      ...props
+    }: Position & {
+      moduleSize?: Length;
+      errorCorrection?: "H" | "Q" | "M" | "L";
+      children: TextChildren;
+    }
+  ) =>
+    label.drawQrCode({
+      ...props,
+      position: position(props),
+      data: text(children),
+    })
+);
+
+/**
+ * A field with any command, for elements without their own component. The
+ * command is added as written; children are the escaped field data.
+ */
+const Field = primitive(
+  (
+    label,
+    {
+      children,
+      ...props
+    }: Position & {
+      command: `${"^" | "~"}${string}`;
+      children?: TextChildren;
+    }
+  ) =>
+    label.drawField({
+      command: props.command,
+      position: position(props),
+      data: children === undefined ? undefined : text(children),
+    })
+);
+
 /** An image, e.g. from ImageConverter */
 const Graphic = primitive((label, props: Position & { graphic: Graphic }) =>
   label.drawGraphic({ position: position(props), graphic: props.graphic })
@@ -277,6 +319,8 @@ export {
   Code128,
   EAN13,
   DataMatrix,
+  QrCode,
+  Field,
   Graphic,
   StoredGraphic,
   Raw,

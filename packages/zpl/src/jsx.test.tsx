@@ -11,6 +11,8 @@ import {
   StoredGraphic,
   DefaultFont,
   Raw,
+  QrCode,
+  Field,
   build,
 } from "./jsx.js";
 import LabelBuilder from "./Label.js";
@@ -157,6 +159,41 @@ suite("jsx", () => {
           </Label>
         )
       ).toThrow(ZplError);
+    });
+  });
+
+  describe("QR codes and custom fields", () => {
+    test("produce the same ZPL as the builder", () => {
+      const label = build(
+        <Label width={mm(57)} height={mm(19)} dpmm={12}>
+          <QrCode
+            x={dots(20)}
+            y={dots(20)}
+            moduleSize={dots(4)}
+            errorCorrection="Q"
+          >
+            https://example.com/{42}
+          </QrCode>
+          <Field x={dots(300)} y={dots(20)} command="^B3N,N,100,Y,N">
+            ABC^1
+          </Field>
+        </Label>
+      );
+
+      const expected = builder()
+        .drawQrCode({
+          position: at(20, 20),
+          data: "https://example.com/42",
+          moduleSize: dots(4),
+          errorCorrection: "Q",
+        })
+        .drawField({
+          position: at(300, 20),
+          command: "^B3N,N,100,Y,N",
+          data: "ABC^1",
+        });
+
+      expect(label.toZPL()).toStrictEqual(expected.toZPL());
     });
   });
 

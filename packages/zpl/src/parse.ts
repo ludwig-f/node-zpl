@@ -327,6 +327,19 @@ const parsers: Record<string, CommandParser> = {
           escapeCharacter: p.string(6),
         }
   ),
+  "^BQ": withParams("^BQ", (p) => ({
+    type: "QrCode",
+    orientation: p.oneOf(0, "orientation", ["N"] as const),
+    model: p.oneOf(1, "model", [1, 2] as const),
+    magnification: p.number(2, "magnification"),
+    errorCorrection: p.oneOf(3, "errorCorrection", [
+      "H",
+      "Q",
+      "M",
+      "L",
+    ] as const),
+    mask: p.oneOf(4, "mask", [0, 1, 2, 3, 4, 5, 6, 7] as const),
+  })),
   "~SD": withParams("~SD", (p) => ({
     type: "SetDarkness",
     darkness: p.requiredNumber(0, "darkness"),

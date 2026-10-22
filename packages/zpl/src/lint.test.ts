@@ -232,6 +232,31 @@ suite("lint", () => {
       ]);
     });
 
+    test("a QR code magnification outside the printer's range", () => {
+      expect(
+        lintLabel(
+          { type: "FieldOrigin", x: 10, y: 10 },
+          { type: "QrCode", orientation: "N", model: 2, magnification: 150 },
+          { type: "FieldData", data: "MA,hi" },
+          { type: "FieldSeparator" }
+        ).map((d) => d.message)
+      ).toStrictEqual([
+        "^BQ magnification is 150, but the printer only accepts 1 to 100.",
+      ]);
+    });
+
+    test("a QR code without data", () => {
+      expect(
+        rules([
+          ...header,
+          { type: "FieldOrigin", x: 10, y: 10 },
+          { type: "QrCode", orientation: "N" },
+          { type: "FieldSeparator" },
+          end,
+        ])
+      ).toStrictEqual(["barcode-without-data"]);
+    });
+
     test("a barcode without data", () => {
       expect(
         rules([
