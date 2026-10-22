@@ -40,6 +40,46 @@ const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 > [!TIP]
 > To preview your generated ZPL you can use [Labelary](https://labelary.com/viewer.html)!
 
+### JSX
+
+Labels can also be written as JSX. It compiles to the same commands as the builder, so everything else in this README applies. Set up TypeScript (or your bundler) to use `node-zpl` as the JSX runtime:
+
+```json
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "node-zpl"
+  }
+}
+```
+
+```tsx
+import { Label, Text, Box, Code128, build, mm, dots } from "node-zpl/jsx";
+import type { Length } from "node-zpl";
+
+const order = { id: 10442, barcode: "10442-B3", express: true };
+
+const ReturnAddress = (props: { x: Length; y: Length }) => (
+  <Text x={props.x} y={props.y} height={mm(3)}>Harbor Parts Co.</Text>
+);
+
+const zpl = build(
+  <Label width={mm(101.6)} height={mm(50.8)} dpmm={8}>
+    <ReturnAddress x={mm(5)} y={mm(5)} />
+    <Text x={mm(5)} y={mm(14)} height={mm(4)}>
+      Order #{order.id}
+    </Text>
+    <Box x={mm(5)} y={mm(21)} width={mm(91)} height={dots(3)} thickness={dots(3)} />
+    <Code128 x={mm(5)} y={mm(25)} height={mm(13)}>{order.barcode}</Code128>
+    {order.express && <Text x={mm(70)} y={mm(5)} height={mm(7)}>EXPRESS</Text>}
+  </Label>
+).toZPL();
+```
+
+`build()` returns the same `Label` object as the builder API, with `toZPL()`, `validate()` and `commands`. Text and barcode data go in children, `false`, `null` and `undefined` children are skipped, and lists from `.map()` work as you'd expect. Elements can be reused across labels with different resolutions, since millimeters are converted when the label is built.
+
+In a project that already uses React's JSX, put labels in their own files and switch just those files to the `node-zpl` runtime with a comment at the top: `/** @jsxImportSource node-zpl */`.
+
 ### Units
 
 Every length takes an explicit unit: `mm(10)` for millimeters or `dots(80)` for printer dots, ZPL's native unit. Millimeters are converted to dots using the label's `dpmm` (dots per millimeter: 6, 8, 12 or 24 for 152, 203, 300 or 600 dpi printers). Passing a bare number is a type error, so mixing up units can't happen by accident.
