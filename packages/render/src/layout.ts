@@ -158,7 +158,13 @@ const decodeFieldData = (
 };
 
 /** Barcodes we can draw */
-const drawn = new Set<Command["type"]>(["Code128"]);
+const drawn = new Set<Command["type"]>([
+  "Code11",
+  "Code128",
+  "Ean13",
+  "DataMatrix",
+  "QrCode",
+]);
 
 /** ^BY settings at power-up */
 const initialBarcodeDefaults = { moduleWidth: 2, ratio: 3, height: 10 };

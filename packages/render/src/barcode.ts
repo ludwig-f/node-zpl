@@ -1,9 +1,13 @@
 /**
- * Drawing barcodes. Each symbology is encoded into module widths, then the
- * bars are filled as rectangles in dots, so they land on whole dots and turn
- * with the field like text does: the bottom of the bars acts as the baseline.
+ * Drawing barcodes. Each symbology is encoded into bar widths or a module
+ * grid, then filled as rectangles in dots, so they land on whole dots and
+ * turn with the field like text does: the bottom of the symbol acts as the
+ * baseline.
  */
+import bwipjs from "bwip-js";
+import { encodeCode11 } from "./barcodes/code11.js";
 import { encodeCode128 } from "./barcodes/code128.js";
+import { encodeEan13 } from "./barcodes/ean13.js";
 import { fillPath } from "./raster.js";
 import {
   drawGlyphs,
@@ -13,7 +17,6 @@ import {
   scaledFace,
 } from "./text.js";
 import type { Element } from "./layout.js";
-import type { LinearSymbol } from "./barcodes/linear.js";
 import type { Color, Raster } from "./raster.js";
 import type { Face, Place } from "./text.js";
 
@@ -23,24 +26,144 @@ type Barcode = Extract<Element, { kind: "barcode" }>;
 const GAP_BELOW = 6;
 const GAP_ABOVE = 8;
 
-const encode = (
-  barcode: Barcode
-): { symbol: LinearSymbol; height: number; line?: "below" | "above" } => {
-  const { symbology } = barcode;
+/** How far EAN-13 guard bars reach below the others */
+const GUARD_EXTENSION = 13;
+
+/** Text under part of the bars, centered on the span from `from` to `to` */
+type TextPart = { text: string; from: number; to: number };
+
+type Linear = {
+  kind: "linear";
+  /** Widths of alternating bars and spaces in dots, starting with a bar */
+  widths: number[];
+  /** Bars (by index into widths) that reach below the others */
+  guards?: number[];
+  height: number;
+  line?: "below" | "above";
+  text: string;
+  /** How the text sits below the bars, if not centered as one line */
+  below?: TextPart[];
+};
+
+type Matrix = {
+  kind: "matrix";
+  /** Dark modules, row by row */
+  modules: number[];
+  columns: number;
+  moduleSize: number;
+  /** Moves the symbol down from ^FO, or up from ^FT */
+  shift?: { origin: number; typeset: number };
+};
+
+/** Pixels from bwip-js for 2D symbols, with options like "eclevel=Q" */
+const matrix = (bcid: string, text: string, options: string[] = []) => {
+  const [symbol] = bwipjs.raw(bcid, text, options.join(" "));
+  if (!("pixs" in symbol)) throw new Error("expected a 2D symbol");
+  return { modules: symbol.pixs, columns: symbol.pixx };
+};
+
+/** Default QR magnification for each printhead resolution */
+const qrMagnification = (dpmm: number) =>
+  dpmm <= 6 ? 1 : dpmm <= 8 ? 2 : dpmm <= 12 ? 3 : 6;
+
+/**
+ * QR field data starts with the error correction level and input mode,
+ * like "QA,": in manual mode a character type (and for bytes, a length)
+ * comes before the data
+ */
+const qrData = (data: string, level: string) => {
+  const match = /^([HQML])([AM]),/.exec(data);
+  if (!match) return { eclevel: level, text: data };
+  let text = data.slice(match[0].length);
+  if (match[2] === "M") {
+    text = text[0] === "B" ? text.slice(5) : text.slice(1);
+  }
+  return { eclevel: match[1], text };
+};
+
+const interpretation = (
+  shown: boolean | undefined,
+  above: boolean | undefined
+): Linear["line"] => (shown === false ? undefined : above ? "above" : "below");
+
+const encode = (barcode: Barcode, dpmm: number): Linear | Matrix => {
+  const { symbology, data, moduleWidth } = barcode;
   switch (symbology.type) {
-    case "Code128":
+    case "Code128": {
+      const { widths, text } = encodeCode128(data, symbology.mode);
       return {
-        symbol: encodeCode128(barcode.data, symbology.mode),
+        kind: "linear",
+        widths: widths.map((w) => w * moduleWidth),
         height: symbology.height ?? barcode.height,
-        line:
-          symbology.interpretationLine === false
-            ? undefined
-            : symbology.interpretationLineAbove
-            ? "above"
-            : "below",
+        line: interpretation(
+          symbology.interpretationLine,
+          symbology.interpretationLineAbove
+        ),
+        text,
       };
-    default:
-      throw new Error(`${symbology.type} isn't supported yet`);
+    }
+    case "Code11": {
+      const wide = Math.round(moduleWidth * barcode.ratio);
+      const { widths, text } = encodeCode11(
+        data,
+        symbology.checkDigits ?? 2,
+        moduleWidth,
+        wide
+      );
+      return {
+        kind: "linear",
+        widths,
+        height: symbology.height ?? barcode.height,
+        line: interpretation(
+          symbology.interpretationLine,
+          symbology.interpretationLineAbove
+        ),
+        // Labelary marks the start and stop characters with triangles; we
+        // leave their places blank
+        text: ` ${text} `,
+      };
+    }
+    case "Ean13": {
+      const { widths, guards, text } = encodeEan13(data);
+      const m = moduleWidth;
+      return {
+        kind: "linear",
+        widths: widths.map((w) => w * m),
+        guards,
+        height: symbology.height ?? barcode.height,
+        line: interpretation(
+          symbology.interpretationLine,
+          symbology.interpretationLineAbove
+        ),
+        text,
+        // The first digit sits left of the bars, the others under each half
+        below: [
+          { text: text[0], from: -11 * m, to: -11 * m },
+          { text: text.slice(1, 7), from: 3 * m, to: 45 * m },
+          { text: text.slice(7), from: 50 * m, to: 92 * m },
+        ],
+      };
+    }
+    case "QrCode": {
+      const size = symbology.magnification ?? qrMagnification(dpmm);
+      const { eclevel, text } = qrData(data, symbology.errorCorrection ?? "Q");
+      return {
+        kind: "matrix",
+        ...matrix("qrcode", text, [`eclevel=${eclevel}`]),
+        moduleSize: size,
+        shift: { origin: 10, typeset: 3 * size },
+      };
+    }
+    case "DataMatrix": {
+      const options = [];
+      if (symbology.columns) options.push(`columns=${symbology.columns}`);
+      if (symbology.rows) options.push(`rows=${symbology.rows}`);
+      return {
+        kind: "matrix",
+        ...matrix("datamatrix", data, options),
+        moduleSize: symbology.height ?? 1,
+      };
+    }
   }
 };
 
@@ -69,32 +192,56 @@ const interpretationFace = (barcode: Barcode, dpmm: number): Face =>
     ? faceFor({ ...barcode.font, dpmm })
     : scaledFace("D", barcode.moduleWidth / 2, dpmm);
 
-const drawBarcode = (
+const advanceOf = (face: Face, text: string) => {
+  let advance = 0;
+  for (const char of text) advance += face.advance(char);
+  return advance;
+};
+
+const drawLinear = (
   raster: Raster,
   barcode: Barcode,
+  symbol: Linear,
   dpmm: number,
   color: Color
-): void => {
-  const { symbol, height, line } = encode(barcode);
-  const module = barcode.moduleWidth;
-  const width = symbol.widths.reduce((sum, w) => sum + w, 0) * module;
+) => {
+  const { widths, height, line } = symbol;
+  const width = widths.reduce((sum, w) => sum + w, 0);
   const place = placement(
     { width, height, ascent: height, lastBaseline: 0 },
     barcode
   );
 
+  const guards = new Set(symbol.guards);
+  const extension = symbol.guards ? GUARD_EXTENSION : 0;
   let u = 0;
-  symbol.widths.forEach((w, i) => {
-    if (i % 2 === 0)
-      fillRect(raster, place, u, -height, u + w * module, 0, color);
-    u += w * module;
+  widths.forEach((w, i) => {
+    if (i % 2 === 0) {
+      const bottom = guards.has(i) ? extension : 0;
+      fillRect(raster, place, u, -height, u + w, bottom, color);
+    }
+    u += w;
   });
 
   if (!line || !symbol.text) return;
   const face = interpretationFace(barcode, dpmm);
-  let advance = 0;
-  for (const char of symbol.text) advance += face.advance(char);
-  const top = line === "below" ? GAP_BELOW : -height - GAP_ABOVE - face.height;
+  if (line === "below" && symbol.below) {
+    // Laid out under the bars, between the guards
+    const top = barcode.moduleWidth > 2 ? 2 * barcode.moduleWidth : 4;
+    for (const { text, from, to } of symbol.below) {
+      const advance = advanceOf(face, text);
+      const start = from === to ? from : (from + to - advance) / 2;
+      const glyphs = placeLine(face, text, start, top + face.ascent);
+      drawGlyphs(raster, glyphs, place, color);
+    }
+    return;
+  }
+
+  const top =
+    line === "below"
+      ? GAP_BELOW + extension
+      : -height - GAP_ABOVE - face.height;
+  const advance = advanceOf(face, symbol.text);
   const glyphs = placeLine(
     face,
     symbol.text,
@@ -102,6 +249,49 @@ const drawBarcode = (
     top + face.ascent
   );
   drawGlyphs(raster, glyphs, place, color);
+};
+
+const drawMatrix = (
+  raster: Raster,
+  barcode: Barcode,
+  symbol: Matrix,
+  color: Color
+) => {
+  const { modules, columns, moduleSize } = symbol;
+  const rows = modules.length / columns;
+  const size = columns * moduleSize;
+  const height = rows * moduleSize;
+  const shift = symbol.shift;
+  const y = barcode.fromBottom
+    ? barcode.y - (shift?.typeset ?? 0)
+    : barcode.y + (shift?.origin ?? 0);
+  const place = placement(
+    { width: size, height, ascent: height, lastBaseline: 0 },
+    { ...barcode, y }
+  );
+
+  for (let row = 0; row < rows; row++) {
+    for (let column = 0; column < columns; column++) {
+      if (!modules[row * columns + column]) continue;
+      const u = column * moduleSize;
+      const v = row * moduleSize - height;
+      fillRect(raster, place, u, v, u + moduleSize, v + moduleSize, color);
+    }
+  }
+};
+
+const drawBarcode = (
+  raster: Raster,
+  barcode: Barcode,
+  dpmm: number,
+  color: Color
+): void => {
+  const symbol = encode(barcode, dpmm);
+  if (symbol.kind === "linear") {
+    drawLinear(raster, barcode, symbol, dpmm, color);
+  } else {
+    drawMatrix(raster, barcode, symbol, color);
+  }
 };
 
 export { drawBarcode };

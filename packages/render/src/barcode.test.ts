@@ -154,3 +154,93 @@ describe("Code 128", () => {
     });
   });
 });
+
+describe("EAN-13", () => {
+  test.each([
+    // The guard bars reach 13 dots below the others
+    ["^FO100,100^BY2^BEN,100,N,N^FD590123412345^FS", 100, 289, 100, 212],
+    ["^FO100,100^BY2^BEN,50,N,N^FD590123412345^FS", 100, 289, 100, 162],
+    ["^FO100,100^BY4^BEN,100,N,N^FD590123412345^FS", 100, 479, 100, 212],
+    // The first digit prints left of the bars
+    ["^FT100,300^BY2^BEN,100,Y,N^FD590123412345^FS", 79, 289, 200, 317],
+    ["^FO100,100^BY2^BEN,100,Y,Y^FD590123412345^FS", 100, 289, 74, 212],
+  ])("%s", (body, left, right, top, bottom) => {
+    near(bounds(body), { left, right, top, bottom }, 1);
+  });
+
+  test("prints the digits under the two halves", () => {
+    // Labelary: digits from x 79 to 276, rows 204 to 217
+    const raster = render("^FO100,100^BY2^BEN,100,Y,N^FD590123412345^FS");
+    // Columns 70..99 left of the bars only hold the first digit
+    let top = Infinity;
+    let bottom = -1;
+    for (let y = 0; y < raster.height; y++) {
+      for (let x = 70; x < 100; x++) {
+        if (raster.ink[y * raster.width + x] < 0.5) continue;
+        top = Math.min(top, y);
+        bottom = Math.max(bottom, y);
+      }
+    }
+    expect(Math.abs(top - 204)).toBeLessThanOrEqual(1);
+    expect(Math.abs(bottom - 217)).toBeLessThanOrEqual(1);
+  });
+});
+
+describe("Code 11", () => {
+  test.each([
+    // Two check digits unless asked for one; wide bars are ^BY's ratio wide
+    ["^FO100,100^BY2^B1N,N,100,N,N^FD12345^FS", 100, 277],
+    ["^FO100,100^BY2,2^B1N,N,100,N,N^FD12345^FS", 100, 241],
+    ["^FO100,100^BY2^B1N,Y,100,N,N^FD12345^FS", 100, 257],
+  ])("%s", (body, left, right) => {
+    expect(bounds(body)).toStrictEqual({ left, right, top: 100, bottom: 199 });
+  });
+
+  test("prints the check digits in the interpretation line", () => {
+    // Labelary: digits from x 149 to 229, between start and stop marks
+    near(
+      parts("^FO100,100^BY2^B1N,N,100,Y,N^FD12345^FS").text,
+      {
+        left: 149,
+        right: 229,
+        top: 206,
+        bottom: 219,
+      },
+      2
+    );
+  });
+});
+
+describe("QR code", () => {
+  test.each([
+    // ^FO places it 10 dots lower; version 1 is 21 modules
+    ["^FO100,100^BQN,2,4^FDQA,hello^FS", 100, 183, 110, 193],
+    ["^FO100,100^BQN,2,1^FDQA,hello^FS", 100, 120, 110, 130],
+    ["^FO100,100^BQ^FDQA,hello^FS", 100, 141, 110, 151],
+    ["^FO100,100^BQN,2,4^FDQA,hello world hello world^FS", 100, 215, 110, 225],
+    // ^FT puts its bottom 3 modules above y
+    ["^FT100,300^BQN,2,1^FDQA,hello^FS", 100, 120, 276, 296],
+    ["^FT100,300^BQN,2,8^FDQA,hello^FS", 100, 267, 108, 275],
+  ])("%s", (body, left, right, top, bottom) => {
+    expect(bounds(body)).toStrictEqual({ left, right, top, bottom });
+  });
+});
+
+describe("Data Matrix", () => {
+  test.each([
+    ["^FO100,100^BXN,6,200^FDhello^FS", 100, 171, 100, 171],
+    [
+      "^FO100,100^BXN,6,200^FDhttps://github.com/ludwig-f/node-zpl^FS",
+      100,
+      243,
+      100,
+      243,
+    ],
+    ["^FT100,300^BXN,6,200^FDhello^FS", 100, 171, 228, 299],
+    ["^FO100,100^BXN,,200^FDhello^FS", 100, 111, 100, 111],
+    ["^FO100,100^BXR,6,200^FDhello^FS", 100, 171, 100, 171],
+    ["^FO100,100^BXN,6,200,20,20^FDhello^FS", 100, 219, 100, 219],
+  ])("%s", (body, left, right, top, bottom) => {
+    expect(bounds(body)).toStrictEqual({ left, right, top, bottom });
+  });
+});
