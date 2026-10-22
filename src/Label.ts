@@ -2,6 +2,8 @@ import ZplContent from "./ZplContent.js";
 import ZplError from "./ZplError.js";
 import { escapeFieldData, serialize } from "./serialize.js";
 import { toDots } from "./units.js";
+import { lint } from "./lint.js";
+import type { LintDiagnostic } from "./lint.js";
 import { ZebraFontFamily, Orientation } from "./types.js";
 import type { Color, Command, StorageDevice } from "./ast.js";
 import type { Graphic, Position } from "./types.js";
@@ -390,13 +392,24 @@ class Label extends ZplContent {
    * @returns The generated ZPL, closed with ^XZ if it is not already
    */
   public toZPL(): string {
-    const last = this.nodes[this.nodes.length - 1];
-    const commands: Command[] =
-      last?.type === "EndFormat"
-        ? this.nodes
-        : [...this.nodes, { type: "EndFormat" }];
+    return serialize(this.closedCommands(), { minify: this.minify });
+  }
 
-    return serialize(commands, { minify: this.minify });
+  /**
+   * Find problems the printer would not report, such as values it silently
+   * changes. Checks the label as toZPL() outputs it.
+   */
+  public lint(): LintDiagnostic[] {
+    return lint(this.closedCommands());
+  }
+
+  /** The commands, ending with ^XZ */
+  private closedCommands(): Command[] {
+    const last = this.nodes[this.nodes.length - 1];
+
+    return last?.type === "EndFormat"
+      ? this.nodes
+      : [...this.nodes, { type: "EndFormat" }];
   }
 
   /**

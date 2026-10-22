@@ -176,4 +176,25 @@ const commands = {
   "^ZZ": "Printer Sleep",
 } as const;
 
+/**
+ * The catalog key for a single raw command, e.g. "^A0N,30,30" -> "^A"
+ */
+const commandCode = (zpl: string): string => {
+  if (zpl.startsWith("^A")) {
+    return zpl.startsWith("^A@") ? "^A@" : "^A";
+  }
+
+  return zpl.slice(0, 3);
+};
+
+/**
+ * Codes of the commands in a raw ZPL string that are not ZPL commands
+ */
+const unknownCommands = (zpl: string): string[] =>
+  zpl
+    .split(/(?=[\^~])/)
+    .map((command) => commandCode(command.trim()))
+    .filter((code) => code && !(code in commands));
+
 export default commands;
+export { unknownCommands };
