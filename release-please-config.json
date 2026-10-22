@@ -12,6 +12,13 @@
       "component": "preview",
       "initial-version": "0.1.0",
       "bump-minor-pre-major": true
+    },
+    "packages/render": {
+      "release-type": "node",
+      "package-name": "@node-zpl/render",
+      "component": "render",
+      "initial-version": "0.1.0",
+      "bump-minor-pre-major": true
     }
   }
 }
