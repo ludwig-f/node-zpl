@@ -1,0 +1,16 @@
+{
+  "title": "Docs",
+  "pages": [
+    "index",
+    "getting-started",
+    "---Labels---",
+    "building-labels",
+    "jsx",
+    "parsing",
+    "linting",
+    "---Showing labels---",
+    "preview",
+    "---Printers---",
+    "printing"
+  ]
+}

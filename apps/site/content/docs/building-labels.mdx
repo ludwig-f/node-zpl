@@ -1,0 +1,72 @@
+---
+title: Building labels
+description: Draw text, boxes, barcodes and images with typed method calls.
+---
+
+`Label` builds a label one element at a time. Each method returns the label, so calls can be chained, and `toZPL()` returns the finished ZPL.
+
+```ts
+import { Label, Orientation, mm, dots } from "node-zpl";
+
+const label = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
+  .drawText({
+    position: { x: mm(2), y: mm(2) },
+    text: "Organic Oat Drink",
+    font: { height: mm(4) },
+  })
+  .drawEAN13({
+    position: { x: mm(2), y: mm(8) },
+    data: "735000123456",
+    height: mm(7),
+    orientation: Orientation.Normal,
+  });
+```
+
+## Units
+
+Every length takes an explicit unit: `mm(10)` for millimeters or `dots(80)` for printer dots, ZPL's native unit. Millimeters are converted with the label's `dpmm`. A bare number is a type error, so millimeters and dots can't be mixed up by accident.
+
+## Elements
+
+| Method | Draws |
+| --- | --- |
+| `drawText` | Text in a built-in or downloaded font |
+| `drawBox` | Boxes and lines, optionally rounded or white |
+| `drawCode11`, `drawCode128`, `drawEAN13` | Linear barcodes |
+| `drawDataMatrix` | Data Matrix codes |
+| `drawGraphic` | An image, converted with `ImageConverter` |
+| `drawStoredGraphic` | An image stored on the printer |
+| `setDefaultFont` | The font for text that doesn't set one |
+
+## Escaping
+
+Text and barcode data are escaped for you. Characters that ZPL would read as commands, `^` and `~`, are hex-encoded with `^FH`, so user input can't break a label:
+
+```ts
+label.drawText({ position: { x: dots(0), y: dots(0) }, text: "50% off ^ today" });
+// ^FO0,0^FH^FD50% off _5E today^FS
+```
+
+## Images
+
+`ImageConverter` turns a PNG or JPEG into a ZPL graphic. It runs in Node only, so it has its own entry point:
+
+```ts
+import { readFileSync } from "node:fs";
+import { Label, mm, dots } from "node-zpl";
+import { ImageConverter } from "node-zpl/image";
+
+const graphic = await new ImageConverter().toZPL(readFileSync("logo.png"));
+
+new Label({ width: mm(57), height: mm(19), dpmm: 12 })
+  .drawGraphic({ position: { x: dots(0), y: dots(0) }, graphic });
+```
+
+## Commands without a method
+
+Labels are built from typed command nodes, which you can read with `label.commands`. Commands that don't have a method yet can be added as nodes with `add()`, or as plain ZPL with `raw()`:
+
+```ts
+label.add({ type: "GraphicCircle", diameter: 80, thickness: 4 });
+label.raw("^PQ2"); // print two copies
+```

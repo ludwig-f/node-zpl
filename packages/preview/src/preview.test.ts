@@ -98,6 +98,15 @@ suite("<zpl-preview>", () => {
       });
     });
 
+    test("exposes each image as the label part for styling", async () => {
+      const element = create();
+      const rendered = nextRender(element);
+      element.zpl = "^XA^PW100^LL100^FDHi^FS^XZ";
+      await rendered;
+
+      expect(images(element)[0].getAttribute("part")).toBe("label");
+    });
+
     test("renders one image per label", async () => {
       const element = create();
       const rendered = nextRender(element);

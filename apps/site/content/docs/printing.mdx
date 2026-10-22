@@ -1,0 +1,64 @@
+---
+title: Printing
+description: Send labels to Zebra printers and store graphics on them.
+---
+
+node-zpl produces ZPL text; sending it to a printer is up to you. The printer's firmware does the drawing.
+
+## Sending ZPL
+
+Networked Zebra printers accept raw ZPL on TCP port 9100:
+
+```ts
+import { connect } from "node:net";
+
+const socket = connect(9100, "192.168.1.50", () => socket.end(label.toZPL()));
+```
+
+Printers connected over USB, serial or Bluetooth take the same text through their connection, and print servers usually pass it through untouched. Browsers can't open TCP connections, so web apps send labels through a server, Zebra's Browser Print app, or WebUSB.
+
+## Resolution
+
+Positions in ZPL are in dots, and dot size depends on the printhead. The same ZPL prints at different physical sizes on different printers, so the label's `dpmm` has to match the printer you send it to.
+
+| dpmm | dpi | 1 mm |
+| --- | --- | --- |
+| 6 | 152 | 6 dots |
+| 8 | 203 | 8 dots |
+| 12 | 300 | 12 dots |
+| 24 | 600 | 24 dots |
+
+## `^` and `~` commands
+
+Format commands start with `^`. The printer collects them between `^XA` and `^XZ` and prints them as one label. Control commands start with `~` and act as soon as they arrive, like `~SD` for print darkness. That's why printer settings live in `PrinterSetup` rather than `Label`:
+
+```ts
+import { PrinterSetup } from "node-zpl";
+
+const setup = new PrinterSetup().setDarkness(20).toZPL();
+```
+
+## Storing graphics
+
+Send an image once and recall it by name in every label, instead of including it each time:
+
+```ts
+import { readFileSync } from "node:fs";
+import { Label, PrinterSetup, mm, dots } from "node-zpl";
+import { ImageConverter } from "node-zpl/image";
+
+const graphic = await new ImageConverter().toZPL(readFileSync("logo.png"));
+
+// Once: store it in the printer's RAM (R:) or flash (E:)
+const setup = new PrinterSetup().storeGraphic({ name: "LOGO", graphic, device: "E" }).toZPL();
+
+// In every label
+new Label({ width: mm(57), height: mm(19), dpmm: 12 })
+  .drawStoredGraphic({ position: { x: dots(0), y: dots(0) }, name: "LOGO", device: "E" });
+```
+
+Graphics in RAM are lost when the printer turns off; flash keeps them.
+
+## Fonts
+
+Font 0 is Zebra's licensed CG Triumvirate Bold Condensed, and fonts A to H are built-in bitmap fonts. Previews use lookalikes, so text can come out slightly wider or narrower on the real printer. Leave some room at the end of lines that need to fit.
