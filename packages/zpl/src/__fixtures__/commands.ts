@@ -14,6 +14,8 @@ const commandCases: [Command, string][] = [
   [{ type: "ChangeEncoding", charset: 28 }, "^CI28"],
   [{ type: "DefaultFont", font: "0", height: 30, width: 20 }, "^CF0,30,20"],
   [{ type: "DefaultFont", font: "A" }, "^CFA"],
+  [{ type: "FieldOrientation", orientation: "R" }, "^FWR"],
+  [{ type: "FieldOrientation", orientation: "B", justification: 1 }, "^FWB,1"],
   [{ type: "FieldOrigin", x: 20, y: 30 }, "^FO20,30"],
   [{ type: "FieldOrigin", x: 20, y: 30, justification: 1 }, "^FO20,30,1"],
   [{ type: "FieldTypeset", x: 20, y: 30 }, "^FT20,30"],

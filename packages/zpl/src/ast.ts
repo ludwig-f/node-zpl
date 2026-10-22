@@ -42,6 +42,11 @@ type DefaultFont = Node<
   { font: string; height?: number; width?: number }
 >;
 
+/** `^FWr,z` - default orientation and justification for the following fields */
+type FieldOrientation = Node<
+  "FieldOrientation",
+  { orientation: Orientation; justification?: Justification }
+>;
 /** `^FOx,y,z` */
 type FieldOrigin = Node<
   "FieldOrigin",
@@ -228,6 +233,7 @@ type Command =
   | LabelReverse
   | ChangeEncoding
   | DefaultFont
+  | FieldOrientation
   | FieldOrigin
   | FieldTypeset
   | Font
@@ -268,6 +274,7 @@ export type {
   LabelReverse,
   ChangeEncoding,
   DefaultFont,
+  FieldOrientation,
   FieldOrigin,
   FieldTypeset,
   Font,

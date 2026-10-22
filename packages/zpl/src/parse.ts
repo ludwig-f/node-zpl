@@ -178,6 +178,19 @@ const parsers: Record<string, CommandParser> = {
     height: p.number(1, "height"),
     width: p.number(2, "width"),
   })),
+  "^FW": withParams("^FW", (p) => {
+    const orientation = p.oneOf(0, "orientation", orientations);
+
+    if (!orientation) {
+      throw new ParamError("^FW: orientation is required");
+    }
+
+    return {
+      type: "FieldOrientation",
+      orientation,
+      justification: p.oneOf(1, "justification", [0, 1, 2] as const),
+    };
+  }),
   "^FO": withParams("^FO", (p) => ({
     type: "FieldOrigin",
     x: p.requiredNumber(0, "x", 0),

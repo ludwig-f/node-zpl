@@ -53,6 +53,8 @@ const serializeCommand = (command: Command): string => {
       return `^CI${command.charset}`;
     case "DefaultFont":
       return `^CF${params(command.font, command.height, command.width)}`;
+    case "FieldOrientation":
+      return `^FW${params(command.orientation, command.justification)}`;
     case "FieldOrigin":
       return `^FO${params(command.x, command.y, command.justification)}`;
     case "FieldTypeset":
