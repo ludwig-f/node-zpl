@@ -1,17 +1,17 @@
 import { describe, test, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { parseFont, flattenGlyph } from "./font.js";
+import type { Font } from "./font.js";
 
-const font = parseFont(
-  new Uint8Array(
-    readFileSync(
-      new URL("./__fixtures__/RobotoCondensed-Bold.ttf", import.meta.url)
-    )
-  )
-);
+const load = (path: string) =>
+  parseFont(new Uint8Array(readFileSync(new URL(path, import.meta.url))));
 
-/** Bounds of a glyph's flattened outline, in font units */
-const bounds = (char: string) => {
+const font0 = load("../fonts/font0.ttf");
+// Roboto Condensed cut down to A, e, Å and é, whose accented letters are composite glyphs
+const composite = load("./__fixtures__/composite.ttf");
+
+/** Contour count and bounds of a glyph's flattened outline, in font units */
+const outline = (font: Font, char: string) => {
   const contours = flattenGlyph(
     font,
     font.glyphIndex(char.codePointAt(0)!),
@@ -32,46 +32,50 @@ const bounds = (char: string) => {
 // Expected values come from fontTools
 describe("parseFont", () => {
   test("reads the font's metrics", () => {
-    expect([font.unitsPerEm, font.capHeight, font.numGlyphs]).toStrictEqual([
-      2048, 1456, 1321,
+    expect([font0.unitsPerEm, font0.capHeight, font0.numGlyphs]).toStrictEqual([
+      1000, 686, 269,
     ]);
   });
 
   test("maps characters to glyphs", () => {
-    expect(font.glyphIndex("H".codePointAt(0)!)).toBe(44);
-    expect(font.glyphIndex("Å".codePointAt(0)!)).toBe(671);
-    expect(font.glyphIndex(0x10ffff)).toBe(0);
+    expect(font0.glyphIndex("H".codePointAt(0)!)).toBe(30);
+    expect(font0.glyphIndex("Å".codePointAt(0)!)).toBe(8);
+    expect(font0.glyphIndex(0x10ffff)).toBe(0);
   });
 
   test("reads advance widths", () => {
-    expect(font.advance(44)).toBe(1257);
-    expect(font.advance(83)).toBe(1019);
+    expect(font0.advance(30)).toBe(525);
+    expect(font0.advance(136)).toBe(430);
   });
 });
 
 describe("flattenGlyph", () => {
   test("outlines a simple glyph", () => {
-    expect(bounds("H")).toStrictEqual({
-      contours: 3,
-      bounds: [118, 0, 1137, 1456],
+    expect(outline(font0, "H")).toStrictEqual({
+      contours: 1,
+      bounds: [52, 0, 473, 687],
     });
   });
 
   test("flattens curves to within the tolerance", () => {
-    const { bounds: b } = bounds("o");
-    const expected = [72, -20, 947, 1102];
-    b.forEach((value, i) =>
+    const { contours, bounds } = outline(font0, "o");
+    expect(contours).toBe(2);
+    const expected = [29, -12, 401, 539];
+    bounds.forEach((value, i) =>
       expect(Math.abs(value - expected[i])).toBeLessThanOrEqual(1)
     );
   });
 
   test("assembles composite glyphs from their parts", () => {
-    expect(bounds("Å").bounds).toStrictEqual([23, 0, 1203, 1935]);
-    const accented = bounds("é");
-    expect(accented.bounds[3]).toBeGreaterThan(1500);
+    expect(outline(composite, "Å").bounds).toStrictEqual([23, 0, 1203, 1935]);
+    const { bounds } = outline(composite, "é");
+    const expected = [78, -20, 922, 1537];
+    bounds.forEach((value, i) =>
+      expect(Math.abs(value - expected[i])).toBeLessThanOrEqual(1)
+    );
   });
 
   test("glyphs without an outline have no contours", () => {
-    expect(flattenGlyph(font, font.glyphIndex(32), 0.5)).toStrictEqual([]);
+    expect(flattenGlyph(font0, font0.glyphIndex(32), 0.5)).toStrictEqual([]);
   });
 });
