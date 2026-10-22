@@ -5,6 +5,11 @@
       "release-type": "node",
       "package-name": "node-zpl",
       "include-component-in-tag": false
+    },
+    "packages/preview": {
+      "release-type": "node",
+      "package-name": "@node-zpl/preview",
+      "component": "preview"
     }
   }
 }
