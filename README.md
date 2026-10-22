@@ -1,11 +1,11 @@
 # node-zpl
 
-`node-zpl` is a ZPL (Zebra Programming Language) generator for Node.js written in Typescript.
+`node-zpl` is a ZPL (Zebra Programming Language) generator for TypeScript.
 
 This library provides a thin (but typed!) wrapper around the ZPL commands as described by Zebra.
 
 > [!NOTE]
-> This library is under active development and does not yet support every single ZPL command. Please check the table below to see the currently supported commands. Contributions are welcome!
+> This library is under active development and does not yet support every single ZPL command. Please check the list below to see the currently supported commands. Contributions are welcome!
 
 ## Installation
 
@@ -17,36 +17,62 @@ npm install node-zpl
 
 ## Usage
 
-Here's a basic example of how to use `node-zpl` to generate a label with a EAN-13 bar code:
+Here's a basic example of how to use `node-zpl` to generate a label with some text and an EAN-13 bar code:
 
 ```typescript
-import { Label, Orientation } from "node-zpl";
+import { Label, Orientation, mm, dots } from "node-zpl";
 
-const label = new Label(57, 19, 12)
+const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
+  .drawText({
+    position: { x: mm(2), y: mm(2) },
+    text: "Hello ^ world",
+    font: { height: mm(4) },
+  })
   .drawEAN13({
-    position: {
-      x: 10,
-      y: 20,
-    },
+    position: { x: mm(2), y: mm(8) },
+    data: "123456789012",
+    height: mm(7),
     orientation: Orientation.Normal,
   })
-  .close();
-const zpl = label.dumpZPL();
+  .toZPL();
 ```
 
 > [!TIP]
 > To preview your generated ZPL you can use [Labelary](https://labelary.com/viewer.html)!
 
-You can also convert an image to something usable in ZPL by using the provided `ImageConverter`:
+### Units
+
+Every length takes an explicit unit: `mm(10)` for millimeters or `dots(80)` for printer dots, ZPL's native unit. Millimeters are converted to dots using the label's `dpmm` (dots per millimeter: 6, 8, 12 or 24 for 152, 203, 300 or 600 dpi printers). Passing a bare number is a type error, so mixing up units can't happen by accident.
+
+### Escaping
+
+Field data such as text and bar code contents is escaped automatically. Characters that ZPL would otherwise read as commands (`^` and `~`) are hex-encoded using `^FH`, so user input can't break the label.
+
+### Commands as data
+
+Labels are built from typed command nodes, which you can inspect with `label.commands`. Commands that have no builder method yet can be added as nodes with `label.add(...)`, or as raw ZPL with `label.raw(...)`:
 
 ```typescript
-import { ImageConverter } from "node-zpl";
+label.add({ type: "GraphicCircle", diameter: 80, thickness: 4 });
+label.raw("^PQ2"); // print two copies
+```
+
+### Images
+
+You can convert an image to a ZPL graphic using `ImageConverter`. It depends on [jimp](https://github.com/jimp-dev/jimp) and only runs in Node, so it has its own entry point:
+
+```typescript
+import { Label, mm, dots } from "node-zpl";
+import { ImageConverter } from "node-zpl/image";
 import { readFileSync } from "fs";
 
-const converter = new ImageConverter();
-const buffer = readFileSync("./assets/test-image.png");
+const graphic = await new ImageConverter().toZPL(
+  readFileSync("./assets/test-image.png")
+);
 
-const zpl = await converter.toZPL(buffer);
+const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
+  .drawGraphic({ position: { x: dots(0), y: dots(0) }, graphic })
+  .toZPL();
 ```
 
 ### Supported ZPL Commands
@@ -87,7 +113,7 @@ const zpl = await converter.toZPL(buffer);
 - [ ] `~CC` - Change Caret
 - [ ] `^CD` - Change Delimiter
 - [ ] `~CD` - Change Delimiter
-- [ ] `^CF` - Change Alphanumeric Default Font
+- [x] `^CF` - Change Alphanumeric Default Font
 - [x] `^CI` - Change International Font/Encoding
 - [ ] `^CM` - Change Memory Letter Designation
 - [ ] `^CO` - Cache On
@@ -107,8 +133,8 @@ const zpl = await converter.toZPL(buffer);
 - [ ] `~EG` - Erase Download Graphics
 - [ ] `^FB` - Field Block
 - [ ] `^FC` - Field Clock (or Real Time Clock)
-- [ ] `^FD` - Field Data
-- [ ] `^FH` - Field Hexadecimal Indicator
+- [x] `^FD` - Field Data
+- [x] `^FH` - Field Hexadecimal Indicator
 - [ ] `^FM` - Multiple Field Origin Locations
 - [ ] `^FN` - Field Number
 - [x] `^FO` - Field Origin
@@ -123,7 +149,7 @@ const zpl = await converter.toZPL(buffer);
 - [ ] `^GC` - Graphic Circle
 - [ ] `^GD` - Graphic Diagonal Line
 - [ ] `^GE` - Graphic Ellipse
-- [ ] `^GF` - Graphic Field
+- [x] `^GF` - Graphic Field
 - [ ] `^GS` - Graphic Symbol
 - [ ] `~HB` - Battery Status
 - [ ] `~HD` - Head Diagnostic
@@ -200,7 +226,7 @@ const zpl = await converter.toZPL(buffer);
 - [ ] `^PR`: Print Rate
 - [ ] `~PR`: Applicator Reprint
 - [ ] `~PS`: Print Start
-- [ ] `^PW`: Print Width
+- [x] `^PW`: Print Width
 - [ ] `~RO`: Reset Advanced Counter
 - [ ] `^SC`: Set Serial Communications
 - [x] `~SD`: Set Darkness
@@ -228,14 +254,13 @@ const zpl = await converter.toZPL(buffer);
 - [ ] `^ZZ`: Printer Sleep
 
 > [!TIP]
-> If you need an unsupported ZPL command, use the `raw` method available on all ZplContent instances.
+> If you need an unsupported ZPL command, use the `raw` method available on both `Label` and `PrinterSetup`.
 >
 > ```typescript
-> import { Printer } from "node-zpl";
+> import { PrinterSetup } from "node-zpl";
 >
-> const printer = new Printer();
 > // Put a battery powered printer to sleep after 10s
-> const zpl = printer.raw("^ZZ10").dumpZPL();
+> const zpl = new PrinterSetup().raw("^ZZ10").toZPL();
 > ```
 
 ## Contributing

@@ -1,74 +1,88 @@
 import ZplError from "./ZplError.js";
-import commands from "./commands.js";
+import commandCatalog from "./commands.js";
+import { serialize } from "./serialize.js";
+import type { Command } from "./ast.js";
+
+/**
+ * The catalog key for a raw command, e.g. "^A0N,30,30" -> "^A"
+ */
+const commandCode = (zpl: string): string => {
+  if (zpl.startsWith("^A")) {
+    return zpl.startsWith("^A@") ? "^A@" : "^A";
+  }
+
+  return zpl.slice(0, 3);
+};
 
 /**
  * Base class for all ZPL content
  */
 abstract class ZplContent {
-  protected abstract zpl: string;
+  protected readonly nodes: Command[] = [];
+  protected readonly minify: boolean;
+
+  constructor(options?: { minify?: boolean }) {
+    this.minify = options?.minify ?? true;
+  }
+
+  /**
+   * The content as ZPL command nodes
+   */
+  public get commands(): readonly Command[] {
+    return [...this.nodes];
+  }
+
+  /**
+   * Add command nodes
+   * @param commands Commands to add
+   */
+  public add(...commands: Command[]): this {
+    this.nodes.push(...commands);
+
+    return this;
+  }
 
   /**
    * Add a raw ZPL command
    * @param zpl Any valid ZPL command
    */
   public raw(zpl: string): this {
-    this.zpl += zpl;
-
-    return this;
+    return this.add({ type: "Raw", zpl });
   }
 
   /**
    * @returns The generated ZPL
    */
   public toZPL(): string {
-    return this.zpl;
+    return serialize(this.nodes, { minify: this.minify });
   }
 
   /**
    * Validate the generated ZPL
-   * @param strict Whether to throw an error if the ZPL is invalid. Disable this if you want to use commands that are not yet supported in this library.
+   * @param strict Whether to throw an error if using an unknown ZPL command. Set to `false` if you want to use commands that are not yet supported in this library.
    */
   public validate(strict = true): void {
-    // Remove newlines
-    const generatedZpl = this.toZPL().replace(/\n/g, "");
-
-    if (!generatedZpl) {
+    if (this.nodes.length === 0) {
       throw new ZplError("ZPL content is empty");
     }
 
-    let currentCommand = "";
-    let previousChar = "";
-
-    for (const char of generatedZpl) {
-      // If the current character is a ^ or ~ and the previous character was not, check the current command
-      if (["^", "~"].includes(char) && !["^", "~"].includes(previousChar)) {
-        if (currentCommand) {
-          const foundCommand = Object.keys(commands).find((command) => {
-            return currentCommand.startsWith(command);
-          });
-
-          if (strict && !foundCommand) {
-            throw new ZplError(`Invalid ZPL command: ${currentCommand}`);
-          }
-        }
-
-        // Start a new command
-        currentCommand = char;
-      } else {
-        // Add the current character to the current command
-        currentCommand += char;
-      }
-
-      previousChar = char;
+    if (!strict) {
+      return;
     }
 
-    // Check the last command
-    const foundCommand = Object.keys(commands).find((command) => {
-      return currentCommand.trim().startsWith(command);
-    });
+    for (const node of this.nodes) {
+      if (node.type !== "Raw") {
+        continue;
+      }
 
-    if (strict && !foundCommand) {
-      throw new ZplError(`Invalid ZPL command: ${currentCommand}`);
+      // A raw node may hold several commands
+      for (const zpl of node.zpl.split(/(?=[\^~])/)) {
+        const code = commandCode(zpl.trim());
+
+        if (code && !(code in commandCatalog)) {
+          throw new ZplError(`Invalid ZPL command: ${zpl}`);
+        }
+      }
     }
   }
 }

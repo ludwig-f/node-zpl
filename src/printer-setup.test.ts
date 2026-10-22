@@ -1,38 +1,59 @@
 import { describe, expect, suite, test } from "vitest";
-import PrinterSetup from "./PrinterSetup";
-import ZplError from "./ZplError";
+import PrinterSetup from "./PrinterSetup.js";
+import ZplError from "./ZplError.js";
 
-suite("PrinterManager", () => {
-  describe("constructor", () => {
-    test("should create a new printer setup with the given options", () => {
-      const setup = new PrinterSetup();
-      expect(setup).toBeDefined();
-    });
-  });
-
+suite("PrinterSetup", () => {
   describe("setDarkness", () => {
     test("should set the darkness of the printer", () => {
       const setup = new PrinterSetup().setDarkness(20);
-      expect(setup.toZPL()).toStrictEqual("~SD20\n");
+      expect(setup.toZPL()).toStrictEqual("~SD20");
+    });
+
+    test("should throw if darkness is not between 0 and 30", () => {
+      expect(() => new PrinterSetup().setDarkness(31)).toThrow(ZplError);
+    });
+  });
+
+  describe("storeGraphic", () => {
+    test("should download a graphic to the printer", () => {
+      const setup = new PrinterSetup().storeGraphic({
+        name: "LOGO",
+        graphic: { totalBytes: 4, bytesPerRow: 2, data: "FF00FF00" },
+      });
+      expect(setup.toZPL()).toStrictEqual("~DGR:LOGO.GRF,4,2,FF00FF00");
+    });
+
+    test("should throw if name is not between 1 and 8 characters long", () => {
+      expect(() =>
+        new PrinterSetup().storeGraphic({
+          name: "123456789",
+          graphic: { totalBytes: 0, bytesPerRow: 0, data: "" },
+        })
+      ).toThrow(ZplError);
+    });
+  });
+
+  describe("deleteGraphic", () => {
+    test("should delete a stored graphic", () => {
+      const setup = new PrinterSetup().deleteGraphic("LOGO", "E");
+      expect(setup.toZPL()).toStrictEqual("^IDE:LOGO.GRF");
     });
   });
 
   describe("validate", () => {
-    test("should throw ZPL error if darkness is not between 0 and 30", () => {
-      const setup = new PrinterSetup();
-      expect(() => setup.setDarkness(31)).toThrow(ZplError);
-    });
-
-    test("should throw ZPL error if name is not between 1 and 8 characters long", () => {
-      const setup = new PrinterSetup();
-      expect(() =>
-        setup.storeGraphics("123456789", 0, 0, "", { device: "R" })
-      ).toThrow(ZplError);
-    });
-
     test("should throw if ZPL is empty", () => {
-      const setup = new PrinterSetup();
-      expect(() => setup.validate()).toThrow("ZPL content is empty");
+      expect(() => new PrinterSetup().validate()).toThrow(
+        "ZPL content is empty"
+      );
+    });
+  });
+
+  describe("minify", () => {
+    test("should put each command on its own line when disabled", () => {
+      const setup = new PrinterSetup({ minify: false })
+        .setDarkness(5)
+        .deleteGraphic("LOGO");
+      expect(setup.toZPL()).toStrictEqual("~SD05\n^IDR:LOGO.GRF\n");
     });
   });
 });

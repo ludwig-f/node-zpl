@@ -1,5 +1,12 @@
-type StoreGraphicsOptions = {
-  device: "R" | "E" | "B" | "A";
+import type { Length } from "./units.js";
+
+/**
+ * A 1-bit image as ASCII hex, e.g. the result of ImageConverter.toZPL
+ */
+type Graphic = {
+  totalBytes: number;
+  bytesPerRow: number;
+  data: string;
 };
 
 enum ZebraFontFamily {
@@ -29,9 +36,9 @@ enum Orientation {
 }
 
 type Position = {
-  x: number;
-  y: number;
+  x: Length;
+  y: Length;
 };
 
-export type { StoreGraphicsOptions, Position };
+export type { Graphic, Position };
 export { ZebraFontFamily, Orientation };
