@@ -21,5 +21,5 @@
     "lib": ["ESNext"]
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules/**", "**/*.test.ts", "**/*.test-d.ts", "**/__fixtures__/**"]
+  "exclude": ["node_modules/**", "**/*.test.ts", "**/*.test.tsx", "**/*.test-d.ts", "**/*.test-d.tsx", "**/__fixtures__/**"]
 }

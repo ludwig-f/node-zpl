@@ -16,6 +16,21 @@
       "types": "./build/image.d.ts",
       "import": "./build/image.js",
       "require": "./build/image.js"
+    },
+    "./jsx": {
+      "types": "./build/jsx.d.ts",
+      "import": "./build/jsx.js",
+      "require": "./build/jsx.js"
+    },
+    "./jsx-runtime": {
+      "types": "./build/jsx-runtime.d.ts",
+      "import": "./build/jsx-runtime.js",
+      "require": "./build/jsx-runtime.js"
+    },
+    "./jsx-dev-runtime": {
+      "types": "./build/jsx-dev-runtime.d.ts",
+      "import": "./build/jsx-dev-runtime.js",
+      "require": "./build/jsx-dev-runtime.js"
     }
   },
   "repository": "https://github.com/ludwig-f/node-zpl",
@@ -33,8 +48,8 @@
   ],
   "scripts": {
     "build": "tsc",
-    "fix": "prettier \"src/**/*.ts\" --write",
-    "lint": "eslint src --ext .ts",
+    "fix": "prettier \"src/**/*.{ts,tsx}\" --write",
+    "lint": "eslint src --ext .ts,.tsx",
     "test": "vitest",
     "watch": "tsc -w",
     "version": "standard-version",
@@ -44,6 +59,7 @@
     "node": ">=16"
   },
   "devDependencies": {
+    "@types/react": "^19.1.8",
     "@typescript-eslint/eslint-plugin": "^7.2.0",
     "@typescript-eslint/parser": "^7.2.0",
     "cz-conventional-changelog": "^3.3.0",
@@ -52,6 +68,7 @@
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
     "prettier": "^2.1.1",
+    "react": "^19.1.0",
     "typescript": "^5.4.2",
     "vite": "^5.1.5",
     "vitest": "^1.3.1"
@@ -70,7 +87,7 @@
     }
   },
   "lint-staged": {
-    "*.ts": [
+    "*.{ts,tsx}": [
       "eslint --fix",
       "prettier --write"
     ]
