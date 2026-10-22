@@ -18,7 +18,14 @@ git checkout -b 1337-add-postnet-bar-code
 
 ## Get the test suite running
 
-Make sure you're testing your changes. `node-zpl` uses `vitest` for testing.
+Make sure you're testing your changes. The repository is a [pnpm](https://pnpm.io) workspace with one package per folder in `packages/`, tested with `vitest`:
+
+```bash
+pnpm install
+pnpm test    # all packages
+pnpm lint
+pnpm build
+```
 
 ## Implement your fix or feature
 
