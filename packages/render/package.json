@@ -25,6 +25,8 @@
   },
   "files": [
     "build",
+    "fonts/OFL.txt",
+    "fonts/README.md",
     "CHANGELOG.md",
     "LICENSE",
     "README.md"

@@ -2,6 +2,7 @@ import { parse } from "node-zpl";
 import { Raster, fillPath } from "./raster.js";
 import { boxPath, circlePath, diagonalPath } from "./shapes.js";
 import { layout } from "./layout.js";
+import { drawText } from "./text.js";
 import type { Command } from "node-zpl";
 import type { Element } from "./layout.js";
 import type { Color } from "./raster.js";
@@ -57,6 +58,20 @@ const draw = (raster: Raster, element: Element, color: Color = "B"): void => {
           element.direction
         ),
         element.color === "W" ? "W" : color
+      );
+      break;
+    case "text":
+      drawText(
+        raster,
+        element.text,
+        {
+          x,
+          y,
+          fromBottom: element.fromBottom,
+          height: element.height,
+          width: element.width,
+        },
+        color
       );
       break;
     case "bitmap": {

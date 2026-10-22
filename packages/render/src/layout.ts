@@ -36,6 +36,18 @@ type Element = Common &
         direction: "R" | "L";
       }
     | {
+        kind: "text";
+        text: string;
+        /** Font name: 0, A to Z or 1 to 9 */
+        font: string;
+        /** Character height and width in dots */
+        height: number;
+        width: number;
+        orientation: "N" | "R" | "I" | "B";
+        /** ^FT positions the baseline instead of the top */
+        fromBottom: boolean;
+      }
+    | {
         kind: "bitmap";
         /** Packed rows of bits, most significant bit first */
         bytes: Uint8Array;
@@ -55,14 +67,24 @@ type LabelLayout = {
 
 type StoredGraphic = { bytes: Uint8Array; bytesPerRow: number; rows: number };
 
+type FontSetting = {
+  font: string;
+  height: number;
+  width: number;
+  orientation: "N" | "R" | "I" | "B";
+};
+
 type Field = {
   x: number;
   y: number;
   /** ^FT positions the bottom-left corner instead of the top-left */
   fromBottom: boolean;
   reverse: boolean;
+  /** Font set with ^A for this field only */
+  font?: FontSetting;
+  /** ^FH: the character that starts a hex escape in the field data */
+  hexIndicator?: string;
   commands: number[];
-  elements: Element[];
 };
 
 const newField = (): Field => ({
@@ -71,12 +93,47 @@ const newField = (): Field => ({
   fromBottom: false,
   reverse: false,
   commands: [],
-  elements: [],
 });
+
+/** Font settings at power-up: font A, 9 dots high, 5 wide */
+const initialFont: FontSetting = {
+  font: "A",
+  height: 9,
+  width: 5,
+  orientation: "N",
+};
+
+/**
+ * Field data as text: hex escapes become bytes, and with ^CI28 to 30 the
+ * bytes are UTF-8. Other character sets are read as Latin-1.
+ */
+const decodeFieldData = (
+  data: string,
+  hexIndicator: string | undefined,
+  utf8: boolean
+): string => {
+  if (hexIndicator === undefined) return data;
+
+  const bytes: number[] = [];
+  const encoder = new TextEncoder();
+  for (let i = 0; i < data.length; i++) {
+    const hex = data.slice(i + 1, i + 3);
+    if (data[i] === hexIndicator && /^[0-9A-Fa-f]{2}$/.test(hex)) {
+      bytes.push(parseInt(hex, 16));
+      i += 2;
+    } else if (utf8) {
+      bytes.push(...encoder.encode(data[i]));
+    } else {
+      bytes.push(data.charCodeAt(i) & 0xff);
+    }
+  }
+  return utf8
+    ? new TextDecoder().decode(new Uint8Array(bytes))
+    : String.fromCharCode(...bytes);
+};
 
 /** Commands that draw something we don't render yet */
 const notYetDrawn = new Set<Command["type"]>([
-  "FieldData",
   "Code11",
   "Code128",
   "Ean13",
@@ -92,9 +149,12 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
   let labelReverse = false;
   let field = newField();
 
+  let defaultFont = initialFont;
+  let utf8 = false;
+  let barcode = false;
+
   const add = (element: Element, height: number) => {
     if (field.fromBottom) element.y -= height;
-    field.elements.push(element);
     label?.elements.push(element);
   };
 
@@ -117,7 +177,10 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
       labels.push(label);
       home = { x: 0, y: 0 };
       labelReverse = false;
+      defaultFont = initialFont;
+      utf8 = false;
       field = newField();
+      barcode = false;
       return;
     }
     if (!label) return;
@@ -165,7 +228,56 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
         break;
       case "FieldSeparator":
         field = newField();
+        barcode = false;
         break;
+      case "ChangeEncoding":
+        utf8 = command.charset >= 28 && command.charset <= 30;
+        break;
+      case "DefaultFont": {
+        const height = command.height ?? defaultFont.height;
+        defaultFont = {
+          ...defaultFont,
+          font: command.font,
+          height,
+          width:
+            command.width ??
+            (command.height !== undefined ? height : defaultFont.width),
+        };
+        break;
+      }
+      case "Font": {
+        // A height without a width keeps the font's proportions
+        const height = command.height ?? defaultFont.height;
+        field.font = {
+          font: command.font,
+          height,
+          width: command.width ?? height,
+          orientation: command.orientation ?? defaultFont.orientation,
+        };
+        break;
+      }
+      case "FieldHexIndicator":
+        field.hexIndicator = command.indicator ?? "_";
+        break;
+      case "FieldData": {
+        // Field data under a barcode is drawn by the barcode
+        if (barcode) {
+          label.unsupported.push(index);
+          break;
+        }
+        const font = field.font ?? defaultFont;
+        label.elements.push({
+          ...common(),
+          kind: "text",
+          text: decodeFieldData(command.data, field.hexIndicator, utf8),
+          font: font.font,
+          height: font.height,
+          width: font.width,
+          orientation: font.orientation,
+          fromBottom: field.fromBottom,
+        });
+        break;
+      }
       case "GraphicBox": {
         const thickness = command.thickness ?? 1;
         const width = Math.max(command.width ?? thickness, thickness);
@@ -252,7 +364,10 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
         break;
       }
       default:
-        if (notYetDrawn.has(command.type)) label.unsupported.push(index);
+        if (notYetDrawn.has(command.type)) {
+          label.unsupported.push(index);
+          barcode = true;
+        }
     }
   });
 
