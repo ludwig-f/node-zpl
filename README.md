@@ -78,7 +78,21 @@ const zpl = build(
 
 `build()` returns the same `Label` object as the builder API, with `toZPL()`, `validate()` and `commands`. Text and barcode data go in children, `false`, `null` and `undefined` children are skipped, and lists from `.map()` work as you'd expect. Elements can be reused across labels with different resolutions, since millimeters are converted when the label is built.
 
-In a project that already uses React's JSX, put labels in their own files and switch just those files to the `node-zpl` runtime with a comment at the top: `/** @jsxImportSource node-zpl */`.
+#### In React projects
+
+No setup is needed: label elements also work when compiled by React's JSX runtime, so labels can live next to your React components and use the same JSX settings. Components that return a `<Label>` can be passed to `build()` directly:
+
+```tsx
+const ShippingLabel = ({ order }: { order: Order }) => (
+  <Label width={mm(50)} height={mm(25)} dpmm={8}>
+    <Text x={mm(2)} y={mm(2)} height={mm(4)}>Order {order.id}</Text>
+  </Label>
+);
+
+const zpl = build(<ShippingLabel order={order} />).toZPL();
+```
+
+Label components are plain functions that `build()` calls, not React components, so hooks and React context don't work inside them, and a `<Label>` can't be rendered into a React page.
 
 ### Units
 

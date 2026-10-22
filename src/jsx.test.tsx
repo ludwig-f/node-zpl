@@ -125,6 +125,20 @@ suite("jsx", () => {
       );
     });
 
+    test("accepts a component that returns a <Label>", () => {
+      const ShippingLabel = (props: { id: number }) => (
+        <Label width={mm(10)} height={mm(10)} dpmm={12}>
+          <Text x={dots(0)} y={dots(0)}>
+            Order {props.id}
+          </Text>
+        </Label>
+      );
+
+      expect(build(<ShippingLabel id={42} />).toZPL()).toContain(
+        "^FO0,0^FDOrder 42^FS"
+      );
+    });
+
     test("throws when the root is not a <Label>", () => {
       expect(() =>
         build(

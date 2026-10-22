@@ -1,6 +1,6 @@
 import LabelBuilder from "./Label.js";
 import ZplError from "./ZplError.js";
-import { applyChildren, element, isElement } from "./jsx-runtime.js";
+import { Fragment, jsx } from "./jsx-runtime.js";
 import type { ZplElement, ZplNode } from "./jsx-runtime.js";
 import type { Color, StorageDevice } from "./ast.js";
 import type { Graphic, Orientation, ZebraFontFamily } from "./types.js";
@@ -12,18 +12,29 @@ type Position = { x: Length; y: Length };
 type TextChild = string | number | boolean | null | undefined;
 type TextChildren = TextChild | TextChild[];
 
-const LABEL = Symbol("node-zpl.label");
-
 type LabelProps = ConstructorParameters<typeof LabelBuilder>[0] & {
   children?: ZplNode;
 };
 
-type LabelElement = ZplElement & {
-  readonly [LABEL]: LabelProps;
-};
+const REACT_FRAGMENT = Symbol.for("react.fragment");
 
-const isLabelElement = (value: unknown): value is LabelElement =>
-  isElement(value) && LABEL in value;
+/** How to draw each built-in element, keyed by its component */
+const primitives = new Map<
+  unknown,
+  (label: LabelBuilder, props: never) => void
+>();
+
+/**
+ * Define a built-in element. Calling the component only creates an element;
+ * build() looks up the draw function when it reaches the element.
+ */
+const primitive = <P>(
+  draw: (label: LabelBuilder, props: P) => void
+): ((props: P) => ZplElement) => {
+  const component = (props: P): ZplElement => jsx(component, props);
+  primitives.set(component, draw);
+  return component;
+};
 
 const text = (children: TextChildren): string =>
   (Array.isArray(children) ? children : [children])
@@ -42,51 +53,103 @@ const position = ({ x, y }: Position) => ({ x, y });
  * The root of every label. Turn it into a Label builder with build().
  * Takes the same options as the Label constructor.
  */
-const Label = (props: LabelProps): ZplElement => {
-  const label: LabelElement = {
-    ...element(() => {
-      throw new ZplError("A <Label> cannot be placed inside another <Label>");
-    }),
-    [LABEL]: props,
-  };
+const Label = (props: LabelProps): ZplElement => jsx(Label, props);
 
-  return label;
+/**
+ * Draw a node on the label: built-in elements are drawn, components are
+ * called and their result drawn, and false, null and undefined are skipped
+ * so that `{condition && <Text>…</Text>}` works. Works on elements created
+ * by node-zpl's JSX runtime as well as React's.
+ */
+const draw = (label: LabelBuilder, node: unknown): void => {
+  if (Array.isArray(node)) {
+    for (const child of node) draw(label, child);
+    return;
+  }
+
+  if (node === null || node === undefined || typeof node === "boolean") {
+    return;
+  }
+
+  if (typeof node !== "object" || !("type" in node) || !("props" in node)) {
+    throw new ZplError(
+      `Unexpected child ${JSON.stringify(
+        node
+      )}: text has to be wrapped in <Text>`
+    );
+  }
+
+  const { type, props } = node as {
+    type: unknown;
+    props: { children?: unknown };
+  };
+  const drawPrimitive = primitives.get(type);
+
+  if (type === Label) {
+    throw new ZplError("A <Label> cannot be placed inside another <Label>");
+  } else if (drawPrimitive) {
+    drawPrimitive(label, props as never);
+  } else if (type === Fragment || type === REACT_FRAGMENT) {
+    draw(label, props.children);
+  } else if (typeof type === "function") {
+    draw(label, type(props));
+  } else if (typeof type === "string") {
+    throw new ZplError(`<${type}> can't be used in a label`);
+  } else {
+    throw new ZplError(`Unsupported element type: ${String(type)}`);
+  }
 };
 
 /**
- * Turn a <Label> element into a Label builder, which has toZPL(),
- * validate() and the label's commands
+ * Turn a <Label> element, or a component that returns one, into a Label
+ * builder, which has toZPL(), validate() and the label's commands
  */
 const build = (root: ZplElement): LabelBuilder => {
-  if (!isLabelElement(root)) {
+  // Unwrap components like <ShippingLabel /> until the <Label> appears
+  while (
+    typeof root?.type === "function" &&
+    root.type !== Label &&
+    !primitives.has(root.type) &&
+    root.type !== Fragment
+  ) {
+    root = root.type(root.props);
+  }
+
+  if (root?.type !== Label) {
     throw new ZplError("build() expects a <Label> element");
   }
 
-  const { children, ...options } = root[LABEL];
+  const { children, ...options } = root.props as LabelProps;
   const label = new LabelBuilder(options);
-  applyChildren(label, children);
+  draw(label, children);
 
   return label;
 };
 
 /** Set the default font (^CF) for the text that follows */
-const DefaultFont = (props: {
-  font: ZebraFontFamily | string;
-  height?: Length;
-  width?: Length;
-}): ZplElement => element((label) => label.setDefaultFont(props));
+const DefaultFont = primitive(
+  (
+    label,
+    props: {
+      font: ZebraFontFamily | string;
+      height?: Length;
+      width?: Length;
+    }
+  ) => label.setDefaultFont(props)
+);
 
 /** Text. Without font props it uses the label's default font. */
-const Text = (
-  props: Position & {
-    font?: ZebraFontFamily | string;
-    height?: Length;
-    width?: Length;
-    orientation?: Orientation;
-    children: TextChildren;
-  }
-): ZplElement =>
-  element((label) => {
+const Text = primitive(
+  (
+    label,
+    props: Position & {
+      font?: ZebraFontFamily | string;
+      height?: Length;
+      width?: Length;
+      orientation?: Orientation;
+      children: TextChildren;
+    }
+  ) => {
     const { font, height, width, orientation } = props;
     const hasFont =
       font !== undefined ||
@@ -99,19 +162,22 @@ const Text = (
       text: text(props.children),
       font: hasFont ? { name: font, height, width, orientation } : undefined,
     });
-  });
+  }
+);
 
 /** A box or line */
-const Box = (
-  props: Position & {
-    width: Length;
-    height: Length;
-    thickness: Length;
-    color?: Color;
-    rounding?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
-  }
-): ZplElement =>
-  element((label) => label.drawBox({ ...props, position: position(props) }));
+const Box = primitive(
+  (
+    label,
+    props: Position & {
+      width: Length;
+      height: Length;
+      thickness: Length;
+      color?: Color;
+      rounding?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+    }
+  ) => label.drawBox({ ...props, position: position(props) })
+);
 
 type BarcodeProps = Position & {
   height?: Length;
@@ -122,87 +188,84 @@ type BarcodeProps = Position & {
 };
 
 /** Code 11 barcode, with the data as children */
-const Code11 = ({
-  children,
-  ...props
-}: BarcodeProps & { checkDigits?: 1 | 2 }): ZplElement =>
-  element((label) =>
+const Code11 = primitive(
+  (label, { children, ...props }: BarcodeProps & { checkDigits?: 1 | 2 }) =>
     label.drawCode11({
       ...props,
       position: position(props),
       data: text(children),
     })
-  );
+);
 
 /** Code 128 barcode, with the data as children */
-const Code128 = ({
-  children,
-  ...props
-}: BarcodeProps & {
-  useUcc?: boolean;
-  mode?: "N" | "U" | "A" | "D";
-}): ZplElement =>
-  element((label) =>
+const Code128 = primitive(
+  (
+    label,
+    {
+      children,
+      ...props
+    }: BarcodeProps & { useUcc?: boolean; mode?: "N" | "U" | "A" | "D" }
+  ) =>
     label.drawCode128({
       ...props,
       position: position(props),
       data: text(children),
     })
-  );
+);
 
 /** EAN-13 barcode, with the 12 data digits as children */
-const EAN13 = ({ children, ...props }: BarcodeProps): ZplElement =>
-  element((label) =>
-    label.drawEAN13({
-      ...props,
-      position: position(props),
-      data: text(children),
-    })
-  );
+const EAN13 = primitive((label, { children, ...props }: BarcodeProps) =>
+  label.drawEAN13({
+    ...props,
+    position: position(props),
+    data: text(children),
+  })
+);
 
 /** Data Matrix code, with the data as children */
-const DataMatrix = ({
-  children,
-  ...props
-}: Position & {
-  moduleSize: Length;
-  orientation?: Orientation;
-  quality?: 0 | 50 | 80 | 100 | 140 | 200;
-  columns?: number;
-  rows?: number;
-  formatId?: 1 | 2 | 3 | 4 | 5 | 6;
-  escapeCharacter?: string;
-  children: TextChildren;
-}): ZplElement =>
-  element((label) =>
+const DataMatrix = primitive(
+  (
+    label,
+    {
+      children,
+      ...props
+    }: Position & {
+      moduleSize: Length;
+      orientation?: Orientation;
+      quality?: 0 | 50 | 80 | 100 | 140 | 200;
+      columns?: number;
+      rows?: number;
+      formatId?: 1 | 2 | 3 | 4 | 5 | 6;
+      escapeCharacter?: string;
+      children: TextChildren;
+    }
+  ) =>
     label.drawDataMatrix({
       ...props,
       position: position(props),
       data: text(children),
     })
-  );
+);
 
 /** An image, e.g. from ImageConverter */
-const Graphic = (props: Position & { graphic: Graphic }): ZplElement =>
-  element((label) =>
-    label.drawGraphic({ position: position(props), graphic: props.graphic })
-  );
+const Graphic = primitive((label, props: Position & { graphic: Graphic }) =>
+  label.drawGraphic({ position: position(props), graphic: props.graphic })
+);
 
 /** A graphic stored on the printer with PrinterSetup.storeGraphic() */
-const StoredGraphic = (
-  props: Position & {
-    name: string;
-    device?: StorageDevice;
-    magnification?: { x: number; y: number };
-  }
-): ZplElement =>
-  element((label) =>
-    label.drawStoredGraphic({ ...props, position: position(props) })
-  );
+const StoredGraphic = primitive(
+  (
+    label,
+    props: Position & {
+      name: string;
+      device?: StorageDevice;
+      magnification?: { x: number; y: number };
+    }
+  ) => label.drawStoredGraphic({ ...props, position: position(props) })
+);
 
 /** ZPL for commands without an element, added verbatim */
-const Raw = (props: { zpl: string }): ZplElement =>
-  element((label) => label.raw(props.zpl));
+const Raw = primitive((label, props: { zpl: string }) => label.raw(props.zpl));
 
 export {
   Label,

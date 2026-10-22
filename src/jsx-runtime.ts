@@ -2,61 +2,38 @@
  * JSX runtime for node-zpl. TypeScript and bundlers load this module when a
  * project sets `"jsx": "react-jsx"` and `"jsxImportSource": "node-zpl"`.
  *
- * Elements are lazy: they record what to draw and are applied to a Label
- * builder by build(). This lets the same element be reused in labels with
- * different resolutions, since millimeters are converted to dots only once
- * the element ends up in a label.
+ * Elements have the same shape as React's, `{ type, props, key }`, and
+ * components are not called until build() walks the tree. That means labels
+ * also work when compiled by React's own runtime, and the same element can be
+ * reused in labels with different resolutions, since millimeters are
+ * converted to dots only once the element ends up in a label.
  */
-import ZplError from "./ZplError.js";
-import type Label from "./Label.js";
-
-const ELEMENT = Symbol.for("node-zpl.element");
 
 type ZplElement = {
-  readonly [ELEMENT]: true;
-  /** Draw the element on a label */
-  readonly apply: (label: Label) => void;
+  // `any` keeps elements structurally compatible with React's element type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  type: (props: any) => any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  props: any;
+  key: string | null;
 };
 
 /** Anything that can appear as a child of <Label> */
 type ZplNode = ZplElement | ZplNode[] | boolean | null | undefined;
 
-const isElement = (value: unknown): value is ZplElement =>
-  typeof value === "object" && value !== null && ELEMENT in value;
-
-const element = (apply: (label: Label) => void): ZplElement => ({
-  [ELEMENT]: true,
-  apply,
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const jsx = <P>(
+  type: (props: P) => unknown,
+  props: P,
+  key?: string | number
+): ZplElement => ({
+  type,
+  props,
+  key: key === undefined ? null : String(key),
 });
 
-/**
- * Apply children in order, skipping false, null and undefined so that
- * `{condition && <Text>…</Text>}` works
- */
-const applyChildren = (label: Label, children: unknown): void => {
-  if (Array.isArray(children)) {
-    for (const child of children) applyChildren(label, child);
-  } else if (isElement(children)) {
-    children.apply(label);
-  } else if (
-    children !== undefined &&
-    children !== null &&
-    typeof children !== "boolean"
-  ) {
-    throw new ZplError(
-      `Unexpected child ${JSON.stringify(
-        children
-      )}: text has to be wrapped in <Text>`
-    );
-  }
-};
-
 const Fragment = (props: { children?: ZplNode }): ZplElement =>
-  element((label) => applyChildren(label, props.children));
-
-type Component<P> = (props: P) => ZplElement;
-
-const jsx = <P>(type: Component<P>, props: P): ZplElement => type(props);
+  jsx(Fragment, props);
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 declare namespace JSX {
@@ -75,4 +52,4 @@ declare namespace JSX {
 }
 
 export type { ZplElement, ZplNode, JSX };
-export { jsx, jsx as jsxs, Fragment, element, isElement, applyChildren };
+export { jsx, jsx as jsxs, Fragment };
