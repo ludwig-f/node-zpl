@@ -3,34 +3,26 @@
   "type": "module",
   "version": "1.0.5",
   "description": "Build, parse and lint ZPL for Zebra label printers, with typed method calls or JSX",
-  "types": "build/index.d.ts",
-  "module": "build/index.js",
-  "main": "build/index.js",
   "exports": {
     ".": {
       "types": "./build/index.d.ts",
-      "import": "./build/index.js",
-      "require": "./build/index.js"
+      "default": "./build/index.js"
     },
     "./image": {
       "types": "./build/image.d.ts",
-      "import": "./build/image.js",
-      "require": "./build/image.js"
+      "default": "./build/image.js"
     },
     "./jsx": {
       "types": "./build/jsx.d.ts",
-      "import": "./build/jsx.js",
-      "require": "./build/jsx.js"
+      "default": "./build/jsx.js"
     },
     "./jsx-runtime": {
       "types": "./build/jsx-runtime.d.ts",
-      "import": "./build/jsx-runtime.js",
-      "require": "./build/jsx-runtime.js"
+      "default": "./build/jsx-runtime.js"
     },
     "./jsx-dev-runtime": {
       "types": "./build/jsx-dev-runtime.d.ts",
-      "import": "./build/jsx-dev-runtime.js",
-      "require": "./build/jsx-dev-runtime.js"
+      "default": "./build/jsx-dev-runtime.js"
     }
   },
   "repository": {
@@ -56,7 +48,7 @@
     "watch": "tsc -w"
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=22"
   },
   "devDependencies": {
     "@types/node": "^20.19.43",
@@ -68,8 +60,6 @@
   },
   "files": [
     "build",
-    "!**/*.spec.*",
-    "!**/*.json",
     "CHANGELOG.md",
     "LICENSE",
     "README.md"

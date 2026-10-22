@@ -20,17 +20,18 @@
   "exports": {
     ".": {
       "types": "./build/index.d.ts",
-      "import": "./build/index.js"
+      "default": "./build/index.js"
     },
     "./react": {
       "types": "./build/react.d.ts",
-      "import": "./build/react.js"
+      "default": "./build/react.js"
     }
   },
   "files": [
     "build",
-    "README.md",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "LICENSE",
+    "README.md"
   ],
   "sideEffects": true,
   "scripts": {
@@ -60,5 +61,8 @@
     "@types/react": {
       "optional": true
     }
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

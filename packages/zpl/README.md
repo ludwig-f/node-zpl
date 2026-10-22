@@ -15,6 +15,8 @@ Install `node-zpl` using the package manager of your choice. Using `npm`:
 npm install node-zpl
 ```
 
+`node-zpl` is an ES module and needs Node 22 or newer. CommonJS projects can still load it with `require()`, which Node supports for ES modules since 22.12.
+
 ## Usage
 
 Here's a basic example of how to use `node-zpl` to generate a label with some text and an EAN-13 bar code:
