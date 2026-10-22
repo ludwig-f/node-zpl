@@ -49,7 +49,7 @@ ZPL with several labels shows one image per label. Changes made together, like s
 
 ### Styling
 
-The images and error message are exposed as [parts](https://developer.mozilla.org/en-US/docs/Web/CSS/::part): `zpl-preview::part(labels)` and `zpl-preview::part(error)`.
+The label images, the element around them and the error message are exposed as [parts](https://developer.mozilla.org/en-US/docs/Web/CSS/::part): `zpl-preview::part(label)`, `zpl-preview::part(labels)` and `zpl-preview::part(error)`.
 
 ## Loading the renderer
 

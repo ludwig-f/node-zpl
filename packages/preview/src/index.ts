@@ -273,6 +273,7 @@ class ZplPreview extends Base {
       ...images.map((src, index) => {
         const image = document.createElement("img");
         image.src = src;
+        image.setAttribute("part", "label");
         image.alt =
           images.length === 1
             ? "Label"
