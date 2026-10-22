@@ -2,7 +2,7 @@
   "name": "node-zpl",
   "type": "module",
   "version": "1.0.5",
-  "description": "ZPL generator for TypeScript",
+  "description": "Build, parse and lint ZPL for Zebra label printers, with typed method calls or JSX",
   "types": "build/index.d.ts",
   "module": "build/index.js",
   "main": "build/index.js",

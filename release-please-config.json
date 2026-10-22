@@ -4,8 +4,7 @@
     "packages/zpl": {
       "release-type": "node",
       "package-name": "node-zpl",
-      "include-component-in-tag": false,
-      "release-as": "2.0.0"
+      "include-component-in-tag": false
     }
   }
 }
