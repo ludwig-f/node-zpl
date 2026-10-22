@@ -6,6 +6,7 @@
  */
 import { decodeGraphicData } from "./graphics.js";
 import type { Command } from "node-zpl";
+import type { Orientation } from "./text.js";
 
 type Common = {
   x: number;
@@ -43,7 +44,7 @@ type Element = Common &
         /** Character height and width in dots, as given (see FontSetting) */
         height?: number;
         width?: number;
-        orientation: "N" | "R" | "I" | "B";
+        orientation: Orientation;
         /** ^FT positions the baseline instead of the top */
         fromBottom: boolean;
       }
@@ -75,7 +76,8 @@ type FontSetting = {
    */
   height?: number;
   width?: number;
-  orientation: "N" | "R" | "I" | "B";
+  /** Missing when ^A doesn't give one: the field then uses ^FW's */
+  orientation?: Orientation;
 };
 
 type Field = {
@@ -100,12 +102,7 @@ const newField = (): Field => ({
 });
 
 /** Font settings at power-up: font A, 9 dots high, 5 wide */
-const initialFont: FontSetting = {
-  font: "A",
-  height: 9,
-  width: 5,
-  orientation: "N",
-};
+const initialFont: FontSetting = { font: "A", height: 9, width: 5 };
 
 /**
  * Field data as text: hex escapes become bytes, and with ^CI28 to 30 the
@@ -154,6 +151,7 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
   let field = newField();
 
   let defaultFont = initialFont;
+  let orientation: Orientation = "N";
   let utf8 = false;
   let barcode = false;
 
@@ -182,6 +180,7 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
       home = { x: 0, y: 0 };
       labelReverse = false;
       defaultFont = initialFont;
+      orientation = "N";
       utf8 = false;
       field = newField();
       barcode = false;
@@ -257,10 +256,13 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
           font: command.font,
           height: sized ? command.height : defaultFont.height,
           width: sized ? command.width : defaultFont.width,
-          orientation: command.orientation ?? defaultFont.orientation,
+          orientation: command.orientation,
         };
         break;
       }
+      case "FieldOrientation":
+        orientation = command.orientation;
+        break;
       case "FieldHexIndicator":
         field.hexIndicator = command.indicator ?? "_";
         break;
@@ -278,7 +280,7 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
           font: font.font,
           height: font.height,
           width: font.width,
-          orientation: font.orientation,
+          orientation: font.orientation ?? orientation,
           fromBottom: field.fromBottom,
         });
         break;

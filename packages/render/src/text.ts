@@ -166,6 +166,8 @@ const cellFor = (name: string, dpmm: number): Cell | undefined => {
   };
 };
 
+type Orientation = "N" | "R" | "I" | "B";
+
 type TextOptions = {
   x: number;
   /** Top of the text, or the baseline when fromBottom is set */
@@ -175,44 +177,39 @@ type TextOptions = {
   /** Height and width as given in ^A or ^CF; either may be missing */
   height?: number;
   width?: number;
+  orientation: Orientation;
   dpmm: number;
 };
 
-/** Draw a glyph scaled by (scaleX, scaleY) with its origin at (x, baseline) */
-const drawGlyph = (
-  raster: Raster,
-  font: Font,
-  glyph: number,
-  x: number,
-  baseline: number,
-  scaleX: number,
-  scaleY: number,
-  color: Color
-) => {
-  const contours = flattenGlyph(font, glyph, 0.1 / scaleY).map((contour) =>
-    contour.map(
-      ([gx, gy]) => [x + gx * scaleX, baseline - gy * scaleY] as const
-    )
-  );
-  if (contours.length) fillPath(raster, contours, color);
+/** A glyph placed on the baseline, scaled from font units to dots */
+type PlacedGlyph = {
+  font: Font;
+  glyph: number;
+  /** Distance along the baseline from the start of the text */
+  pen: number;
+  scaleX: number;
+  scaleY: number;
 };
 
-const drawFont0 = (
-  raster: Raster,
-  text: string,
-  options: TextOptions,
-  color: Color
-) => {
+/** A line of text laid out unrotated, with the baseline at y = 0 */
+type TextBlock = {
+  glyphs: PlacedGlyph[];
+  /** How far the text advances along the baseline */
+  advance: number;
+  /** Height of the block and how far its top is above the baseline */
+  height: number;
+  ascent: number;
+};
+
+const layoutFont0 = (text: string, options: TextOptions): TextBlock => {
   const font = load("0", font0Data);
   const advances = font0AdvanceTable();
   // A missing dimension takes the other's value
   const height = options.height ?? options.width ?? 9;
   const width = options.width ?? height;
   const scaleY = (CAP_HEIGHT * height) / font.capHeight;
-  const baseline = options.fromBottom
-    ? options.y
-    : options.y + CAP_HEIGHT * height;
-  let pen = options.x;
+  const glyphs: PlacedGlyph[] = [];
+  let pen = 0;
 
   for (const char of text) {
     const code = char.codePointAt(0)!;
@@ -223,18 +220,17 @@ const drawFont0 = (
     }
     const target = (advance * width) / 100;
     const glyph = font.glyphIndex(code);
-    drawGlyph(
-      raster,
+    glyphs.push({
       font,
       glyph,
       pen,
-      baseline,
-      target / font.advance(glyph),
+      scaleX: target / font.advance(glyph),
       scaleY,
-      color
-    );
+    });
     pen += target;
   }
+
+  return { glyphs, advance: pen, height, ascent: CAP_HEIGHT * height };
 };
 
 /** Whole-step magnification from 1 to 10 for a size in dots */
@@ -243,13 +239,11 @@ const magnification = (dots: number | undefined, base: number) =>
     ? undefined
     : Math.min(10, Math.max(1, Math.round(dots / base)));
 
-const drawBitmapFont = (
-  raster: Raster,
+const layoutBitmapFont = (
   text: string,
   cell: Cell,
-  options: TextOptions,
-  color: Color
-) => {
+  options: TextOptions
+): TextBlock => {
   const font = cell.bold
     ? load("mono-bold", dejavuMonoBoldData)
     : load("mono", dejavuMonoData);
@@ -268,20 +262,69 @@ const drawBitmapFont = (
   const scaleX = (cell.inkWidth * magX) / (hRight - hLeft);
   const scaleY = ((cell.baseline - cell.capTop) * magY) / font.capHeight;
 
-  const top = options.fromBottom ? options.y - cell.baseline * magY : options.y;
-  const baseline = top + cell.baseline * magY;
   const advance = (cell.width + cell.gap) * magX;
-  let pen = options.x;
+  const glyphs: PlacedGlyph[] = [];
+  let pen = 0;
 
   for (let char of text) {
     if (cell.letters === "upper") char = char.toUpperCase();
     const blank = cell.letters === "no-lower" && char !== char.toUpperCase();
     if (!blank) {
-      const glyph = font.glyphIndex(char.codePointAt(0)!);
-      const x = pen + cell.inkLeft * magX - hLeft * scaleX;
-      drawGlyph(raster, font, glyph, x, baseline, scaleX, scaleY, color);
+      glyphs.push({
+        font,
+        glyph: font.glyphIndex(char.codePointAt(0)!),
+        pen: pen + cell.inkLeft * magX - hLeft * scaleX,
+        scaleX,
+        scaleY,
+      });
     }
     pen += advance;
+  }
+
+  return {
+    glyphs,
+    advance: pen,
+    height: cell.height * magY,
+    ascent: cell.baseline * magY,
+  };
+};
+
+/**
+ * Where a point of the text block lands on the label, given its distance u
+ * along the baseline and v below it. Printers turn the laid-out block in
+ * whole dots: ^FO puts the turned block's top-left corner at the origin,
+ * ^FT turns it about the start of the baseline.
+ */
+const placement = (
+  block: TextBlock,
+  options: TextOptions
+): ((u: number, v: number) => readonly [number, number]) => {
+  const { x, y } = options;
+  if (options.fromBottom) {
+    switch (options.orientation) {
+      case "R":
+        return (u, v) => [x - v, y + u];
+      case "I":
+        return (u, v) => [x - u, y - v];
+      case "B":
+        return (u, v) => [x + v, y - u];
+      default:
+        return (u, v) => [x + u, y + v];
+    }
+  }
+
+  // The turned block is one dot short of the text's advance
+  const width = Math.ceil(block.advance - 1e-9) - 1;
+  const { height, ascent } = block;
+  switch (options.orientation) {
+    case "R":
+      return (u, v) => [x + height - ascent - v, y + u];
+    case "I":
+      return (u, v) => [x + width - u, y + height - ascent - v];
+    case "B":
+      return (u, v) => [x + ascent + v, y + width - u];
+    default:
+      return (u, v) => [x + u, y + ascent + v];
   }
 };
 
@@ -293,9 +336,19 @@ const drawText = (
   color: Color
 ): void => {
   const cell = cellFor(options.font, options.dpmm);
-  if (cell) drawBitmapFont(raster, text, cell, options, color);
-  // Font 0 stands in for fonts we don't have yet
-  else drawFont0(raster, text, options, color);
+  const block = cell
+    ? layoutBitmapFont(text, cell, options)
+    : // Font 0 stands in for fonts we don't have yet
+      layoutFont0(text, options);
+  const place = placement(block, options);
+
+  for (const { font, glyph, pen, scaleX, scaleY } of block.glyphs) {
+    const contours = flattenGlyph(font, glyph, 0.1 / scaleY).map((contour) =>
+      contour.map(([gx, gy]) => place(pen + gx * scaleX, -gy * scaleY))
+    );
+    if (contours.length) fillPath(raster, contours, color);
+  }
 };
 
+export type { Orientation };
 export { drawText };
