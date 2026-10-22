@@ -1,0 +1,11 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "packages": {
+    "packages/zpl": {
+      "release-type": "node",
+      "package-name": "node-zpl",
+      "include-component-in-tag": false,
+      "release-as": "2.0.0"
+    }
+  }
+}

@@ -1,0 +1,6 @@
+packages:
+  - "packages/*"
+
+# Dependencies allowed to run install scripts
+allowBuilds:
+  esbuild: true
