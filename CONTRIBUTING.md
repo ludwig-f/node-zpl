@@ -73,3 +73,8 @@ A PR can only be merged into main by a maintainer if:
 - It is up to date with current main.
 
 Any maintainer is allowed to merge a PR if all of these conditions are met.
+
+## Releasing a new package
+
+Packages that aren't ready to publish are marked `"private": true` in their `package.json` and left out of `release-please-config.json`. To release one, remove `"private"`, add the package to `release-please-config.json` (with `"initial-version"` for its first version) and add it to `.release-please-manifest.json` at `"0.0.0"`.
+

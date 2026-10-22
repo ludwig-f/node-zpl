@@ -5,13 +5,6 @@
       "release-type": "node",
       "package-name": "node-zpl",
       "include-component-in-tag": false
-    },
-    "packages/preview": {
-      "release-type": "node",
-      "package-name": "@node-zpl/preview",
-      "component": "preview",
-      "initial-version": "0.1.0",
-      "bump-minor-pre-major": true
     }
   }
 }
