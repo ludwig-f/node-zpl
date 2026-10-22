@@ -47,6 +47,7 @@
   "devDependencies": {
     "@types/node": "^22.20.5",
     "typescript": "~5.9.3",
-    "vitest": "^1.6.1"
+    "vitest": "^1.6.1",
+    "zpl-renderer-js": "^5.0.0"
   }
 }

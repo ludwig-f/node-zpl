@@ -23,11 +23,13 @@ By default it prints whole dots the way a printer does: a dot is printed when it
 
 ## Accuracy
 
-Geometry follows Zebra's ZPL II Programming Guide and is checked against [Labelary](https://labelary.com), which matches real printers closely. Boxes, circles, diagonals and images match Labelary dot for dot; large rounded corners can differ by a few dots. `scripts/compare-labelary.mjs` compares any ZPL file with Labelary's render:
+Geometry follows Zebra's ZPL II Programming Guide. `scripts/compare.mjs` compares our render of any ZPL file with two references, [Labelary](https://labelary.com) and [zebrash](https://github.com/ingridhq/zebrash): where both agree and we don't, it's likely our bug; where they disagree, Zebra's guide or a real printout decides.
 
 ```bash
 pnpm --filter @node-zpl/render build
-node packages/render/scripts/compare-labelary.mjs label.zpl 4 6 8
+node packages/render/scripts/compare.mjs --diff 4 6 8 label.zpl
 ```
+
+Boxes, circles, diagonals and images match Labelary dot for dot, except large rounded corners, where we match zebrash instead.
 
 Parts of the design and the graphic decoding are based on [zebrash](https://github.com/ingridhq/zebrash) (MIT).

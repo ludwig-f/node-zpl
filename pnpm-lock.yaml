@@ -170,6 +170,9 @@ importers:
       vitest:
         specifier: ^1.6.1
         version: 1.6.1(@types/node@22.20.5)(happy-dom@14.12.3)(lightningcss@1.33.0)
+      zpl-renderer-js:
+        specifier: ^5.0.0
+        version: 5.0.0
 
   packages/zpl:
     dependencies:
