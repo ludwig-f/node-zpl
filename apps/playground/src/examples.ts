@@ -97,7 +97,7 @@ const examples: {
 ^FO20,20^GB360,1,3^FS
 ^FX EAN-13 data must be 12 digits, without the check digit
 ^FO20,40^BEN,50^FD7350001234569^FS
-^FX This field is never closed with ^FS
+^FX This field is never closed
 ^FO20,130^A0,30^FDUnclosed field
 ^FO20,170^A0,24^FDNext field^FS
 ^FX This field starts past the right edge
