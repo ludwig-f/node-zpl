@@ -18,7 +18,9 @@ const config = {
   async headers() {
     return [
       {
-        source: "/_next/static/chunks/:file(turbopack-worker-.*)",
+        // Under /_next/static/chunks locally and /_next/static/immutable/chunks
+        // on Vercel
+        source: "/_next/static/:dir*/:file(turbopack-worker-.*)",
         headers: [
           {
             key: "Content-Security-Policy",
