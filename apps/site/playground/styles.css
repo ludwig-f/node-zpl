@@ -1,0 +1,529 @@
+/*
+ * The ZPL viewer, whose layout the code playground will share: a toolbar,
+ * the editor with its problems on the left, and the label on the printer's
+ * platen on the right. On phones, tabs switch between the editor, the
+ * preview and the problems. Scoped to .playground.
+ */
+.playground {
+  --panel: var(--zk-code);
+  --ink: var(--zk-ink);
+  --muted: var(--zk-muted);
+  --line: var(--zk-rule);
+  --accent: var(--zk-accent);
+  --selection: var(--zk-accent-soft);
+  --active-line: var(--zk-surface);
+  --warn: var(--zk-warn);
+  --error: var(--zk-err);
+  --syntax-command: var(--zk-syn-zpl);
+  --syntax-data: var(--zk-syn-str);
+  --syntax-comment: var(--zk-syn-com);
+  --syntax-number: var(--zk-syn-num);
+
+  --font-ui: var(--font-archivo), system-ui, sans-serif;
+  --font-code: var(--font-plex-mono), ui-monospace, "SF Mono", Menlo, monospace;
+
+  display: grid;
+  /* The toolbar, then the workspace; phones add a row of tabs between */
+  grid-template-rows: auto minmax(0, 1fr);
+  height: calc(100dvh - var(--fd-header-height, 56px));
+  min-height: 560px;
+  background: var(--zk-bg);
+  color: var(--ink);
+  font: 15px/1.5 var(--font-ui);
+}
+
+.playground button,
+.playground select,
+.playground input:not([type="checkbox"]) {
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--zk-rule-strong);
+  border-radius: 4px;
+  background: var(--zk-raised);
+  color: var(--ink);
+  font: 600 13px var(--font-ui);
+}
+
+.playground select,
+.playground input:not([type="checkbox"]) {
+  padding: 0 8px;
+  font: 500 13px var(--font-code);
+}
+
+.playground button {
+  cursor: pointer;
+}
+
+.playground button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.playground button.primary {
+  border-color: transparent;
+  background: var(--accent);
+  color: var(--zk-on-accent);
+  font-weight: 700;
+}
+
+/* Toolbar */
+
+.playground .toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px max(16px, env(safe-area-inset-right, 0px)) 8px
+    max(16px, env(safe-area-inset-left, 0px));
+  overflow-x: auto;
+  border-bottom: 1px solid var(--line);
+  background: var(--zk-surface);
+}
+
+/* The toolbar scrolls sideways on phones instead of squeezing its controls */
+.playground .toolbar > * {
+  flex: none;
+}
+
+.playground .filename {
+  padding-right: 8px;
+  font: 600 13px var(--font-code);
+  white-space: nowrap;
+}
+
+.playground .divider {
+  flex: none;
+  width: 1px;
+  height: 24px;
+  background: var(--line);
+}
+
+.playground .field,
+.playground .toggle,
+.playground .custom-size {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.playground .custom-size input {
+  width: 72px;
+  font-variant-numeric: tabular-nums;
+}
+
+.playground .toggle input {
+  accent-color: var(--accent);
+}
+
+.playground .segmented {
+  display: flex;
+  flex: none;
+  overflow: hidden;
+  border: 1px solid var(--zk-rule-strong);
+  border-radius: 4px;
+}
+
+.playground .segmented button {
+  height: 34px;
+  padding: 0 10px;
+  border: none;
+  border-right: 1px solid var(--line);
+  border-radius: 0;
+  font: 600 12.5px var(--font-code);
+  outline-offset: -2px;
+}
+
+.playground .segmented button:last-child {
+  border-right: none;
+}
+
+.playground .segmented button[aria-checked="true"] {
+  background: var(--ink);
+  color: var(--zk-bg);
+}
+
+.playground .unit {
+  margin-left: -4px;
+  color: var(--muted);
+  font: 500 12.5px var(--font-code);
+}
+
+.playground .spacer {
+  flex: 1;
+}
+
+/* Workspace */
+
+.playground .tabs {
+  display: none;
+}
+
+.playground .workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  min-height: 0;
+}
+
+.playground .code {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-height: 0;
+  border-right: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.playground .editor {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.playground .problems {
+  display: flex;
+  flex-direction: column;
+  max-height: 260px;
+  border-top: 1px solid var(--zk-rule-strong);
+  background: var(--zk-surface);
+}
+
+/* Rows animate from 0fr to 1fr, so the list slides open to its own height */
+.playground .problems-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  min-height: 0;
+}
+
+.playground .problems[data-open="true"] .problems-body {
+  grid-template-rows: 1fr;
+}
+
+.playground .problems[data-open="false"] .problems-header {
+  border-bottom-color: transparent;
+}
+
+.playground .problems-body > div {
+  min-height: 0;
+  overflow: auto;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .playground .problems-body {
+    transition: grid-template-rows 200ms ease-out;
+  }
+}
+
+.playground .problems-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--zk-surface);
+  color: var(--muted);
+  font: 600 11.5px var(--font-code);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.playground ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.playground .problem {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.playground .problem .line {
+  height: auto;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font: 600 12.5px/1.6 var(--font-code);
+  text-align: left;
+}
+
+.playground .problem .line:hover {
+  color: var(--accent);
+}
+
+.playground .problem div {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.playground .problem .rule {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--warn);
+  font: 600 12.5px var(--font-code);
+}
+
+.playground .problem.error .rule {
+  color: var(--error);
+}
+
+/* Diamonds for warnings, squares for errors, so color isn't the only cue */
+.playground .problem .marker {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  background: currentColor;
+  transform: rotate(45deg) scale(0.85);
+}
+
+.playground .problem.error .marker {
+  transform: none;
+}
+
+.playground .problem .message {
+  font-size: 14px;
+}
+
+.playground .clean {
+  margin: 0;
+  padding: 14px 16px;
+  color: var(--zk-ok);
+  font-weight: 600;
+}
+
+.playground .problems-tab {
+  display: none;
+}
+
+/* Preview */
+
+.playground .preview {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background-color: var(--zk-platen);
+  background-image: radial-gradient(var(--zk-dot) 1px, transparent 1.3px);
+  background-size: 8px 8px;
+}
+
+.playground .status {
+  display: flex;
+  flex: none;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--zk-surface);
+  color: var(--muted);
+  font: 500 12.5px var(--font-code);
+}
+
+.playground .status .busy {
+  color: var(--accent);
+}
+
+.playground .blocked {
+  flex: none;
+  margin: 14px 16px 0;
+  padding: 10px 14px;
+  border: 1px solid var(--zk-err-line);
+  border-radius: 6px;
+  background: var(--zk-err-soft);
+  color: var(--error);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.playground .bench-area {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.playground .bench {
+  padding: 24px 20px 40px;
+}
+
+/* A label that wouldn't print is shown dimmed behind a dashed outline */
+.playground .bench-area.dimmed .liner {
+  opacity: 0.45;
+  outline: 2px dashed var(--error);
+  outline-offset: 6px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .playground .bench zpl-preview::part(label) {
+    transition: opacity 120ms;
+  }
+}
+
+.playground .notice {
+  position: fixed;
+  left: 50%;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  padding: 8px 14px;
+  border-radius: 6px;
+  background: var(--ink);
+  color: var(--zk-bg);
+  font-size: 14px;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.playground .notice:empty {
+  display: none;
+}
+
+/* Phones: one panel at a time, picked with tabs */
+@media (max-width: 860px) {
+  .playground .filename,
+  .playground .divider,
+  .playground .toggle,
+  .playground .spacer {
+    display: none;
+  }
+
+  .playground {
+    grid-template-rows: auto auto minmax(0, 1fr);
+  }
+
+  .playground .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .playground .tabs button {
+    flex: 1;
+    height: 46px;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .playground .tabs button[aria-selected="true"] {
+    color: var(--ink);
+    box-shadow: inset 0 -2px 0 var(--accent);
+  }
+
+  .playground .workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .playground .workspace > section {
+    display: none;
+  }
+
+  .playground[data-tab="Editor"] .code,
+  .playground[data-tab="Code"] .code,
+  .playground[data-tab="Problems"] .problems-tab {
+    display: grid;
+  }
+
+  .playground[data-tab="Preview"] .preview {
+    display: flex;
+  }
+
+  .playground .code {
+    border-right: none;
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .playground .code .problems {
+    display: none;
+  }
+
+  .playground .problems-tab {
+    align-content: start;
+    overflow: auto;
+    background: var(--zk-surface);
+  }
+
+  .playground .problems-tab button.line {
+    min-height: 44px;
+  }
+}
+
+/* Show as code */
+
+.playground .code-panel {
+  width: min(880px, calc(100vw - 32px));
+  max-height: calc(100dvh - 64px);
+  /* Tailwind's reset clears the margin that centers dialogs */
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--zk-rule-strong);
+  border-radius: 6px;
+  background: var(--zk-bg);
+  color: var(--ink);
+}
+
+.playground .code-panel[open] {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.playground .code-panel::backdrop {
+  background: color-mix(in srgb, var(--zk-ink) 35%, transparent);
+}
+
+.playground .code-panel-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--zk-surface);
+}
+
+.playground .code-panel-header h2 {
+  margin: 0 8px 0 0;
+  font: 700 15px var(--font-ui);
+}
+
+.playground .code-panel-header .spacer {
+  flex: 1;
+}
+
+.playground .code-panel-body {
+  overflow: auto;
+  background: var(--panel);
+}
+
+.playground .code-panel-body pre {
+  margin: 0;
+  padding: 16px;
+  font: 13px/1.6 var(--font-code);
+  white-space: pre;
+}
+
+.playground .code-panel-error {
+  margin: 0;
+  padding: 16px;
+  color: var(--error);
+}
+
+.playground .code-panel-note {
+  margin: 0;
+  padding: 10px 16px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.playground .code-panel-note a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

@@ -1,0 +1,14 @@
+{
+  "title": "API reference",
+  "pages": [
+    "label",
+    "jsx",
+    "parsing",
+    "convert",
+    "printer",
+    "render",
+    "preview",
+    "print",
+    "types"
+  ]
+}
