@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@codemirror/commands": "^6.11.1",
+    "@codemirror/lang-javascript": "^6.2.5",
     "@codemirror/language": "^6.13.1",
     "@codemirror/lint": "^6.9.7",
     "@codemirror/state": "^6.7.6",
@@ -30,7 +31,8 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "server-only": "^0.0.1",
-    "shiki": "4.5.0"
+    "shiki": "4.5.0",
+    "sucrase": "3.35.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",

@@ -20,6 +20,7 @@ export function baseOptions(): BaseLayoutProps {
     },
     links: [
       { text: "Docs", url: "/docs", active: "nested-url" },
+      { text: "Playground", url: "/playground" },
       { text: "Viewer", url: "/viewer" },
       { text: "Reference", url: "/reference" },
       { text: "Releases", url: "/releases" },

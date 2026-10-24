@@ -8,10 +8,23 @@ import {
   lineNumbers,
   highlightActiveLine,
 } from "@codemirror/view";
-import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+import {
+  defaultKeymap,
+  history,
+  historyKeymap,
+  indentWithTab,
+} from "@codemirror/commands";
 import { lintGutter, setDiagnostics } from "@codemirror/lint";
 import { zplHighlighting, zplLanguage } from "./zpl-language";
-import type { Problem } from "./analyze";
+import { tsxLanguage } from "./tsx-language";
+
+/** A problem to underline, as offsets in the text */
+type EditorProblem = {
+  from: number;
+  to: number;
+  severity: "error" | "warning";
+  message: string;
+};
 
 type EditorHandle = {
   /** Select a range and scroll it into view */
@@ -20,8 +33,13 @@ type EditorHandle = {
 
 type EditorProps = {
   value: string;
-  problems: Problem[];
+  problems: EditorProblem[];
   onChange: (value: string) => void;
+  /**
+   * What's being edited: ZPL, or zplkit code in TypeScript and JSX
+   * @defaultValue "zpl"
+   */
+  language?: "zpl" | "tsx";
 };
 
 const theme = EditorView.theme({
@@ -75,9 +93,9 @@ const theme = EditorView.theme({
   },
 });
 
-/** CodeMirror editor for ZPL, showing problems as underlines */
+/** CodeMirror editor for ZPL or zplkit code, showing problems as underlines */
 const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
-  { value, problems, onChange },
+  { value, problems, onChange, language = "zpl" },
   ref
 ) {
   const container = useRef<HTMLDivElement>(null);
@@ -95,10 +113,20 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
           highlightActiveLine(),
           history(),
           keymap.of([...defaultKeymap, ...historyKeymap]),
-          EditorView.lineWrapping,
-          EditorView.contentAttributes.of({ "aria-label": "ZPL" }),
-          zplLanguage,
-          zplHighlighting,
+          // Code keeps its indentation readable without wrapping
+          ...(language === "zpl"
+            ? [
+                EditorView.lineWrapping,
+                EditorView.contentAttributes.of({ "aria-label": "ZPL" }),
+                zplLanguage,
+                zplHighlighting,
+              ]
+            : [
+                EditorView.contentAttributes.of({ "aria-label": "Code" }),
+                // Tab indents; Escape, then Tab, moves focus on
+                keymap.of([indentWithTab]),
+                tsxLanguage,
+              ]),
           lintGutter(),
           theme,
           EditorView.updateListener.of((update) => {
@@ -159,5 +187,5 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
   return <div className="editor" ref={container} />;
 });
 
-export type { EditorHandle };
+export type { EditorHandle, EditorProblem };
 export default Editor;

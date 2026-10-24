@@ -1,14 +1,12 @@
 import type { Metadata } from "next";
-import ToViewer from "./to-viewer";
+import PlaygroundLoader from "@/playground/PlaygroundLoader";
 
-// Only forwards old links for now. When the code playground replaces this
-// page, remove robots and alternates and add /playground back to the sitemap
 export const metadata: Metadata = {
-  title: "ZPL viewer",
-  robots: { index: false },
-  alternates: { canonical: "/viewer" },
+  title: "Playground",
+  description:
+    "Write zplkit code in TypeScript and JSX and see the label as you type. Everything runs in your browser.",
 };
 
 export default function PlaygroundPage() {
-  return <ToViewer />;
+  return <PlaygroundLoader />;
 }

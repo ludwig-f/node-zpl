@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import "@zplkit/preview/react";
 import "./styles.css";
 import Editor from "./Editor";
+import ProblemList from "./ProblemList";
 import Bench from "./Bench";
 import CodePanel from "./CodePanel";
 import examples from "./examples";
@@ -86,41 +87,6 @@ const blockingReason = (problems: Problem[]) => {
 };
 
 type Tab = "Editor" | "Preview" | "Problems";
-
-function ProblemList({
-  problems,
-  onSelect,
-}: {
-  problems: Problem[];
-  onSelect: (problem: Problem) => void;
-}) {
-  if (problems.length === 0) {
-    return <p className="clean">No problems. This label prints as shown.</p>;
-  }
-  return (
-    <ul>
-      {problems.map((problem, index) => (
-        <li key={index} className={`problem ${problem.severity}`}>
-          <button
-            type="button"
-            className="line"
-            onClick={() => onSelect(problem)}
-            aria-label={`Go to line ${problem.line}`}
-          >
-            L{problem.line}
-          </button>
-          <div>
-            <span className="rule">
-              <span className="marker" aria-hidden="true" />
-              {problem.severity} · {problem.rule}
-            </span>
-            <span className="message">{problem.message}</span>
-          </div>
-        </li>
-      ))}
-    </ul>
-  );
-}
 
 export default function Viewer() {
   const [state, setState] = useState<ShareState>(
