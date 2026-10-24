@@ -44,6 +44,38 @@ class PrinterSetup extends ZplContent {
   }
 
   /**
+   * Store a TrueType font on the printer, to be used with
+   * `drawText({ font: { file: "R:NAME.TTF" } })`
+   * @param options.name Name of the font, 1 to 8 characters; it's stored as NAME.TTF
+   * @param options.data The .ttf file
+   * @param options.device Device to store the font on - defaults to "R" (DRAM)
+   */
+  public storeFont(options: {
+    name: string;
+    data: Uint8Array;
+    device?: StorageDevice;
+  }): this {
+    const { name, data, device = "R" } = options;
+
+    if (name.length < 1 || name.length > 8) {
+      throw new ZplError("Name must be between 1 and 8 characters long");
+    }
+
+    let hex = "";
+    for (const byte of data) hex += byte.toString(16).padStart(2, "0");
+
+    return this.add({
+      type: "DownloadFont",
+      bounded: false,
+      device,
+      name,
+      extension: "TTF",
+      size: data.length,
+      data: hex.toUpperCase(),
+    });
+  }
+
+  /**
    * Delete a stored graphic from the printer
    * @param name Name of the graphic
    * @param device Device the graphic is stored on - defaults to "R" (DRAM)

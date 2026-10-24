@@ -5,11 +5,15 @@ import {
   Box,
   Code11,
   Code128,
+  Code39,
+  Interleaved2of5,
+  PDF417,
   EAN13,
   DataMatrix,
   Graphic,
   StoredGraphic,
   DefaultFont,
+  FieldOrientation,
   Raw,
   QrCode,
   Field,
@@ -31,8 +35,12 @@ suite("jsx", () => {
       const label = build(
         <Label width={mm(57)} height={mm(19)} dpmm={12}>
           <DefaultFont font="0" height={dots(30)} />
+          <FieldOrientation orientation={Orientation.BottomUp270Degrees} />
           <Text x={dots(20)} y={dots(20)} font="0" height={mm(4)}>
             Hello
+          </Text>
+          <Text x={dots(20)} y={dots(60)} file="E:ARIAL.TTF" height={mm(3)}>
+            Arial
           </Text>
           <Box
             x={dots(0)}
@@ -48,6 +56,15 @@ suite("jsx", () => {
           <Code11 x={dots(300)} y={dots(80)} checkDigits={1}>
             123
           </Code11>
+          <Code39 x={dots(20)} y={dots(150)} checkDigit>
+            ABC
+          </Code39>
+          <Interleaved2of5 x={dots(300)} y={dots(150)} printHri={false}>
+            1234
+          </Interleaved2of5>
+          <PDF417 x={dots(500)} y={dots(150)} rowHeight={dots(6)} columns={3}>
+            pdf
+          </PDF417>
           <EAN13 x={dots(400)} y={dots(80)} height={mm(5)}>
             590123412345
           </EAN13>
@@ -66,10 +83,16 @@ suite("jsx", () => {
 
       const expected = builder()
         .setDefaultFont({ font: "0", height: dots(30) })
+        .setFieldOrientation(Orientation.BottomUp270Degrees)
         .drawText({
           position: at(20, 20),
           text: "Hello",
           font: { name: "0", height: mm(4) },
+        })
+        .drawText({
+          position: at(20, 60),
+          text: "Arial",
+          font: { file: "E:ARIAL.TTF", height: mm(3) },
         })
         .drawBox({
           position: at(0, 0),
@@ -85,6 +108,18 @@ suite("jsx", () => {
           mode: "A",
         })
         .drawCode11({ position: at(300, 80), data: "123", checkDigits: 1 })
+        .drawCode39({ position: at(20, 150), data: "ABC", checkDigit: true })
+        .drawInterleaved2of5({
+          position: at(300, 150),
+          data: "1234",
+          printHri: false,
+        })
+        .drawPDF417({
+          position: at(500, 150),
+          data: "pdf",
+          rowHeight: dots(6),
+          columns: 3,
+        })
         .drawEAN13({
           position: at(400, 80),
           data: "590123412345",

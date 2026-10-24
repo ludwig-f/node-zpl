@@ -78,6 +78,9 @@ const codes: { [T in Command["type"]]?: string } = {
 const barcodes = new Set<Command["type"]>([
   "Code11",
   "Code128",
+  "Code39",
+  "Interleaved2of5",
+  "Pdf417",
   "Ean13",
   "DataMatrix",
   "QrCode",
@@ -87,6 +90,8 @@ const barcodes = new Set<Command["type"]>([
 const isControlCommand = (command: Command): boolean =>
   command.type === "SetDarkness" ||
   command.type === "DownloadGraphic" ||
+  command.type === "DownloadFont" ||
+  command.type === "DownloadObject" ||
   (command.type === "Raw" && command.zpl.startsWith("~"));
 
 const dots = (count: number): string => `${count} dot${count === 1 ? "" : "s"}`;

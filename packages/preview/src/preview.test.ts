@@ -136,6 +136,22 @@ suite("<zpl-preview>", () => {
       expect(pngSize(images(element)[0].src).width).toBe(120);
     });
 
+    test("waits until it's in the page to render", async () => {
+      // React creates custom elements and sets their properties before
+      // adding them, and an early event would reach an unmounted component
+      const element = document.createElement("zpl-preview") as ZplPreview;
+      let renders = 0;
+      element.addEventListener("zpl-render", () => renders++);
+      element.zpl = "^XA^PW100^LL100^FDHi^FS^XZ";
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      expect(renders).toBe(0);
+
+      const rendered = nextRender(element);
+      document.body.append(element);
+      await rendered;
+      expect(renders).toBe(1);
+    });
+
     test("shows nothing for empty ZPL", async () => {
       const element = create();
       element.zpl = "";

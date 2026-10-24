@@ -9,9 +9,9 @@
     "build": "pnpm -r build",
     "test": "pnpm -r test",
     "lint": "eslint packages/*/src apps/site/app apps/site/components apps/site/lib apps/site/playground --ext .ts,.tsx",
-    "fix": "prettier \"packages/*/src/**/*.{ts,tsx}\" \"apps/site/{app,components,lib,playground}/**/*.{ts,tsx,css}\" --write",
+    "fix": "prettier \"packages/*/src/**/*.{ts,tsx}\" \"packages/render/scripts/*.mjs\" \"apps/site/{app,components,lib,playground}/**/*.{ts,tsx,css}\" --write",
     "prepare": "husky",
-    "format:check": "prettier \"packages/*/src/**/*.{ts,tsx}\" \"apps/site/{app,components,lib,playground}/**/*.{ts,tsx,css}\" --check"
+    "format:check": "prettier \"packages/*/src/**/*.{ts,tsx}\" \"packages/render/scripts/*.mjs\" \"apps/site/{app,components,lib,playground}/**/*.{ts,tsx,css}\" --check"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.2.0",

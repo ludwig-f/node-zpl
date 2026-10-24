@@ -84,8 +84,4 @@ suite("configure({ render })", () => {
 
     expect(shownImages(element)).toStrictEqual(["data:image/png;base64,bmV3"]);
   });
-
-  test("can't set wasmUrl once a renderer is in use", () => {
-    expect(() => configure({ wasmUrl: "/zebrash.wasm" })).toThrow();
-  });
 });

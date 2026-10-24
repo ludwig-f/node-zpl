@@ -109,7 +109,7 @@ Field data such as text and bar code contents is escaped automatically. Characte
 Elements without their own method can be drawn with `drawField`, which wraps any command in a field and escapes its data:
 
 ```typescript
-label.drawField({ position: { x: mm(2), y: mm(2) }, command: "^B3N,N,100,Y,N", data: "ABC-123" });
+label.drawField({ position: { x: mm(2), y: mm(2) }, command: "^B8N,100,Y,N", data: "1234567" });
 ```
 
 ### Commands as data
@@ -192,14 +192,14 @@ const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 ### Supported ZPL Commands
 
 - [x] `^A` - Scalable/bitmapped font
-- [ ] `^A@` - Use font name to call font
+- [x] `^A@` - Use font name to call font
 - [ ] `^B0` - Aztec bar code parameters
 - [x] `^B1` - Code 11 bar code
-- [ ] `^B2` - Interleaved 2 of 5 bar code
-- [ ] `^B3` - Code 39 bar code
+- [x] `^B2` - Interleaved 2 of 5 bar code
+- [x] `^B3` - Code 39 bar code
 - [ ] `^B4` - Code 49 bar code
 - [ ] `^B5` - Planet Code bar code
-- [ ] `^B7` - PDF417 bar code
+- [x] `^B7` - PDF417 bar code
 - [ ] `^B8` - EAN-8 bar code
 - [ ] `^B9` - UPC-E bar code
 - [ ] `^BA` - Code 93 bar code
@@ -221,7 +221,7 @@ const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 - [ ] `^BT` - TLC39 bar code
 - [ ] `^BU` - UPC-A bar code
 - [x] `^BX` - Data Matrix bar code
-- [ ] `^BY` - Bar code field default
+- [x] `^BY` - Bar code field default
 - [ ] `^BZ` - POSTNET bar code
 - [ ] `^CC` - Change Caret
 - [ ] `~CC` - Change Caret
@@ -234,18 +234,18 @@ const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 - [ ] `^CT` - Change Tilde
 - [ ] `~CT` - Change Tilde
 - [ ] `^CV` - Code Validation
-- [ ] `^CW` - Font Identifier
+- [x] `^CW` - Font Identifier
 - [ ] `~DB` - Download Bitmap Font
 - [ ] `~DE` - Download Encoding
 - [ ] `^DF` - Download Format
 - [x] `~DG` - Download Graphics
 - [ ] `~DN` - Abort Download Graphics
 - [ ] `~DS` - Download Intellifont (Scalable Font)
-- [ ] `~DT` - Download Bounded TrueType font
-- [ ] `~DU` - Download Unbounded TrueType font
-- [ ] `~DY` - Download Graphics / Native TrueType or OpenType font
+- [x] `~DT` - Download Bounded TrueType font
+- [x] `~DU` - Download Unbounded TrueType font
+- [x] `~DY` - Download Graphics / Native TrueType or OpenType font
 - [ ] `~EG` - Erase Download Graphics
-- [ ] `^FB` - Field Block
+- [x] `^FB` - Field Block
 - [ ] `^FC` - Field Clock (or Real Time Clock)
 - [x] `^FD` - Field Data
 - [x] `^FH` - Field Hexadecimal Indicator
@@ -253,15 +253,15 @@ const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 - [ ] `^FN` - Field Number
 - [x] `^FO` - Field Origin
 - [ ] `^FP` - Field Parameter
-- [ ] `^FR` - Field Reverse Print
+- [x] `^FR` - Field Reverse Print
 - [x] `^FS` - Field Separator
-- [ ] `^FT` - Field Typeset
+- [x] `^FT` - Field Typeset
 - [ ] `^FV` - Field Variable
-- [ ] `^FW` - Field Orientation
-- [ ] `^FX` - Comment
+- [x] `^FW` - Field Orientation
+- [x] `^FX` - Comment
 - [x] `^GB` - Graphic Box
-- [ ] `^GC` - Graphic Circle
-- [ ] `^GD` - Graphic Diagonal Line
+- [x] `^GC` - Graphic Circle
+- [x] `^GD` - Graphic Diagonal Line
 - [ ] `^GE` - Graphic Ellipse
 - [x] `^GF` - Graphic Field
 - [ ] `^GS` - Graphic Symbol

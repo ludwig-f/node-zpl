@@ -151,6 +151,15 @@ suite("Label", () => {
     });
   });
 
+  describe("setFieldOrientation", () => {
+    test("should set the orientation of the fields that follow", () => {
+      const label = smallLabel().setFieldOrientation(
+        Orientation.Rotated90Degrees
+      );
+      expect(label.toZPL()).toStrictEqual(header + "^FWR^XZ");
+    });
+  });
+
   describe("drawBox", () => {
     test("should draw a black box on a normal label", () => {
       const label = wideLabel().drawBox({
@@ -201,6 +210,27 @@ suite("Label", () => {
       expect(label.toZPL()).toStrictEqual(
         wideHeader + "^FO20,20^FDHello^FS^XZ"
       );
+    });
+
+    test("should use a font file by name", () => {
+      const label = wideLabel().drawText({
+        position: at20,
+        text: "Hello",
+        font: { file: "E:ARIAL.TTF", height: dots(30) },
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^A@,30,,E:ARIAL.TTF^FDHello^FS^XZ"
+      );
+    });
+
+    test("should throw on a font file that isn't a name with an extension", () => {
+      expect(() =>
+        wideLabel().drawText({
+          position: at20,
+          text: "Hello",
+          font: { file: "E:ARIAL" },
+        })
+      ).toThrow(ZplError);
     });
 
     test("should default to font 0 when only a size is given", () => {
@@ -254,6 +284,54 @@ suite("Label", () => {
       });
       expect(label.toZPL()).toStrictEqual(
         wideHeader + "^FO20,20^B1N,Y,108,Y,N^FD1234567890^FS^XZ"
+      );
+    });
+  });
+
+  describe("drawCode39", () => {
+    test("should draw a Code 39 barcode on the label", () => {
+      const label = wideLabel().drawCode39({
+        position: at20,
+        data: "ABC-123",
+        height: mm(9),
+        checkDigit: true,
+        orientation: Orientation.Normal,
+        printHri: true,
+        printHriAbove: false,
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^B3N,Y,108,Y,N^FDABC-123^FS^XZ"
+      );
+    });
+  });
+
+  describe("drawInterleaved2of5", () => {
+    test("should draw an Interleaved 2 of 5 barcode on the label", () => {
+      const label = wideLabel().drawInterleaved2of5({
+        position: at20,
+        data: "123456",
+        height: mm(9),
+        orientation: Orientation.Normal,
+        printHri: false,
+        checkDigit: true,
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^B2N,108,N,,Y^FD123456^FS^XZ"
+      );
+    });
+  });
+
+  describe("drawPDF417", () => {
+    test("should draw a PDF417 barcode on the label", () => {
+      const label = wideLabel().drawPDF417({
+        position: at20,
+        data: "hello",
+        rowHeight: dots(8),
+        securityLevel: 3,
+        columns: 4,
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^B7,8,3,4^FDhello^FS^XZ"
       );
     });
   });

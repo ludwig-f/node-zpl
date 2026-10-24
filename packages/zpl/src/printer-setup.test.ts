@@ -33,6 +33,31 @@ suite("PrinterSetup", () => {
     });
   });
 
+  describe("storeFont", () => {
+    test("should download a TrueType font to the printer", () => {
+      const setup = new PrinterSetup().storeFont({
+        name: "ARIAL",
+        data: new Uint8Array([0, 1, 255]),
+      });
+      expect(setup.toZPL()).toStrictEqual("~DUR:ARIAL.TTF,3,0001FF");
+    });
+
+    test("should store it on another device", () => {
+      const setup = new PrinterSetup().storeFont({
+        name: "ARIAL",
+        device: "E",
+        data: new Uint8Array([10]),
+      });
+      expect(setup.toZPL()).toStrictEqual("~DUE:ARIAL.TTF,1,0A");
+    });
+
+    test("should throw if name is not between 1 and 8 characters long", () => {
+      expect(() =>
+        new PrinterSetup().storeFont({ name: "", data: new Uint8Array() })
+      ).toThrow(ZplError);
+    });
+  });
+
   describe("deleteGraphic", () => {
     test("should delete a stored graphic", () => {
       const setup = new PrinterSetup().deleteGraphic("LOGO", "E");

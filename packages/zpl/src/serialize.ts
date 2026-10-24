@@ -53,6 +53,8 @@ const serializeCommand = (command: Command): string => {
       return `^CI${command.charset}`;
     case "DefaultFont":
       return `^CF${params(command.font, command.height, command.width)}`;
+    case "FieldOrientation":
+      return `^FW${params(command.orientation, command.justification)}`;
     case "FieldOrigin":
       return `^FO${params(command.x, command.y, command.justification)}`;
     case "FieldTypeset":
@@ -63,6 +65,20 @@ const serializeCommand = (command: Command): string => {
         `${command.font}${command.orientation ?? ""}`,
         command.height,
         command.width
+      )}`;
+    case "FontByName":
+      return `^A@${params(
+        command.orientation,
+        command.height,
+        command.width,
+        `${command.device ? `${command.device}:` : ""}${command.name}.${
+          command.extension
+        }`
+      )}`;
+    case "FontIdentifier":
+      return `^CW${params(
+        command.font,
+        `${command.device}:${command.name}.${command.extension}`
       )}`;
     case "FieldBlock":
       return `^FB${params(
@@ -134,6 +150,31 @@ const serializeCommand = (command: Command): string => {
         yn(command.uccCheckDigit),
         command.mode
       )}`;
+    case "Code39":
+      return `^B3${params(
+        command.orientation,
+        yn(command.checkDigit),
+        command.height,
+        yn(command.interpretationLine),
+        yn(command.interpretationLineAbove)
+      )}`;
+    case "Interleaved2of5":
+      return `^B2${params(
+        command.orientation,
+        command.height,
+        yn(command.interpretationLine),
+        yn(command.interpretationLineAbove),
+        yn(command.checkDigit)
+      )}`;
+    case "Pdf417":
+      return `^B7${params(
+        command.orientation,
+        command.rowHeight,
+        command.securityLevel,
+        command.columns,
+        command.rows,
+        yn(command.truncate)
+      )}`;
     case "Ean13":
       return `^BE${params(
         command.orientation,
@@ -164,6 +205,21 @@ const serializeCommand = (command: Command): string => {
     case "DownloadGraphic":
       return `~DG${params(
         `${command.device}:${command.name}.GRF`,
+        command.totalBytes,
+        command.bytesPerRow,
+        command.data
+      )}`;
+    case "DownloadFont":
+      return `${command.bounded ? "~DT" : "~DU"}${params(
+        `${command.device}:${command.name}.${command.extension}`,
+        command.size,
+        command.data
+      )}`;
+    case "DownloadObject":
+      return `~DY${params(
+        `${command.device}:${command.name}`,
+        command.format,
+        command.extension,
         command.totalBytes,
         command.bytesPerRow,
         command.data

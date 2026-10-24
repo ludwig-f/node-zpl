@@ -42,6 +42,11 @@ type DefaultFont = Node<
   { font: string; height?: number; width?: number }
 >;
 
+/** `^FWr,z` - default orientation and justification for the following fields */
+type FieldOrientation = Node<
+  "FieldOrientation",
+  { orientation: Orientation; justification?: Justification }
+>;
 /** `^FOx,y,z` */
 type FieldOrigin = Node<
   "FieldOrigin",
@@ -61,6 +66,24 @@ type Font = Node<
     height?: number;
     width?: number;
   }
+>;
+/** `^A@o,h,w,d:o.x` */
+type FontByName = Node<
+  "FontByName",
+  {
+    orientation?: Orientation;
+    height?: number;
+    width?: number;
+    /** Without a device, the printer looks on each */
+    device?: StorageDevice;
+    name: string;
+    extension: string;
+  }
+>;
+/** `^CWa,d:o.x`: lets ^A and ^CF call a font file by a letter */
+type FontIdentifier = Node<
+  "FontIdentifier",
+  { font: string; device: StorageDevice; name: string; extension: string }
 >;
 /** `^FBa,b,c,d,e` */
 type FieldBlock = Node<
@@ -156,6 +179,47 @@ type Code128 = Node<
     mode?: "N" | "U" | "A" | "D";
   }
 >;
+/** `^B3o,e,h,f,g` */
+type Code39 = Node<
+  "Code39",
+  {
+    orientation?: Orientation;
+    /** Adds a Mod-43 check digit */
+    checkDigit?: boolean;
+    height?: number;
+    interpretationLine?: boolean;
+    interpretationLineAbove?: boolean;
+  }
+>;
+/** `^B2o,h,f,g,e` */
+type Interleaved2of5 = Node<
+  "Interleaved2of5",
+  {
+    orientation?: Orientation;
+    height?: number;
+    interpretationLine?: boolean;
+    interpretationLineAbove?: boolean;
+    /** Adds a Mod-10 check digit */
+    checkDigit?: boolean;
+  }
+>;
+/** `^B7o,h,s,c,r,t` */
+type Pdf417 = Node<
+  "Pdf417",
+  {
+    orientation?: Orientation;
+    /** Height of each row in dots */
+    rowHeight?: number;
+    /** Error correction, 0 (detection only) to 8 */
+    securityLevel?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+    /** Data columns, 1 to 30 */
+    columns?: number;
+    /** Rows, 3 to 90 */
+    rows?: number;
+    /** Leaves out the right row indicators and stop pattern */
+    truncate?: boolean;
+  }
+>;
 /** `^BEo,h,f,g` */
 type Ean13 = Node<
   "Ean13",
@@ -208,6 +272,38 @@ type DownloadGraphic = Node<
     data: string;
   }
 >;
+/** `~DUd:o.x,s,data` (unbounded) and `~DTd:o.x,s,data` (bounded) */
+type DownloadFont = Node<
+  "DownloadFont",
+  {
+    /** ~DT: a font converted to Zebra's bounded format; ~DU: a TrueType file */
+    bounded: boolean;
+    device: StorageDevice;
+    name: string;
+    extension: string;
+    /** Size of the font in bytes */
+    size: number;
+    /** The font as hex */
+    data: string;
+  }
+>;
+/** `~DYd:f,b,x,t,w,data` */
+type DownloadObject = Node<
+  "DownloadObject",
+  {
+    device: StorageDevice;
+    /** Name without extension: `extension` sets the file type */
+    name: string;
+    /** A: hex (or :B64: / :Z64:), B: binary, C: AR-compressed, P: PNG */
+    format: "A" | "B" | "C" | "P";
+    /** File type, like T for TrueType (.TTF) or G for a graphic (.GRF) */
+    extension: string;
+    totalBytes: number;
+    /** Bytes per row, for graphics */
+    bytesPerRow?: number;
+    data: string;
+  }
+>;
 /** `^IDd:o.x` */
 type DeleteObject = Node<
   "DeleteObject",
@@ -228,9 +324,12 @@ type Command =
   | LabelReverse
   | ChangeEncoding
   | DefaultFont
+  | FieldOrientation
   | FieldOrigin
   | FieldTypeset
   | Font
+  | FontByName
+  | FontIdentifier
   | FieldBlock
   | FieldReverse
   | FieldHexIndicator
@@ -245,11 +344,16 @@ type Command =
   | BarcodeDefaults
   | Code11
   | Code128
+  | Code39
+  | Interleaved2of5
+  | Pdf417
   | Ean13
   | DataMatrix
   | QrCode
   | SetDarkness
   | DownloadGraphic
+  | DownloadFont
+  | DownloadObject
   | DeleteObject
   | Raw;
 
@@ -268,9 +372,12 @@ export type {
   LabelReverse,
   ChangeEncoding,
   DefaultFont,
+  FieldOrientation,
   FieldOrigin,
   FieldTypeset,
   Font,
+  FontByName,
+  FontIdentifier,
   FieldBlock,
   FieldReverse,
   FieldHexIndicator,
@@ -285,11 +392,16 @@ export type {
   BarcodeDefaults,
   Code11,
   Code128,
+  Code39,
+  Interleaved2of5,
+  Pdf417,
   Ean13,
   DataMatrix,
   QrCode,
   SetDarkness,
   DownloadGraphic,
+  DownloadFont,
+  DownloadObject,
   DeleteObject,
   Raw,
 };

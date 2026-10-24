@@ -1,7 +1,6 @@
 {
   "name": "@node-zpl/preview",
   "version": "0.0.0",
-  "private": true,
   "description": "<zpl-preview>, a web component that shows ZPL labels as images in any framework",
   "type": "module",
   "license": "MIT",
@@ -43,7 +42,7 @@
     "access": "public"
   },
   "dependencies": {
-    "zpl-renderer-js": "^5.0.0"
+    "@node-zpl/render": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.19.43",

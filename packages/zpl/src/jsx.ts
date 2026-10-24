@@ -138,21 +138,30 @@ const DefaultFont = primitive(
   ) => label.setDefaultFont(props)
 );
 
+/** Set the orientation (^FW) of the fields that follow and don't give one */
+const FieldOrientation = primitive(
+  (label, props: { orientation: Orientation }) =>
+    label.setFieldOrientation(props.orientation)
+);
+
 /** Text. Without font props it uses the label's default font. */
 const Text = primitive(
   (
     label,
     props: Position & {
       font?: ZebraFontFamily | string;
+      /** A font file on the printer, like "E:ARIAL.TTF", instead of a font */
+      file?: string;
       height?: Length;
       width?: Length;
       orientation?: Orientation;
       children: TextChildren;
     }
   ) => {
-    const { font, height, width, orientation } = props;
+    const { font, file, height, width, orientation } = props;
     const hasFont =
       font !== undefined ||
+      file !== undefined ||
       height !== undefined ||
       width !== undefined ||
       orientation !== undefined;
@@ -160,7 +169,9 @@ const Text = primitive(
     label.drawText({
       position: position(props),
       text: text(props.children),
-      font: hasFont ? { name: font, height, width, orientation } : undefined,
+      font: hasFont
+        ? { name: font, file, height, width, orientation }
+        : undefined,
     });
   }
 );
@@ -207,6 +218,50 @@ const Code128 = primitive(
     }: BarcodeProps & { useUcc?: boolean; mode?: "N" | "U" | "A" | "D" }
   ) =>
     label.drawCode128({
+      ...props,
+      position: position(props),
+      data: text(children),
+    })
+);
+
+/** Code 39 barcode, with the data as children */
+const Code39 = primitive(
+  (label, { children, ...props }: BarcodeProps & { checkDigit?: boolean }) =>
+    label.drawCode39({
+      ...props,
+      position: position(props),
+      data: text(children),
+    })
+);
+
+/** Interleaved 2 of 5 barcode, with the digits as children */
+const Interleaved2of5 = primitive(
+  (label, { children, ...props }: BarcodeProps & { checkDigit?: boolean }) =>
+    label.drawInterleaved2of5({
+      ...props,
+      position: position(props),
+      data: text(children),
+    })
+);
+
+/** PDF417 barcode, with the data as children */
+const PDF417 = primitive(
+  (
+    label,
+    {
+      children,
+      ...props
+    }: Position & {
+      rowHeight?: Length;
+      securityLevel?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+      columns?: number;
+      rows?: number;
+      truncate?: boolean;
+      orientation?: Orientation;
+      children: TextChildren;
+    }
+  ) =>
+    label.drawPDF417({
       ...props,
       position: position(props),
       data: text(children),
@@ -313,10 +368,14 @@ export {
   Label,
   build,
   DefaultFont,
+  FieldOrientation,
   Text,
   Box,
   Code11,
   Code128,
+  Code39,
+  Interleaved2of5,
+  PDF417,
   EAN13,
   DataMatrix,
   QrCode,
