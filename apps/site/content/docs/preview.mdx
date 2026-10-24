@@ -27,6 +27,7 @@ The `zpl` property also accepts a `Label` from zplkit, or anything with a `toZPL
 | `width`, `height` | `^PW`/`^LL`, else 4 × 6 in | Label size in millimeters                                                   |
 | `dpmm`            | 8                          | Dots per millimeter: 6, 8, 12 or 24                                         |
 | `smoothing`       | 0.4                        | Edge smoothing, from 0 (the printer's exact dots) to 1 (fully anti-aliased) |
+| `fade`            |                            | Fade labels in when they first appear, instead of popping in                |
 
 ZPL with several labels shows one image per label.
 
@@ -114,3 +115,11 @@ configure({
 ## Styling
 
 The label images, their container and the error message are exposed as CSS parts: `::part(label)`, `::part(labels)` and `::part(error)`.
+
+With `fade`, labels fade in over 200 ms the first time they appear, and later changes to the ZPL replace them without fading. Set `--zpl-fade-duration` to change how long it takes. People who prefer reduced motion see them without the fade.
+
+```css
+zpl-preview {
+  --zpl-fade-duration: 400ms;
+}
+```

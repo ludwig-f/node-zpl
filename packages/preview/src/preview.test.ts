@@ -184,6 +184,35 @@ suite("<zpl-preview>", () => {
     });
   });
 
+  describe("fading in", () => {
+    const labels = (element: HTMLElement) =>
+      element.shadowRoot!.querySelector('[part="labels"]')!;
+
+    test("marks labels that appear where there were none", async () => {
+      const element = create();
+      element.setAttribute("fade", "");
+      let rendered = nextRender(element);
+      element.setAttribute("zpl", "^XA^FO20,20^A0,40^FDHi^FS^XZ");
+      await rendered;
+      expect(labels(element).hasAttribute("data-entering")).toBe(true);
+
+      // A new render of labels already shown doesn't fade again
+      rendered = nextRender(element);
+      element.setAttribute("zpl", "^XA^FO20,20^A0,40^FDHo^FS^XZ");
+      await rendered;
+      expect(labels(element).hasAttribute("data-entering")).toBe(false);
+    });
+
+    test("fade reflects as a boolean attribute", () => {
+      const element = create();
+      expect(element.fade).toBe(false);
+      element.fade = true;
+      expect(element.hasAttribute("fade")).toBe(true);
+      element.fade = false;
+      expect(element.hasAttribute("fade")).toBe(false);
+    });
+  });
+
   describe("errors", () => {
     test("shows the error and fires zpl-error for ZPL without labels", async () => {
       const element = create();
