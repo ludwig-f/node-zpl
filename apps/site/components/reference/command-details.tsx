@@ -28,7 +28,10 @@ const detailsOf = (code: string) =>
   (details as unknown as Record<string, Details | undefined>)[code];
 
 /** An example's image, rendered at build time, by command code */
-type Examples = Record<string, { file: string; width: number; height: number }>;
+type Examples = Record<
+  string,
+  { file: string; left: number; top: number; width: number; height: number }
+>;
 
 export function CommandDetails({
   command,
