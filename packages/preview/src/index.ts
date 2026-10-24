@@ -174,7 +174,8 @@ class ZplPreview extends Base {
 
   /** Render once after the current batch of changes */
   #schedule(): void {
-    if (this.#scheduled) return;
+    // Rendered once added to the page: connectedCallback schedules it then
+    if (this.#scheduled || !this.isConnected) return;
     this.#scheduled = true;
     queueMicrotask(() => {
       this.#scheduled = false;
