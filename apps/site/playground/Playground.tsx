@@ -124,7 +124,6 @@ export default function Playground() {
   const [render, setRender] = useState<{ busy: boolean; ms?: number }>({
     busy: true,
   });
-  const started = useRef(0);
   const editor = useRef<EditorHandle>(null);
   const { zpl, widthMm, heightMm, dpmm, smoothing } = state;
   const update = (changes: Partial<ShareState>) =>
@@ -153,12 +152,6 @@ export default function Playground() {
     const timeout = setTimeout(() => setNotice(undefined), 2500);
     return () => clearTimeout(timeout);
   }, [notice]);
-
-  // Time each render, from the change to the preview's zpl-render event
-  useEffect(() => {
-    started.current = performance.now();
-    setRender((current) => ({ ...current, busy: true }));
-  }, [zpl, widthMm, heightMm, dpmm, smoothing]);
 
   const problems = useMemo(
     () => analyze(zpl, { dpmm, widthMm, heightMm }),
@@ -389,12 +382,12 @@ export default function Playground() {
                 height={heightMm}
                 dpmm={dpmm}
                 smoothing={smoothing}
+                onzpl-render-start={() =>
+                  setRender((current) => ({ ...current, busy: true }))
+                }
                 onzpl-render={(event) => {
                   setImages(event.detail.images);
-                  setRender({
-                    busy: false,
-                    ms: Math.round(performance.now() - started.current),
-                  });
+                  setRender({ busy: false, ms: event.detail.duration });
                 }}
                 onzpl-error={() => {
                   setImages([]);

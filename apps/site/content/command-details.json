@@ -1916,11 +1916,15 @@
   },
   "^LL": {
     "summary": "Sets the label length (height). It is required for continuous media. Put it before the first ^FS so it affects the current label.",
-    "syntax": "^LLy",
+    "syntax": "^LLy,x",
     "params": [
       [
         "y",
         "Label length, in dots: 1 to 32000"
+      ],
+      [
+        "x",
+        "Y applies the length to all media, N (default) to continuous media only"
       ]
     ],
     "example": "^XA\n^PW812\n^LL1218\n^FO50,50^A0N,40,40^FD4x6 label at 203 dpi^FS\n^XZ"
