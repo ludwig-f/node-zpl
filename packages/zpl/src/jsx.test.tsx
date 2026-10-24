@@ -39,6 +39,9 @@ suite("jsx", () => {
           <Text x={dots(20)} y={dots(20)} font="0" height={mm(4)}>
             Hello
           </Text>
+          <Text x={dots(20)} y={dots(60)} file="E:ARIAL.TTF" height={mm(3)}>
+            Arial
+          </Text>
           <Box
             x={dots(0)}
             y={dots(0)}
@@ -85,6 +88,11 @@ suite("jsx", () => {
           position: at(20, 20),
           text: "Hello",
           font: { name: "0", height: mm(4) },
+        })
+        .drawText({
+          position: at(20, 60),
+          text: "Arial",
+          font: { file: "E:ARIAL.TTF", height: mm(3) },
         })
         .drawBox({
           position: at(0, 0),

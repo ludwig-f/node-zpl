@@ -59,6 +59,26 @@ new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 
 Graphics in RAM are lost when the printer turns off; flash keeps them.
 
+## Storing fonts
+
+TrueType fonts can be stored the same way, then used by file name:
+
+```ts
+const setup = new PrinterSetup()
+  .storeFont({ name: "ARIAL", data: readFileSync("arial.ttf"), device: "E" })
+  .toZPL();
+
+new Label({ width: mm(57), height: mm(19), dpmm: 12 })
+  .drawText({
+    position: { x: dots(0), y: dots(0) },
+    text: "Hello",
+    font: { file: "E:ARIAL.TTF", height: mm(4) },
+  });
+// ^A@,48,,E:ARIAL.TTF
+```
+
+The font's em is the height you give, and the width stretches it. Check the font's license allows embedding before sending it to printers. Fonts already on the printer, like Zebra's own, are used by file name too.
+
 ## Fonts
 
 Font 0 is Zebra's licensed CG Triumvirate Bold Condensed, and fonts A to H are built-in bitmap fonts. Previews use lookalikes, so text can come out slightly wider or narrower on the real printer. Leave some room at the end of lines that need to fit.

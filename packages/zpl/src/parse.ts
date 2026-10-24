@@ -106,7 +106,20 @@ const colors = ["B", "W"] as const;
 const devices = ["R", "E", "B", "A"] as const;
 
 const storedObject = (code: string, value: string) => {
-  const match = /^([REBA]):([^.]+)\.(\w+)$/.exec(value);
+  const object = objectPath(code, value);
+
+  if (!object.device) {
+    throw new ParamError(
+      `${code}: expected an object like R:NAME.GRF, got '${value}'`
+    );
+  }
+
+  return { ...object, device: object.device };
+};
+
+/** An object like R:NAME.TTF, where the device may be left out */
+const objectPath = (code: string, value: string) => {
+  const match = /^(?:([REBA]):)?([^.:]+)\.(\w+)$/.exec(value);
 
   if (!match) {
     throw new ParamError(
@@ -115,7 +128,7 @@ const storedObject = (code: string, value: string) => {
   }
 
   return {
-    device: match[1] as (typeof devices)[number],
+    device: match[1] as (typeof devices)[number] | undefined,
     name: match[2],
     extension: match[3],
   };
@@ -131,6 +144,22 @@ const splitN = (body: string, delimiter: string, count: number): string[] => {
     ...parts.slice(0, count - 1),
     ...(parts.length >= count ? [parts.slice(count - 1).join(delimiter)] : []),
   ];
+};
+
+const downloadFont = (
+  code: "~DU" | "~DT",
+  body: string,
+  delimiter: string
+): Command => {
+  const p = new Params(code, splitN(body, delimiter, 3));
+
+  return {
+    type: "DownloadFont",
+    bounded: code === "~DT",
+    ...storedObject(code, p.requiredString(0, "object")),
+    size: p.requiredNumber(1, "size"),
+    data: p.string(2) ?? "",
+  };
 };
 
 type CommandParser = (body: string, delimiter: string) => Command | null;
@@ -395,6 +424,41 @@ const parsers: Record<string, CommandParser> = {
       totalBytes: p.requiredNumber(1, "totalBytes"),
       bytesPerRow: p.requiredNumber(2, "bytesPerRow"),
       data: p.string(3) ?? "",
+    };
+  },
+  "^A@": withParams("^A@", (p) => ({
+    type: "FontByName",
+    orientation: p.oneOf(0, "orientation", orientations),
+    height: p.number(1, "height"),
+    width: p.number(2, "width"),
+    ...objectPath("^A@", p.requiredString(3, "font")),
+  })),
+  "^CW": withParams("^CW", (p) => ({
+    type: "FontIdentifier",
+    font: p.requiredString(0, "font"),
+    ...storedObject("^CW", p.requiredString(1, "object")),
+  })),
+  "~DU": (body, delimiter) => downloadFont("~DU", body, delimiter),
+  "~DT": (body, delimiter) => downloadFont("~DT", body, delimiter),
+  "~DY": (body, delimiter) => {
+    const p = new Params("~DY", splitN(body, delimiter, 6));
+    const target = p.requiredString(0, "object");
+    const match = /^([REBA]):([^.:]+)$/.exec(target);
+    if (!match) {
+      throw new ParamError(
+        `~DY: expected an object like R:NAME, got '${target}'`
+      );
+    }
+
+    return {
+      type: "DownloadObject",
+      device: match[1] as (typeof devices)[number],
+      name: match[2],
+      format: p.oneOf(1, "format", ["A", "B", "C", "P"] as const) ?? "A",
+      extension: p.requiredString(2, "extension"),
+      totalBytes: p.requiredNumber(3, "totalBytes"),
+      bytesPerRow: p.number(4, "bytesPerRow"),
+      data: p.string(5) ?? "",
     };
   },
   "^ID": withParams("^ID", (p) => ({

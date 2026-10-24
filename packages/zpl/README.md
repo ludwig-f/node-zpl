@@ -192,7 +192,7 @@ const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 ### Supported ZPL Commands
 
 - [x] `^A` - Scalable/bitmapped font
-- [ ] `^A@` - Use font name to call font
+- [x] `^A@` - Use font name to call font
 - [ ] `^B0` - Aztec bar code parameters
 - [x] `^B1` - Code 11 bar code
 - [x] `^B2` - Interleaved 2 of 5 bar code
@@ -234,16 +234,16 @@ const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 - [ ] `^CT` - Change Tilde
 - [ ] `~CT` - Change Tilde
 - [ ] `^CV` - Code Validation
-- [ ] `^CW` - Font Identifier
+- [x] `^CW` - Font Identifier
 - [ ] `~DB` - Download Bitmap Font
 - [ ] `~DE` - Download Encoding
 - [ ] `^DF` - Download Format
 - [x] `~DG` - Download Graphics
 - [ ] `~DN` - Abort Download Graphics
 - [ ] `~DS` - Download Intellifont (Scalable Font)
-- [ ] `~DT` - Download Bounded TrueType font
-- [ ] `~DU` - Download Unbounded TrueType font
-- [ ] `~DY` - Download Graphics / Native TrueType or OpenType font
+- [x] `~DT` - Download Bounded TrueType font
+- [x] `~DU` - Download Unbounded TrueType font
+- [x] `~DY` - Download Graphics / Native TrueType or OpenType font
 - [ ] `~EG` - Erase Download Graphics
 - [x] `^FB` - Field Block
 - [ ] `^FC` - Field Clock (or Real Time Clock)

@@ -67,6 +67,24 @@ type Font = Node<
     width?: number;
   }
 >;
+/** `^A@o,h,w,d:o.x` */
+type FontByName = Node<
+  "FontByName",
+  {
+    orientation?: Orientation;
+    height?: number;
+    width?: number;
+    /** Without a device, the printer looks on each */
+    device?: StorageDevice;
+    name: string;
+    extension: string;
+  }
+>;
+/** `^CWa,d:o.x`: lets ^A and ^CF call a font file by a letter */
+type FontIdentifier = Node<
+  "FontIdentifier",
+  { font: string; device: StorageDevice; name: string; extension: string }
+>;
 /** `^FBa,b,c,d,e` */
 type FieldBlock = Node<
   "FieldBlock",
@@ -254,6 +272,38 @@ type DownloadGraphic = Node<
     data: string;
   }
 >;
+/** `~DUd:o.x,s,data` (unbounded) and `~DTd:o.x,s,data` (bounded) */
+type DownloadFont = Node<
+  "DownloadFont",
+  {
+    /** ~DT: a font converted to Zebra's bounded format; ~DU: a TrueType file */
+    bounded: boolean;
+    device: StorageDevice;
+    name: string;
+    extension: string;
+    /** Size of the font in bytes */
+    size: number;
+    /** The font as hex */
+    data: string;
+  }
+>;
+/** `~DYd:f,b,x,t,w,data` */
+type DownloadObject = Node<
+  "DownloadObject",
+  {
+    device: StorageDevice;
+    /** Name without extension: `extension` sets the file type */
+    name: string;
+    /** A: hex (or :B64: / :Z64:), B: binary, C: AR-compressed, P: PNG */
+    format: "A" | "B" | "C" | "P";
+    /** File type, like T for TrueType (.TTF) or G for a graphic (.GRF) */
+    extension: string;
+    totalBytes: number;
+    /** Bytes per row, for graphics */
+    bytesPerRow?: number;
+    data: string;
+  }
+>;
 /** `^IDd:o.x` */
 type DeleteObject = Node<
   "DeleteObject",
@@ -278,6 +328,8 @@ type Command =
   | FieldOrigin
   | FieldTypeset
   | Font
+  | FontByName
+  | FontIdentifier
   | FieldBlock
   | FieldReverse
   | FieldHexIndicator
@@ -300,6 +352,8 @@ type Command =
   | QrCode
   | SetDarkness
   | DownloadGraphic
+  | DownloadFont
+  | DownloadObject
   | DeleteObject
   | Raw;
 
@@ -322,6 +376,8 @@ export type {
   FieldOrigin,
   FieldTypeset,
   Font,
+  FontByName,
+  FontIdentifier,
   FieldBlock,
   FieldReverse,
   FieldHexIndicator,
@@ -344,6 +400,8 @@ export type {
   QrCode,
   SetDarkness,
   DownloadGraphic,
+  DownloadFont,
+  DownloadObject,
   DeleteObject,
   Raw,
 };

@@ -232,6 +232,7 @@ class Label extends ZplContent {
    * @param options.position Position (x, y) of the text
    * @param options.font Font to use - defaults to the label's default font
    * @param options.font.name Font name - defaults to font 0
+   * @param options.font.file A font file on the printer instead, like "E:ARIAL.TTF" (see PrinterSetup.storeFont)
    * @param options.font.height Character height
    * @param options.font.width Character width
    * @param options.font.orientation Orientation of the text
@@ -241,6 +242,7 @@ class Label extends ZplContent {
     position: Position;
     font?: {
       name?: ZebraFontFamily | string;
+      file?: string;
       height?: Length;
       width?: Length;
       orientation?: Orientation;
@@ -249,7 +251,23 @@ class Label extends ZplContent {
     const { text, position, font } = options;
     const commands: Command[] = [];
 
-    if (font) {
+    if (font?.file !== undefined) {
+      const match = /^(?:([REBA]):)?([^.:]+)\.(\w+)$/.exec(font.file);
+      if (!match) {
+        throw new ZplError(
+          `Font file must be a name with an extension, like E:ARIAL.TTF, got '${font.file}'`
+        );
+      }
+      commands.push({
+        type: "FontByName",
+        orientation: font.orientation,
+        height: this.optionalDots(font.height),
+        width: this.optionalDots(font.width),
+        device: match[1] as StorageDevice | undefined,
+        name: match[2],
+        extension: match[3],
+      });
+    } else if (font) {
       commands.push({
         type: "Font",
         font: font.name ?? ZebraFontFamily.ZERO,

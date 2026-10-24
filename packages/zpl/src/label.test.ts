@@ -212,6 +212,27 @@ suite("Label", () => {
       );
     });
 
+    test("should use a font file by name", () => {
+      const label = wideLabel().drawText({
+        position: at20,
+        text: "Hello",
+        font: { file: "E:ARIAL.TTF", height: dots(30) },
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^A@,30,,E:ARIAL.TTF^FDHello^FS^XZ"
+      );
+    });
+
+    test("should throw on a font file that isn't a name with an extension", () => {
+      expect(() =>
+        wideLabel().drawText({
+          position: at20,
+          text: "Hello",
+          font: { file: "E:ARIAL" },
+        })
+      ).toThrow(ZplError);
+    });
+
     test("should default to font 0 when only a size is given", () => {
       const label = wideLabel().drawText({
         position: at20,

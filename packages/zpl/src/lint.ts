@@ -90,6 +90,8 @@ const barcodes = new Set<Command["type"]>([
 const isControlCommand = (command: Command): boolean =>
   command.type === "SetDarkness" ||
   command.type === "DownloadGraphic" ||
+  command.type === "DownloadFont" ||
+  command.type === "DownloadObject" ||
   (command.type === "Raw" && command.zpl.startsWith("~"));
 
 const dots = (count: number): string => `${count} dot${count === 1 ? "" : "s"}`;

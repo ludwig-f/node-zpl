@@ -150,15 +150,18 @@ const Text = primitive(
     label,
     props: Position & {
       font?: ZebraFontFamily | string;
+      /** A font file on the printer, like "E:ARIAL.TTF", instead of a font */
+      file?: string;
       height?: Length;
       width?: Length;
       orientation?: Orientation;
       children: TextChildren;
     }
   ) => {
-    const { font, height, width, orientation } = props;
+    const { font, file, height, width, orientation } = props;
     const hasFont =
       font !== undefined ||
+      file !== undefined ||
       height !== undefined ||
       width !== undefined ||
       orientation !== undefined;
@@ -166,7 +169,9 @@ const Text = primitive(
     label.drawText({
       position: position(props),
       text: text(props.children),
-      font: hasFont ? { name: font, height, width, orientation } : undefined,
+      font: hasFont
+        ? { name: font, file, height, width, orientation }
+        : undefined,
     });
   }
 );

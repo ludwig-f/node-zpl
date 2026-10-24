@@ -85,10 +85,24 @@ suite("parse", () => {
       ]);
     });
 
-    test("keeps ^A@ verbatim instead of reading it as font @", () => {
+    test("reads ^A@ as a font file, not as font @", () => {
       expect(parseCommands("^A@N,50,50,E:ARIAL.TTF")).toStrictEqual([
-        { type: "Raw", zpl: "^A@N,50,50,E:ARIAL.TTF" },
+        {
+          type: "FontByName",
+          orientation: "N",
+          height: 50,
+          width: 50,
+          device: "E",
+          name: "ARIAL",
+          extension: "TTF",
+        },
       ]);
+    });
+
+    test("keeps a font file without an extension verbatim", () => {
+      const { commands, diagnostics } = parse("^A@N,50,50,E:ARIAL");
+      expect(commands[0]).toMatchObject({ type: "Raw" });
+      expect(diagnostics[0].message).toMatch(/\^A@/);
     });
 
     test("keeps non-ASCII graphic fields verbatim", () => {

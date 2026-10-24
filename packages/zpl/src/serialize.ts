@@ -66,6 +66,20 @@ const serializeCommand = (command: Command): string => {
         command.height,
         command.width
       )}`;
+    case "FontByName":
+      return `^A@${params(
+        command.orientation,
+        command.height,
+        command.width,
+        `${command.device ? `${command.device}:` : ""}${command.name}.${
+          command.extension
+        }`
+      )}`;
+    case "FontIdentifier":
+      return `^CW${params(
+        command.font,
+        `${command.device}:${command.name}.${command.extension}`
+      )}`;
     case "FieldBlock":
       return `^FB${params(
         command.width,
@@ -191,6 +205,21 @@ const serializeCommand = (command: Command): string => {
     case "DownloadGraphic":
       return `~DG${params(
         `${command.device}:${command.name}.GRF`,
+        command.totalBytes,
+        command.bytesPerRow,
+        command.data
+      )}`;
+    case "DownloadFont":
+      return `${command.bounded ? "~DT" : "~DU"}${params(
+        `${command.device}:${command.name}.${command.extension}`,
+        command.size,
+        command.data
+      )}`;
+    case "DownloadObject":
+      return `~DY${params(
+        `${command.device}:${command.name}`,
+        command.format,
+        command.extension,
         command.totalBytes,
         command.bytesPerRow,
         command.data
