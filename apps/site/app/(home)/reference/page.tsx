@@ -3,6 +3,7 @@ import Link from "next/link";
 import data from "@/content/commands.json";
 import { CommandsTable } from "@/components/reference/commands-table";
 import { categoryAnchor } from "@/components/reference/anchor";
+import { commandExamples } from "@/lib/command-examples";
 
 export const metadata: Metadata = {
   title: "Supported commands",
@@ -13,7 +14,15 @@ const supported = data.commands.filter(
   (command) => command.support !== "no"
 ).length;
 
-export default function ReferencePage() {
+export default async function ReferencePage() {
+  // Only what the table needs; the images are served as files
+  const examples = Object.fromEntries(
+    [...(await commandExamples())].map(([code, { file, width, height }]) => [
+      code,
+      { file, width, height },
+    ])
+  );
+
   return (
     <div className="@container w-full [--fd-header-height:3.5rem]">
       <div className="mx-auto grid max-w-[1280px] gap-x-10 px-[clamp(16px,4cqi,48px)] @[1000px]:grid-cols-[220px_minmax(0,1fr)]">
@@ -43,9 +52,9 @@ export default function ReferencePage() {
               Supported commands
             </h1>
             <p className="max-w-[40em] text-pretty text-muted">
-              zplkit supports {supported} of the {data.commands.length} commands
-              in Zebra&apos;s ZPL II Programming Guide. A supported command can
-              be built with zplkit,{" "}
+              zplkit currently supports {supported} of the{" "}
+              {data.commands.length} commands in Zebra&apos;s ZPL II Programming
+              Guide. A supported command can be built with zplkit,{" "}
               <code className="font-mono text-[0.9em]">parse()</code> reads it
               into a typed node, and the{" "}
               <Link
@@ -71,7 +80,7 @@ export default function ReferencePage() {
               .
             </p>
           </div>
-          <CommandsTable />
+          <CommandsTable examples={examples} />
         </main>
       </div>
     </div>

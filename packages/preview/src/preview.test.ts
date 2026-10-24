@@ -136,6 +136,29 @@ suite("<zpl-preview>", () => {
       expect(pngSize(images(element)[0].src).width).toBe(120);
     });
 
+    test("fires zpl-render-start before each render", async () => {
+      const element = create();
+      const events: string[] = [];
+      element.addEventListener("zpl-render-start", () => events.push("start"));
+      element.addEventListener("zpl-render", () => events.push("render"));
+      const rendered = nextRender(element);
+      element.setAttribute("zpl", "^XA^FO20,20^A0,40^FDHi^FS^XZ");
+
+      await rendered;
+      expect(events).toStrictEqual(["start", "render"]);
+    });
+
+    test("tells zpl-render the size, resolution and time it took", async () => {
+      const element = create();
+      const rendered = nextRender(element);
+      element.setAttribute("dpmm", "12");
+      element.setAttribute("zpl", "^XA^PW600^LL300^FO20,20^A0,40^FDHi^FS^XZ");
+
+      const { detail } = await rendered;
+      expect(detail).toMatchObject({ width: 50, height: 25, dpmm: 12 });
+      expect(detail.duration).toBeGreaterThanOrEqual(0);
+    });
+
     test("waits until it's in the page to render", async () => {
       // React creates custom elements and sets their properties before
       // adding them, and an early event would reach an unmounted component

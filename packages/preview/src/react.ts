@@ -3,7 +3,13 @@
  * Needs React 19, which sets props on custom elements as properties.
  */
 import "./index.js";
-import type { ZplPreview, ZplSource } from "./index.js";
+import type {
+  ErrorDetail,
+  RenderDetail,
+  RenderStartDetail,
+  ZplPreview,
+  ZplSource,
+} from "./index.js";
 import type { HTMLAttributes, RefAttributes } from "react";
 
 type ZplPreviewProps = HTMLAttributes<ZplPreview> &
@@ -13,8 +19,9 @@ type ZplPreviewProps = HTMLAttributes<ZplPreview> &
     height?: number;
     dpmm?: number;
     smoothing?: number;
-    "onzpl-render"?: (event: CustomEvent<{ images: string[] }>) => void;
-    "onzpl-error"?: (event: CustomEvent<{ error: Error }>) => void;
+    "onzpl-render-start"?: (event: CustomEvent<RenderStartDetail>) => void;
+    "onzpl-render"?: (event: CustomEvent<RenderDetail>) => void;
+    "onzpl-error"?: (event: CustomEvent<ErrorDetail>) => void;
   };
 
 declare module "react" {

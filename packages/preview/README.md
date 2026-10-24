@@ -53,7 +53,8 @@ ZPL with several labels shows one image per label. Changes made together, like s
 
 ### Events
 
-- `zpl-render`: `event.detail.images` holds the rendered PNGs as data URLs.
+- `zpl-render-start`: a render started, with `event.detail.zpl`. Use it to show a loading state.
+- `zpl-render`: `event.detail.images` holds the rendered PNGs as data URLs, with the label `width` and `height` in millimeters, the `dpmm` used and the `duration` in milliseconds.
 - `zpl-error`: `event.detail.error` is the rendering error. The element also shows its message.
 
 ### Styling

@@ -4,7 +4,7 @@ import { Fragment, useState } from "react";
 import { ChevronRight } from "lucide-react";
 import data from "@/content/commands.json";
 import details from "@/content/command-details.json";
-import { categoryAnchor } from "./anchor";
+import { anchorOf, categoryAnchor } from "./anchor";
 
 type Command = (typeof data.commands)[number];
 type Support = "yes" | "partial" | "no";
@@ -19,18 +19,21 @@ type Details = {
 const detailsOf = (code: string) =>
   (details as unknown as Record<string, Details | undefined>)[code];
 
-/** The anchor for a command: #BC for ^BC, #tilde-CC for ~CC */
-const anchorOf = (code: string) =>
-  code.startsWith("~") ? `tilde-${code.slice(1)}` : code.slice(1);
+/** An example's image, rendered at build time, by command code */
+type Examples = Record<string, { file: string; width: number; height: number }>;
 
 const isSupported = (command: Command) => command.support !== "no";
 
+/** Like a checkbox: checked, indeterminate for partly, or empty */
 function Mark({ value }: { value: Support }) {
+  const box =
+    "inline-flex size-[18px] items-center justify-center rounded-[4px]";
   if (value === "yes") {
     return (
       <span
+        role="img"
         aria-label="Supported"
-        className="inline-flex size-5 items-center justify-center rounded-[3px] bg-ok-soft text-[13px] font-extrabold text-ok"
+        className={`${box} bg-ok text-[12px] font-extrabold text-bg`}
       >
         ✓
       </span>
@@ -38,23 +41,35 @@ function Mark({ value }: { value: Support }) {
   }
   if (value === "partial") {
     return (
-      <span className="inline-flex h-5 items-center rounded-[3px] bg-warn-soft px-1.5 font-mono text-[11.5px] font-semibold text-warn">
-        partly
+      <span
+        role="img"
+        aria-label="Partly supported"
+        className={`${box} bg-warn`}
+      >
+        <span className="h-[2px] w-2 rounded-full bg-bg" />
       </span>
     );
   }
   return (
-    <span className="font-mono text-[11.5px] font-medium text-muted">
-      not yet
-    </span>
+    <span
+      role="img"
+      aria-label="Not yet"
+      className={`${box} border-[1.5px] border-rule-strong`}
+    />
   );
 }
 
-function CommandDetails({ command }: { command: Command }) {
+function CommandDetails({
+  command,
+  image,
+}: {
+  command: Command;
+  image?: Examples[string];
+}) {
   const info = detailsOf(command.code);
   if (!info) return null;
   return (
-    <div className="flex max-w-[64ch] flex-col gap-3 py-1 text-[14px] leading-[1.55]">
+    <div className="flex max-w-[64ch] flex-col gap-3 pb-4 pt-1 text-[14px] leading-[1.55]">
       <p className="text-ink-2">{info.summary}</p>
       <code className="w-fit rounded-[3px] bg-code-inline px-1.5 py-0.5 font-mono text-[13px] text-ink">
         {info.syntax}
@@ -76,26 +91,50 @@ function CommandDetails({ command }: { command: Command }) {
           {info.example}
         </pre>
       )}
+      {image && (
+        <figure className="flex flex-col gap-1.5">
+          {/* The paper only dims in dark mode, so what's shown is what prints */}
+          <div className="w-fit max-w-full overflow-hidden rounded-[6px] bg-paper shadow-label">
+            <img
+              src={`/reference/examples/${image.file}`}
+              alt={`What the ${command.code} example prints`}
+              width={image.width}
+              height={image.height}
+              loading="lazy"
+              className="block h-auto max-w-full mix-blend-multiply"
+              style={{ width: image.width * 0.75 }}
+            />
+          </div>
+          <figcaption className="font-mono text-[11.5px] text-muted">
+            Rendered by @zplkit/render at 203 dpi
+          </figcaption>
+        </figure>
+      )}
     </div>
   );
 }
 
 /** The supported commands, generated from the code, with a filter */
-export function CommandsTable() {
+export function CommandsTable({ examples }: { examples: Examples }) {
   const [query, setQuery] = useState("");
   const [mode, setMode] = useState<Mode>("All");
   const [open, setOpen] = useState<Set<string>>(new Set());
+  // Rows stay in the page after they're first opened, so they can close
+  // with the same animation they open with
+  const [opened, setOpened] = useState<Set<string>>(new Set());
   // Spaces are ignored, so "barcode" finds Zebra's "bar code"
   const squash = (text: string) => text.toLowerCase().replace(/\s+/g, "");
   const q = squash(query);
 
-  const toggle = (code: string) =>
+  const toggle = (code: string) => {
+    setOpened((current) => new Set(current).add(code));
     setOpen((current) => {
       const next = new Set(current);
       if (next.has(code)) next.delete(code);
       else next.add(code);
       return next;
     });
+  };
 
   const matches = (command: Command) => {
     const text = squash(
@@ -133,7 +172,10 @@ export function CommandsTable() {
           <Mark value="yes" /> Supported
         </span>
         <span className="flex items-center gap-1.5">
-          <Mark value="partial" /> Supported, with limits in the notes
+          <Mark value="partial" /> Partly, see the notes
+        </span>
+        <span className="flex items-center gap-1.5">
+          <Mark value="no" /> Not yet
         </span>
       </div>
 
@@ -280,13 +322,30 @@ export function CommandsTable() {
                             {command.note}
                           </td>
                         </tr>
-                        {expanded && (
+                        {opened.has(command.code) && expandable && (
                           <tr id={detailsId} className="bg-surface">
                             <td
                               colSpan={4}
-                              className="border-b border-rule px-3 pb-4 pt-1 @[640px]:ps-[42px]"
+                              className={`border-b p-0 transition-colors duration-200 motion-reduce:transition-none ${
+                                expanded ? "border-rule" : "border-transparent"
+                              }`}
                             >
-                              <CommandDetails command={command} />
+                              {/* Rows from 0fr to 1fr slide to the content's height */}
+                              <div
+                                inert={!expanded}
+                                className={`grid transition-[grid-template-rows] duration-200 ease-out motion-reduce:transition-none ${
+                                  expanded
+                                    ? "grid-rows-[1fr]"
+                                    : "grid-rows-[0fr]"
+                                }`}
+                              >
+                                <div className="min-h-0 overflow-hidden px-3 @[640px]:ps-[42px]">
+                                  <CommandDetails
+                                    command={command}
+                                    image={examples[command.code]}
+                                  />
+                                </div>
+                              </div>
                             </td>
                           </tr>
                         )}

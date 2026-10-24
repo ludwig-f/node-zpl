@@ -72,8 +72,9 @@ const Base = (
  * and `smoothing` (0 for the printer's exact dots to 1 for fully
  * anti-aliased edges, default 0.4).
  *
- * Events: `zpl-render` with `detail.images` (PNG data URLs) and
- * `zpl-error` with `detail.error`.
+ * Events: `zpl-render-start` when a render starts, `zpl-render` with
+ * `detail.images` (PNG data URLs), the size and resolution used and how long
+ * it took, and `zpl-error` with `detail.error`.
  */
 class ZplPreview extends Base {
   static observedAttributes = ["zpl", "width", "height", "dpmm", "smoothing"];
@@ -201,6 +202,11 @@ class ZplPreview extends Base {
       this.height ??
       (lastValue(zpl, "LL") ?? DEFAULT_SIZE_MM.height * dpmm) / dpmm;
 
+    const started = performance.now();
+    this.dispatchEvent(
+      new CustomEvent("zpl-render-start", { detail: { zpl } })
+    );
+
     try {
       const render = await loadRenderer();
       const pngs = await render(zpl, {
@@ -226,7 +232,12 @@ class ZplPreview extends Base {
       if (id !== this.#renderId) return;
 
       this.#show(images, undefined);
-      this.dispatchEvent(new CustomEvent("zpl-render", { detail: { images } }));
+      const duration = Math.round(performance.now() - started);
+      this.dispatchEvent(
+        new CustomEvent("zpl-render", {
+          detail: { images, width, height, dpmm, duration },
+        })
+      );
     } catch (thrown) {
       if (id !== this.#renderId) return;
 
@@ -262,11 +273,40 @@ if (
   customElements.define("zpl-preview", ZplPreview);
 }
 
+/** `zpl-render-start`: a render started, for the ZPL in `zpl` */
+type RenderStartDetail = { zpl: string };
+
+/** `zpl-render`: the labels as PNG data URLs, and how they were rendered */
+type RenderDetail = {
+  images: string[];
+  /** Label width and height in millimeters */
+  width: number;
+  height: number;
+  dpmm: number;
+  /** Milliseconds from the start of the render to the images */
+  duration: number;
+};
+
+/** `zpl-error`: why the ZPL couldn't be shown */
+type ErrorDetail = { error: Error };
+
 declare global {
   interface HTMLElementTagNameMap {
     "zpl-preview": ZplPreview;
   }
+  interface HTMLElementEventMap {
+    "zpl-render-start": CustomEvent<RenderStartDetail>;
+    "zpl-render": CustomEvent<RenderDetail>;
+    "zpl-error": CustomEvent<ErrorDetail>;
+  }
 }
 
-export type { ZplSource, Render, RenderOptions };
+export type {
+  ZplSource,
+  Render,
+  RenderOptions,
+  RenderStartDetail,
+  RenderDetail,
+  ErrorDetail,
+};
 export { ZplPreview, configure };

@@ -28,7 +28,30 @@ The `zpl` property also accepts a `Label` from zplkit, or anything with a `toZPL
 | `dpmm`            | 8                          | Dots per millimeter: 6, 8, 12 or 24                                         |
 | `smoothing`       | 0.4                        | Edge smoothing, from 0 (the printer's exact dots) to 1 (fully anti-aliased) |
 
-ZPL with several labels shows one image per label. It fires `zpl-render` with `event.detail.images` (PNG data URLs) and `zpl-error` with `event.detail.error`.
+ZPL with several labels shows one image per label.
+
+## Events
+
+| Event              | `event.detail`                                  | Fired when                                                |
+| ------------------ | ----------------------------------------------- | --------------------------------------------------------- |
+| `zpl-render-start` | `zpl`                                           | A render starts, for example to show a loading state      |
+| `zpl-render`       | `images`, `width`, `height`, `dpmm`, `duration` | The labels are shown                                      |
+| `zpl-error`        | `error`                                         | The ZPL can't be shown; the element shows the message too |
+
+`images` are PNG data URLs, one per label, ready to show or download. `width` and `height` are the label size in millimeters that was used, from the attributes or `^PW` and `^LL`, and `duration` is how long the render took in milliseconds.
+
+```ts
+const preview = document.querySelector("zpl-preview")!;
+preview.addEventListener("zpl-render-start", () => spinner.show());
+preview.addEventListener("zpl-render", (event) => {
+  spinner.hide();
+  console.log(
+    `${event.detail.images.length} labels in ${event.detail.duration} ms`
+  );
+});
+```
+
+The events are typed, so `event.detail` is known in TypeScript once `@zplkit/preview` is imported.
 
 ## Frameworks
 
