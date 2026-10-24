@@ -3,7 +3,7 @@ import { Raster, fillPath } from "./raster.js";
 import { boxPath, circlePath, diagonalPath } from "./shapes.js";
 import { layout } from "./layout.js";
 import { drawText } from "./text.js";
-import { drawBarcode } from "./barcode.js";
+import { drawBarcode, drawPlaceholder } from "./barcode.js";
 import type { Command } from "node-zpl";
 import type { Element } from "./layout.js";
 import type { Color } from "./raster.js";
@@ -86,6 +86,9 @@ const draw = (
       break;
     case "barcode":
       drawBarcode(raster, element, dpmm, color);
+      break;
+    case "placeholder":
+      drawPlaceholder(raster, element, dpmm, color);
       break;
     case "bitmap": {
       const {

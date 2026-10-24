@@ -1,5 +1,7 @@
 // Barcode placement, as measured on Labelary at 8 dpmm
 import { describe, test, expect } from "vitest";
+import { parse } from "node-zpl";
+import { layout } from "./layout.js";
 import { renderLabels } from "./render.js";
 
 const size = { widthMm: 101.6, heightMm: 101.6, dpmm: 8 };
@@ -242,5 +244,44 @@ describe("Data Matrix", () => {
     ["^FO100,100^BXN,6,200,20,20^FDhello^FS", 100, 219, 100, 219],
   ])("%s", (body, left, right, top, bottom) => {
     expect(bounds(body)).toStrictEqual({ left, right, top, bottom });
+  });
+});
+
+describe("barcodes we can't draw yet", () => {
+  const body = "^FO100,100^BY2,3,60^BZN,40,Y^FD12345^FS";
+
+  test("don't print their data as text", () => {
+    const [label] = layout(parse(`^XA${body}^XZ`).commands);
+    expect(label.elements.map((element) => element.kind)).toStrictEqual([
+      "placeholder",
+    ]);
+    expect(label.elements[0]).toMatchObject({
+      code: "^BZ",
+      x: 100,
+      y: 100,
+      height: 60,
+    });
+    expect(label.unsupported).toStrictEqual([3, 4]);
+  });
+
+  test("draw a placeholder as tall as ^BY's height", () => {
+    const { left, top, bottom } = bounds(body);
+    expect({ left, top, bottom }).toStrictEqual({
+      left: 100,
+      top: 100,
+      bottom: 159,
+    });
+  });
+
+  test("placeholders are at least 40 dots tall", () => {
+    expect(bounds("^FT100,300^BZ^FD12345^FS")).toMatchObject({
+      top: 260,
+      bottom: 299,
+    });
+  });
+
+  test("^BY isn't a barcode", () => {
+    const [label] = layout(parse("^XA^BY3^FO10,10^FDHI^FS^XZ").commands);
+    expect(label.elements[0].kind).toBe("text");
   });
 });

@@ -65,6 +65,16 @@ type Element = Common &
         font?: FontSetting;
       }
     | {
+        /** Stands in for a barcode we can't draw yet */
+        kind: "placeholder";
+        /** The barcode command, like ^B7 */
+        code: string;
+        /** ^BY's height, at least MIN_PLACEHOLDER_HEIGHT */
+        height: number;
+        orientation: Orientation;
+        fromBottom: boolean;
+      }
+    | {
         kind: "bitmap";
         /** Packed rows of bits, most significant bit first */
         bytes: Uint8Array;
@@ -112,8 +122,8 @@ type Field = {
   /** ^FH: the character that starts a hex escape in the field data */
   hexIndicator?: string;
   block?: TextBlockOptions;
-  /** The barcode the field data goes into */
-  barcode?: BarcodeCommand;
+  /** The barcode the field data goes into, or the code of one we can't draw */
+  barcode?: BarcodeCommand | { type: "Unsupported"; code: string };
   commands: number[];
 };
 
@@ -165,6 +175,15 @@ const drawn = new Set<Command["type"]>([
   "DataMatrix",
   "QrCode",
 ]);
+
+/** ^Bx commands without a typed node, apart from ^BY, are barcodes */
+const unsupportedBarcode = (command: Command) =>
+  command.type === "Raw" && /^\^B[0-9A-XZ]/.test(command.zpl)
+    ? command.zpl.slice(0, 3)
+    : undefined;
+
+/** So a placeholder for a barcode with ^BY's default height is legible */
+const MIN_PLACEHOLDER_HEIGHT = 40;
 
 /** ^BY settings at power-up */
 const initialBarcodeDefaults = { moduleWidth: 2, ratio: 3, height: 10 };
@@ -305,6 +324,22 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
         const data = decodeFieldData(command.data, field.hexIndicator, utf8);
         const { barcode } = field;
         if (barcode) {
+          if (barcode.type === "Unsupported") {
+            label.unsupported.push(index);
+            const height = Math.max(
+              barcodeDefaults.height,
+              MIN_PLACEHOLDER_HEIGHT
+            );
+            label.elements.push({
+              ...common(),
+              kind: "placeholder",
+              code: barcode.code,
+              height,
+              orientation,
+              fromBottom: field.fromBottom,
+            });
+            break;
+          }
           // Field data under a barcode we can't draw yet isn't drawn either
           if (!drawn.has(barcode.type)) {
             label.unsupported.push(index);
@@ -439,6 +474,14 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
         field.barcode = command;
         if (!drawn.has(command.type)) label.unsupported.push(index);
         break;
+      case "Raw": {
+        const code = unsupportedBarcode(command);
+        if (code) {
+          field.barcode = { type: "Unsupported", code };
+          label.unsupported.push(index);
+        }
+        break;
+      }
     }
   });
 

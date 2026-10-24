@@ -21,6 +21,7 @@ import type { Color, Raster } from "./raster.js";
 import type { Face, Place } from "./text.js";
 
 type Barcode = Extract<Element, { kind: "barcode" }>;
+type Placeholder = Extract<Element, { kind: "placeholder" }>;
 
 /** Gaps between the bars and the interpretation line's character cells */
 const GAP_BELOW = 6;
@@ -294,4 +295,71 @@ const drawBarcode = (
   }
 };
 
-export { drawBarcode };
+/**
+ * A crossed-out box in place of a barcode we can't draw yet, naming the
+ * command, so a preview doesn't silently leave it out
+ */
+const drawPlaceholder = (
+  raster: Raster,
+  placeholder: Placeholder,
+  dpmm: number,
+  color: Color
+): void => {
+  const text = `${placeholder.code} not supported`;
+  // Font D, magnified so it stays legible at higher resolutions
+  const face = faceFor({
+    font: "D",
+    height: 18 * Math.max(1, Math.round(dpmm / 8)),
+    dpmm,
+  });
+  const advance = advanceOf(face, text);
+  const padding = face.height;
+  const width = Math.ceil(advance + 2 * padding);
+  const { height } = placeholder;
+  const place = placement(
+    { width, height, ascent: height, lastBaseline: 0 },
+    placeholder
+  );
+  const line = Math.max(1, Math.round(dpmm / 4));
+
+  // Outline and diagonals, with the bottom edge at v = 0
+  fillRect(raster, place, 0, -height, width, -height + line, color);
+  fillRect(raster, place, 0, -line, width, 0, color);
+  fillRect(raster, place, 0, -height, line, 0, color);
+  fillRect(raster, place, width - line, -height, width, 0, color);
+  fillPath(
+    raster,
+    [
+      [
+        place(0, -height),
+        place(0, -height + line),
+        place(width, 0),
+        place(width, -line),
+      ],
+      [
+        place(0, 0),
+        place(0, -line),
+        place(width, -height + line),
+        place(width, -height),
+      ],
+    ],
+    color
+  );
+
+  // The name on a clear band across the middle
+  const top = (-height - face.height) / 2;
+  const clear = color === "B" ? "W" : "B";
+  fillRect(
+    raster,
+    place,
+    padding / 2,
+    top - 2,
+    width - padding / 2,
+    top + face.height + 2,
+    clear
+  );
+  const glyphs = placeLine(face, text, padding, top + face.ascent);
+  drawGlyphs(raster, glyphs, place, color);
+};
+
+export { drawBarcode, drawPlaceholder };
