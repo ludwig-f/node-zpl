@@ -13,7 +13,7 @@ It draws:
 - Graphic symbols (`^GS`), stored formats (`^DF`, `^XF`, `^FN`), labels printed upside down (`^PO`) and stored images as backgrounds (`^IL`)
 - Reverse printing (`^FR`, `^LR`), label home (`^LH`), print width (`^PW`) and UTF-8 text (`^CI28`)
 
-Other barcodes are drawn as a crossed-out box naming the command. Commands it understands but doesn't draw yet are listed in each label's `layout().unsupported`. The [supported commands table](https://zpl.fingal.dev/docs/commands) lists them all.
+Other barcodes are drawn as a crossed-out box naming the command. Commands it understands but doesn't draw yet are listed in each label's `layout().unsupported`. The [supported commands table](https://zplkit.fingal.dev/docs/commands) lists them all.
 
 ## Usage
 
