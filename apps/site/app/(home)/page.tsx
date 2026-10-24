@@ -278,10 +278,10 @@ export default async function HomePage() {
               Read the docs
             </Link>
             <Link
-              href="/playground"
+              href="/viewer"
               className="inline-flex h-12 items-center rounded-md border-[1.5px] border-ink px-[22px] font-bold transition-colors hover:bg-surface"
             >
-              Open the playground →
+              Open the ZPL viewer →
             </Link>
           </div>
         </div>
@@ -441,14 +441,14 @@ export default async function HomePage() {
           </span>
         </Link>
         <Link
-          href="/playground"
+          href="/viewer"
           className="flex flex-col gap-1.5 p-7 transition-colors hover:bg-surface"
         >
           <span className="font-mono text-xs font-semibold uppercase tracking-[0.06em] text-muted">
             No install
           </span>
           <span className="text-2xl font-extrabold [font-stretch:112%]">
-            Paste ZPL in the playground →
+            Paste ZPL in the viewer →
           </span>
           <span className="text-muted">
             Edit on the left, and watch the label redraw on the right.

@@ -100,7 +100,7 @@ export function LiveExample({
     }
   };
 
-  const openInPlayground = async () => {
+  const openInViewer = async () => {
     const hash = await encodeShare({
       zpl: text,
       // A label from the top left corner to past the ink shown
@@ -109,7 +109,7 @@ export function LiveExample({
       dpmm: DPMM,
       smoothing: 0.4,
     });
-    window.location.href = `/playground#${hash}`;
+    window.location.href = `/viewer#${hash}`;
   };
 
   const button =
@@ -134,8 +134,8 @@ export function LiveExample({
           >
             Reset
           </button>
-          <button type="button" onClick={openInPlayground} className={button}>
-            Open in playground
+          <button type="button" onClick={openInViewer} className={button}>
+            Open in viewer
           </button>
         </div>
         <textarea
