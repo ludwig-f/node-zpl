@@ -17,7 +17,7 @@ const splineSansMono = Spline_Sans_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: { default: "node-zpl", template: "%s | node-zpl" },
+  title: { default: "zplkit", template: "%s | zplkit" },
   description:
     "Build, parse, lint and preview ZPL for Zebra label printers in TypeScript, with typed method calls or JSX.",
 };

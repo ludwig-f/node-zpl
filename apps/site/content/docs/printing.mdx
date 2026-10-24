@@ -3,7 +3,7 @@ title: Printing
 description: Send labels to Zebra printers and store graphics on them.
 ---
 
-node-zpl produces ZPL text; sending it to a printer is up to you. The printer's firmware does the drawing.
+zplkit produces ZPL text; sending it to a printer is up to you. The printer's firmware does the drawing.
 
 ## Sending ZPL
 
@@ -33,7 +33,7 @@ Positions in ZPL are in dots, and dot size depends on the printhead. The same ZP
 Format commands start with `^`. The printer collects them between `^XA` and `^XZ` and prints them as one label. Control commands start with `~` and act as soon as they arrive, like `~SD` for print darkness. That's why printer settings live in `PrinterSetup` rather than `Label`:
 
 ```ts
-import { PrinterSetup } from "node-zpl";
+import { PrinterSetup } from "zplkit";
 
 const setup = new PrinterSetup().setDarkness(20).toZPL();
 ```
@@ -44,8 +44,8 @@ Send an image once and recall it by name in every label, instead of including it
 
 ```ts
 import { readFileSync } from "node:fs";
-import { Label, PrinterSetup, mm, dots } from "node-zpl";
-import { ImageConverter } from "node-zpl/image";
+import { Label, PrinterSetup, mm, dots } from "zplkit";
+import { ImageConverter } from "zplkit/image";
 
 const graphic = await new ImageConverter().toZPL(readFileSync("logo.png"));
 

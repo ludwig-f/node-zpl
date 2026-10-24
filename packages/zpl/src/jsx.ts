@@ -59,7 +59,7 @@ const Label = (props: LabelProps): ZplElement => jsx(Label, props);
  * Draw a node on the label: built-in elements are drawn, components are
  * called and their result drawn, and false, null and undefined are skipped
  * so that `{condition && <Text>…</Text>}` works. Works on elements created
- * by node-zpl's JSX runtime as well as React's.
+ * by zplkit's JSX runtime as well as React's.
  */
 const draw = (label: LabelBuilder, node: unknown): void => {
   if (Array.isArray(node)) {

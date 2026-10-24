@@ -86,7 +86,7 @@ suite("<zpl-preview>", () => {
       });
     });
 
-    test("accepts anything with toZPL(), like a node-zpl Label", async () => {
+    test("accepts anything with toZPL(), like a zplkit Label", async () => {
       const element = create();
       const rendered = nextRender(element);
       element.zpl = { toZPL: () => "^XA^PW100^LL100^FO0,0^GB50,50,50^FS^XZ" };

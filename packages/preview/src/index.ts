@@ -1,6 +1,6 @@
 /**
  * <zpl-preview>: shows ZPL as images, rendered locally in the browser by
- * @node-zpl/render. Importing this module registers the element.
+ * @zplkit/render. Importing this module registers the element.
  */
 
 /** What the element asks a renderer for */
@@ -15,7 +15,7 @@ type RenderOptions = {
 /** Renders ZPL to one base64-encoded PNG per label */
 type Render = (zpl: string, options: RenderOptions) => Promise<string[]>;
 
-/** Anything with a toZPL() method, such as a node-zpl Label */
+/** Anything with a toZPL() method, such as a zplkit Label */
 type ZplSource = string | { toZPL(): string };
 
 let renderer: Promise<Render> | undefined;
@@ -32,7 +32,7 @@ const configure = (options: { render?: Render }): void => {
 
 // The renderer is only loaded once something is rendered
 const loadRenderer = (): Promise<Render> =>
-  (renderer ??= import("@node-zpl/render").then((module) => module.renderZpl));
+  (renderer ??= import("@zplkit/render").then((module) => module.renderZpl));
 
 const DEFAULT_SMOOTHING = 0.4;
 

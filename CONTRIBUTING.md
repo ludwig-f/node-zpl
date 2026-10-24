@@ -1,6 +1,6 @@
-# Contributing to node-zpl
+# Contributing to zplkit
 
-First off, thank you for considering contributing to `node-zpl`.
+First off, thank you for considering contributing to `zplkit`.
 
 ## Where do I go from here?
 
@@ -8,7 +8,7 @@ If you've noticed a bug or have a feature request, create an issue! It's general
 
 ## Fork & create a branch
 
-If this is something you think you can fix, then fork `node-zpl` and create a branch with a descriptive name.
+If this is something you think you can fix, then fork `zplkit` and create a branch with a descriptive name.
 
 A good branch name would be (where issue #1337 is the ticket you're working on):
 
@@ -33,7 +33,7 @@ At this point, you're ready to make your changes!
 
 ## Make a Pull Request
 
-If you've gotten this far, you should make sure that your local main branch is up to date with `node-zpl`s main branch:
+If you've gotten this far, you should make sure that your local main branch is up to date with `zplkit`s main branch:
 
 ```bash
 git remote add upstream git@github.com:ludwig-f/node-zpl

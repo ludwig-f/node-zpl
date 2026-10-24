@@ -3,21 +3,21 @@ title: Preview
 description: Show ZPL as images in the browser with the <zpl-preview> web component.
 ---
 
-`<zpl-preview>` renders ZPL to images in the browser with [`@node-zpl/render`](/docs/rendering). Label data never leaves the page. Because it's a standard web component, it works in plain HTML and every framework.
+`<zpl-preview>` renders ZPL to images in the browser with [`@zplkit/render`](/docs/rendering). Label data never leaves the page. Because it's a standard web component, it works in plain HTML and every framework.
 
 ```bash
-npm install @node-zpl/preview
+npm install @zplkit/preview
 ```
 
 ```html
 <script type="module">
-  import "@node-zpl/preview";
+  import "@zplkit/preview";
 </script>
 
 <zpl-preview zpl="^XA^PW400^LL200^FO20,20^A0,40^FDHello^FS^XZ"></zpl-preview>
 ```
 
-The `zpl` property also accepts a `Label` from node-zpl, or anything with a `toZPL()` method.
+The `zpl` property also accepts a `Label` from zplkit, or anything with a `toZPL()` method.
 
 ## Attributes
 
@@ -37,7 +37,7 @@ ZPL with several labels shows one image per label. It fires `zpl-render` with `e
 React 19 sets props on custom elements as properties, so `zpl` can be a `Label`. Import the React entry to register the element and get typed props:
 
 ```tsx
-import "@node-zpl/preview/react";
+import "@zplkit/preview/react";
 
 <zpl-preview
   zpl={label}
@@ -79,7 +79,7 @@ The renderer, with its fonts and barcode encoders, loads the first time a previe
 `configure({ render })` replaces it, for example with one that calls your own service:
 
 ```ts
-import { configure } from "@node-zpl/preview";
+import { configure } from "@zplkit/preview";
 
 configure({
   render: async (zpl, { widthMm, heightMm, dpmm, grayscale }) => {

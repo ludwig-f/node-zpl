@@ -3,17 +3,17 @@
   "packages": {
     "packages/zpl": {
       "release-type": "node",
-      "package-name": "node-zpl",
+      "package-name": "zplkit",
       "include-component-in-tag": false
     },
     "packages/render": {
       "release-type": "node",
-      "package-name": "@node-zpl/render",
+      "package-name": "@zplkit/render",
       "initial-version": "0.1.0"
     },
     "packages/preview": {
       "release-type": "node",
-      "package-name": "@node-zpl/preview",
+      "package-name": "@zplkit/preview",
       "initial-version": "0.1.0"
     }
   }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import "@node-zpl/preview/react";
+import "@zplkit/preview/react";
 import "./styles.css";
 import Editor from "./Editor";
 import Bench from "./Bench";
@@ -11,6 +11,7 @@ import { decodeShare, encodeShare } from "./share";
 import type { EditorHandle } from "./Editor";
 import type { ShareState } from "./share";
 
+// Kept from before the rename, so saved labels stay
 const STORAGE_KEY = "node-zpl-playground";
 
 const fromExample = (index: number): ShareState => ({

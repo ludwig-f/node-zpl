@@ -6,11 +6,11 @@ const src = (file: string) =>
 
 export default defineConfig({
   // Tests use JSX the way consumers do, compiled against the local runtime
-  esbuild: { jsx: "automatic", jsxImportSource: "node-zpl" },
+  esbuild: { jsx: "automatic", jsxImportSource: "zplkit" },
   resolve: {
     alias: {
-      "node-zpl/jsx-runtime": src("jsx-runtime.ts"),
-      "node-zpl/jsx-dev-runtime": src("jsx-dev-runtime.ts"),
+      "zplkit/jsx-runtime": src("jsx-runtime.ts"),
+      "zplkit/jsx-dev-runtime": src("jsx-dev-runtime.ts"),
     },
   },
   test: {

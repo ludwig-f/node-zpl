@@ -1,4 +1,4 @@
-import { lint, parse } from "node-zpl";
+import { lint, parse } from "zplkit";
 
 type Problem = {
   from: number;
@@ -22,7 +22,7 @@ const lineAt = (text: string, offset: number): number =>
 
 /**
  * Find problems in ZPL: parameters the parser couldn't read, and everything
- * node-zpl's linter reports. Ordered by position in the text.
+ * zplkit's linter reports. Ordered by position in the text.
  */
 const analyze = (zpl: string, settings: Settings): Problem[] => {
   const { commands, diagnostics } = parse(zpl);

@@ -1,9 +1,9 @@
-# @node-zpl/preview
+# @zplkit/preview
 
-`<zpl-preview>` is a web component that shows ZPL labels as images. Rendering happens locally in the browser with [`@node-zpl/render`](../render), so label data never leaves the page. Because it's a standard custom element, it works the same in plain HTML, React, Vue, Svelte and Angular.
+`<zpl-preview>` is a web component that shows ZPL labels as images. Rendering happens locally in the browser with [`@zplkit/render`](../render), so label data never leaves the page. Because it's a standard custom element, it works the same in plain HTML, React, Vue, Svelte and Angular.
 
 ```bash
-npm install @node-zpl/preview
+npm install @zplkit/preview
 ```
 
 ## Usage
@@ -12,17 +12,17 @@ Importing the package registers the element:
 
 ```html
 <script type="module">
-  import "@node-zpl/preview";
+  import "@zplkit/preview";
 </script>
 
 <zpl-preview zpl="^XA^PW400^LL200^FO20,20^A0,40^FDHello^FS^XZ"></zpl-preview>
 ```
 
-Set the `zpl` property instead of the attribute to pass a [node-zpl](https://github.com/ludwig-f/node-zpl/tree/main/packages/zpl#readme) `Label`, or anything else with a `toZPL()` method:
+Set the `zpl` property instead of the attribute to pass a [zplkit](https://github.com/ludwig-f/node-zpl/tree/main/packages/zpl#readme) `Label`, or anything else with a `toZPL()` method:
 
 ```ts
-import { Label, mm } from "node-zpl";
-import "@node-zpl/preview";
+import { Label, mm } from "zplkit";
+import "@zplkit/preview";
 
 document.querySelector("zpl-preview").zpl = new Label({
   width: mm(50),
@@ -76,10 +76,10 @@ configure({
 
 ### React
 
-React 19 passes props to custom elements as properties, so `zpl` can be a `Label`. Import `@node-zpl/preview/react` to register the element and add its props to React's JSX types:
+React 19 passes props to custom elements as properties, so `zpl` can be a `Label`. Import `@zplkit/preview/react` to register the element and add its props to React's JSX types:
 
 ```tsx
-import "@node-zpl/preview/react";
+import "@zplkit/preview/react";
 
 <zpl-preview
   zpl={label}

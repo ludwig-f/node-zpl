@@ -1,5 +1,5 @@
 {
-  "name": "@node-zpl/render",
+  "name": "@zplkit/render",
   "version": "0.0.0",
   "description": "Render ZPL labels to images in pure TypeScript, in Node and the browser",
   "type": "module",
@@ -44,7 +44,7 @@
   "dependencies": {
     "bwip-js": "4.11.4",
     "fflate": "^0.8.2",
-    "node-zpl": "workspace:*"
+    "zplkit": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",

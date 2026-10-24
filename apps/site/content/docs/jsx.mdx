@@ -6,7 +6,7 @@ description: Write labels as JSX, in React projects or on their own.
 Labels can also be written as JSX. It produces the same commands as the method calls, and `build()` returns the same `Label` object, with `toZPL()`, `lint()` and `commands`.
 
 ```tsx
-import { Label, Text, Box, Code128, build, mm, dots } from "node-zpl/jsx";
+import { Label, Text, Box, Code128, build, mm, dots } from "zplkit/jsx";
 
 const order = { id: 10442, express: true };
 
@@ -58,17 +58,17 @@ No setup is needed. Label elements also work when compiled by React's JSX runtim
 
 ### Without React
 
-Tell TypeScript or your bundler to use node-zpl's JSX runtime:
+Tell TypeScript or your bundler to use zplkit's JSX runtime:
 
 ```json title="tsconfig.json"
 {
   "compilerOptions": {
     "jsx": "react-jsx",
-    "jsxImportSource": "node-zpl"
+    "jsxImportSource": "zplkit"
   }
 }
 ```
 
 ### Vue, Svelte and Angular
 
-Their templates aren't JSX, so use the [method calls](/docs/building-labels) in a `.ts` file. If your build tool compiles `.tsx` files (Vite does), you can also keep labels in a `.tsx` file that starts with `/** @jsxImportSource node-zpl */`.
+Their templates aren't JSX, so use the [method calls](/docs/building-labels) in a `.ts` file. If your build tool compiles `.tsx` files (Vite does), you can also keep labels in a `.tsx` file that starts with `/** @jsxImportSource zplkit */`.
