@@ -10,7 +10,7 @@ Build, parse and lint ZPL, the language Zebra label printers speak, from TypeScr
 - **Linter**: catch the mistakes printers stay quiet about, like values they clamp and labels that never print.
 - **No runtime dependencies** except two small image decoders, used only by `ImageConverter`.
 
-Try it in the [playground](https://zplkit.fingal.dev/playground), or read the [docs](https://zplkit.fingal.dev/docs).
+See labels in the [ZPL viewer](https://zplkit.fingal.dev/viewer), or read the [docs](https://zplkit.fingal.dev/docs).
 
 ## Installation
 
@@ -43,7 +43,7 @@ const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 ```
 
 > [!TIP]
-> To see what a label looks like, paste its ZPL into the [playground](https://zplkit.fingal.dev/playground), or render it to an image with [`@zplkit/render`](https://github.com/ludwig-f/zplkit/tree/main/packages/render).
+> To see what a label looks like, paste its ZPL into the [ZPL viewer](https://zplkit.fingal.dev/viewer), or render it to an image with [`@zplkit/render`](https://github.com/ludwig-f/zplkit/tree/main/packages/render).
 
 ### JSX
 

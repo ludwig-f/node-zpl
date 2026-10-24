@@ -1,7 +1,8 @@
 /*
- * The playground: a toolbar, the editor with its problems on the left, and
- * the label on the printer's platen on the right. On phones, tabs switch
- * between the editor, the preview and the problems. Scoped to .playground.
+ * The ZPL viewer, whose layout the code playground will share: a toolbar,
+ * the editor with its problems on the left, and the label on the printer's
+ * platen on the right. On phones, tabs switch between the editor, the
+ * preview and the problems. Scoped to .playground.
  */
 .playground {
   --panel: var(--zk-code);

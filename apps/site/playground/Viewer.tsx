@@ -122,7 +122,7 @@ function ProblemList({
   );
 }
 
-export default function Playground() {
+export default function Viewer() {
   const [state, setState] = useState<ShareState>(
     () => loadSaved() ?? fromExample(0)
   );
