@@ -102,6 +102,42 @@ const commandCases: [Command, string][] = [
   [{ type: "Ean13", orientation: "R", height: 50 }, "^BER,50"],
   [
     {
+      type: "Industrial2of5",
+      orientation: "N",
+      height: 100,
+      interpretationLine: true,
+      interpretationLineAbove: false,
+    },
+    "^BIN,100,Y,N",
+  ],
+  [{ type: "Standard2of5", orientation: "N", height: 100 }, "^BJN,100"],
+  [
+    {
+      type: "Logmars",
+      orientation: "N",
+      height: 100,
+      interpretationLineAbove: true,
+    },
+    "^BLN,100,Y",
+  ],
+  [
+    {
+      type: "Msi",
+      orientation: "N",
+      checkDigits: "D",
+      height: 100,
+      interpretationLine: true,
+      interpretationLineAbove: false,
+      printCheckDigit: true,
+    },
+    "^BMN,D,100,Y,N,Y",
+  ],
+  [
+    { type: "Plessey", orientation: "N", printCheckDigit: true, height: 100 },
+    "^BPN,Y,100",
+  ],
+  [
+    {
       type: "PostalCode",
       orientation: "N",
       height: 40,

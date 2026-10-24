@@ -69,6 +69,11 @@ const renderedCommands: readonly string[] = [
   "^B5",
   "^BR",
   "^BF",
+  "^BI",
+  "^BJ",
+  "^BL",
+  "^BM",
+  "^BP",
   "^BQ",
   "^BX",
 ];

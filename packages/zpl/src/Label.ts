@@ -28,6 +28,11 @@ import type {
   IntelligentMailOptions,
   Gs1DataBarOptions,
   MicroPdf417Options,
+  Industrial2of5Options,
+  Standard2of5Options,
+  LogmarsOptions,
+  MsiOptions,
+  PlesseyOptions,
   FieldOptions,
   GraphicOptions,
   Interleaved2of5Options,
@@ -560,6 +565,88 @@ class Label extends ZplContent {
         orientation: options.orientation,
         rowHeight: this.optionalDots(options.rowHeight),
         mode: options.mode,
+      },
+      ...this.fieldData(options.data),
+    ]);
+  }
+
+  /**
+   * Draw an Industrial 2 of 5 barcode on the label
+   */
+  public industrial2of5(options: Industrial2of5Options): this {
+    return this.addField(options.position, [
+      {
+        type: "Industrial2of5",
+        orientation: options.orientation,
+        height: this.optionalDots(options.height),
+        interpretationLine: options.printHri,
+        interpretationLineAbove: options.printHriAbove,
+      },
+      ...this.fieldData(options.data),
+    ]);
+  }
+
+  /**
+   * Draw a Standard 2 of 5 barcode on the label
+   */
+  public standard2of5(options: Standard2of5Options): this {
+    return this.addField(options.position, [
+      {
+        type: "Standard2of5",
+        orientation: options.orientation,
+        height: this.optionalDots(options.height),
+        interpretationLine: options.printHri,
+        interpretationLineAbove: options.printHriAbove,
+      },
+      ...this.fieldData(options.data),
+    ]);
+  }
+
+  /**
+   * Draw a LOGMARS barcode on the label
+   */
+  public logmars(options: LogmarsOptions): this {
+    return this.addField(options.position, [
+      {
+        type: "Logmars",
+        orientation: options.orientation,
+        height: this.optionalDots(options.height),
+        interpretationLineAbove: options.printHriAbove,
+      },
+      ...this.fieldData(options.data),
+    ]);
+  }
+
+  /**
+   * Draw an MSI barcode on the label
+   */
+  public msi(options: MsiOptions): this {
+    return this.addField(options.position, [
+      {
+        type: "Msi",
+        orientation: options.orientation,
+        height: this.optionalDots(options.height),
+        interpretationLine: options.printHri,
+        interpretationLineAbove: options.printHriAbove,
+        checkDigits: options.checkDigits,
+        printCheckDigit: options.printCheckDigit,
+      },
+      ...this.fieldData(options.data),
+    ]);
+  }
+
+  /**
+   * Draw a Plessey barcode on the label
+   */
+  public plessey(options: PlesseyOptions): this {
+    return this.addField(options.position, [
+      {
+        type: "Plessey",
+        orientation: options.orientation,
+        height: this.optionalDots(options.height),
+        interpretationLine: options.printHri,
+        interpretationLineAbove: options.printHriAbove,
+        printCheckDigit: options.printCheckDigit,
       },
       ...this.fieldData(options.data),
     ]);

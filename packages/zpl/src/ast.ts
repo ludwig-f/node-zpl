@@ -361,6 +361,61 @@ type MicroPdf417 = Node<
     mode?: number;
   }
 >;
+/** `^BIo,h,f,g`: Industrial 2 of 5 */
+type Industrial2of5 = Node<
+  "Industrial2of5",
+  {
+    orientation?: Orientation;
+    height?: number;
+    interpretationLine?: boolean;
+    interpretationLineAbove?: boolean;
+  }
+>;
+/** `^BJo,h,f,g`: Standard 2 of 5 */
+type Standard2of5 = Node<
+  "Standard2of5",
+  {
+    orientation?: Orientation;
+    height?: number;
+    interpretationLine?: boolean;
+    interpretationLineAbove?: boolean;
+  }
+>;
+/** `^BLo,h,g`: LOGMARS, Code 39 with a check digit, always with its text */
+type Logmars = Node<
+  "Logmars",
+  {
+    orientation?: Orientation;
+    height?: number;
+    interpretationLineAbove?: boolean;
+  }
+>;
+/** `^BMo,e,h,f,g,e2`: MSI */
+type Msi = Node<
+  "Msi",
+  {
+    orientation?: Orientation;
+    /** A none, B one Mod 10 (the default), C two Mod 10, D Mod 11 and Mod 10 */
+    checkDigits?: "A" | "B" | "C" | "D";
+    height?: number;
+    interpretationLine?: boolean;
+    interpretationLineAbove?: boolean;
+    /** Prints the check digits in the interpretation line */
+    printCheckDigit?: boolean;
+  }
+>;
+/** `^BPo,e,h,f,g`: Plessey */
+type Plessey = Node<
+  "Plessey",
+  {
+    orientation?: Orientation;
+    /** Prints the check characters in the interpretation line */
+    printCheckDigit?: boolean;
+    height?: number;
+    interpretationLine?: boolean;
+    interpretationLineAbove?: boolean;
+  }
+>;
 /** `^BXo,h,s,c,r,f,g,a` */
 type DataMatrix = Node<
   "DataMatrix",
@@ -545,6 +600,11 @@ type Command =
   | Planet
   | Gs1DataBar
   | MicroPdf417
+  | Industrial2of5
+  | Standard2of5
+  | Logmars
+  | Msi
+  | Plessey
   | DataMatrix
   | QrCode
   | Aztec
@@ -611,6 +671,11 @@ export type {
   Planet,
   Gs1DataBar,
   MicroPdf417,
+  Industrial2of5,
+  Standard2of5,
+  Logmars,
+  Msi,
+  Plessey,
   DataMatrix,
   QrCode,
   Aztec,

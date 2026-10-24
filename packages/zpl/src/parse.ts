@@ -488,6 +488,43 @@ const parsers: Record<string, CommandParser> = {
     rowHeight: p.number(1, "rowHeight"),
     mode: p.number(2, "mode"),
   })),
+  "^BI": withParams("^BI", (p) => ({
+    type: "Industrial2of5",
+    orientation: p.oneOf(0, "orientation", orientations),
+    height: p.number(1, "height"),
+    interpretationLine: p.yesNo(2, "interpretationLine"),
+    interpretationLineAbove: p.yesNo(3, "interpretationLineAbove"),
+  })),
+  "^BJ": withParams("^BJ", (p) => ({
+    type: "Standard2of5",
+    orientation: p.oneOf(0, "orientation", orientations),
+    height: p.number(1, "height"),
+    interpretationLine: p.yesNo(2, "interpretationLine"),
+    interpretationLineAbove: p.yesNo(3, "interpretationLineAbove"),
+  })),
+  "^BL": withParams("^BL", (p) => ({
+    type: "Logmars",
+    orientation: p.oneOf(0, "orientation", orientations),
+    height: p.number(1, "height"),
+    interpretationLineAbove: p.yesNo(2, "interpretationLineAbove"),
+  })),
+  "^BM": withParams("^BM", (p) => ({
+    type: "Msi",
+    orientation: p.oneOf(0, "orientation", orientations),
+    checkDigits: p.oneOf(1, "checkDigits", ["A", "B", "C", "D"] as const),
+    height: p.number(2, "height"),
+    interpretationLine: p.yesNo(3, "interpretationLine"),
+    interpretationLineAbove: p.yesNo(4, "interpretationLineAbove"),
+    printCheckDigit: p.yesNo(5, "printCheckDigit"),
+  })),
+  "^BP": withParams("^BP", (p) => ({
+    type: "Plessey",
+    orientation: p.oneOf(0, "orientation", orientations),
+    printCheckDigit: p.yesNo(1, "printCheckDigit"),
+    height: p.number(2, "height"),
+    interpretationLine: p.yesNo(3, "interpretationLine"),
+    interpretationLineAbove: p.yesNo(4, "interpretationLineAbove"),
+  })),
   "^BX": withParams("^BX", (p) =>
     // The aspect ratio parameter has no typed node
     p.string(7) !== undefined

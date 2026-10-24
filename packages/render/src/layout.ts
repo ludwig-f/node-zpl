@@ -136,6 +136,11 @@ type BarcodeCommand = Extract<
       | "Planet"
       | "Gs1DataBar"
       | "MicroPdf417"
+      | "Industrial2of5"
+      | "Standard2of5"
+      | "Logmars"
+      | "Msi"
+      | "Plessey"
       | "DataMatrix"
       | "QrCode"
       | "Aztec"
@@ -240,6 +245,11 @@ const drawnCodes = new Set([
   "^B5",
   "^BR",
   "^BF",
+  "^BI",
+  "^BJ",
+  "^BL",
+  "^BM",
+  "^BP",
   "^BQ",
   "^BX",
 ]);
@@ -696,6 +706,11 @@ const layout = (
       case "Planet":
       case "Gs1DataBar":
       case "MicroPdf417":
+      case "Industrial2of5":
+      case "Standard2of5":
+      case "Logmars":
+      case "Msi":
+      case "Plessey":
       case "DataMatrix":
       case "QrCode":
       case "Aztec":
