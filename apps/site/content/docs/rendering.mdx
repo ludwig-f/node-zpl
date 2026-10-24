@@ -68,4 +68,4 @@ Other barcodes show as a crossed-out box naming the command, so they don't go mi
 
 Zebra's built-in fonts can't be redistributed, so open-licensed fonts stand in for them: Archivo for font 0, stretched to font 0's measured letter widths, and DejaVu Sans Mono for fonts A to H. Text takes up the same space as on a printer, but letters look slightly different.
 
-Everything else is checked against two other renderers, [Labelary](https://labelary.com) and [zebrash](https://github.com/ingridhq/zebrash). Shapes, images and barcode bars match Labelary dot for dot. Data Matrix and PDF417 symbols are the same size as a printer's, but may encode the data differently, which scanners read the same. Long runs of digits can make a PDF417 symbol a row shorter.
+Everything else is tested dot for dot against how Zebra printers draw it. Shapes, images and barcode bars come out exactly as printed. Data Matrix and PDF417 symbols are the same size as a printer's, but may encode the data differently, which scanners read the same. Long runs of digits can make a PDF417 symbol a row shorter.

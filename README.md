@@ -1,13 +1,38 @@
 # zplkit
 
-TypeScript tools for ZPL, the language Zebra label printers speak. Formerly `node-zpl`.
+[![npm](https://img.shields.io/npm/v/@zplkit/core?label=%40zplkit%2Fcore)](https://www.npmjs.com/package/@zplkit/core)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 
-Docs and playground: [zpl.fingal.dev](https://zpl.fingal.dev)
+TypeScript tools for ZPL, the language Zebra label printers speak. Build labels with typed code or JSX, check them for the mistakes printers stay quiet about, and see them before you print.
+
+**[Docs](https://zpl.fingal.dev/docs)** and a **[playground](https://zpl.fingal.dev/playground)** live at [zpl.fingal.dev](https://zpl.fingal.dev).
+
+```tsx
+import { Label, Text, Code128, build, mm } from "@zplkit/core/jsx";
+
+const zpl = build(
+  <Label width={mm(50)} height={mm(25)} dpmm={8}>
+    <Text x={mm(3)} y={mm(3)} height={mm(4)}>Order 10442</Text>
+    <Code128 x={mm(3)} y={mm(10)} height={mm(10)}>10442-B3</Code128>
+  </Label>
+).toZPL();
+// ^XA^PW400^LL200^LRN^CI28^LH0,0^FO24,24^A0,32^FDOrder 10442^FS^FO24,80^BC,80^FD10442-B3^FS^XZ
+```
+
+## Packages
 
 | Package | What it does |
 | --- | --- |
-| [`@zplkit/core`](./packages/zpl) | Build labels with typed method calls or JSX, parse and lint existing ZPL |
-| [`@zplkit/render`](./packages/render) | Renders ZPL to images in pure TypeScript, in Node and the browser |
+| [`@zplkit/core`](./packages/zpl) | Build labels with method calls or JSX, and parse and lint existing ZPL |
+| [`@zplkit/render`](./packages/render) | Render ZPL to images the way a printer draws it, in Node or the browser, in plain TypeScript |
 | [`@zplkit/preview`](./packages/preview) | `<zpl-preview>`, a web component that shows ZPL as images in any framework |
 
-The docs site and playground live in [`apps/site`](./apps/site). See [CONTRIBUTING.md](./CONTRIBUTING.md) to work on the repository.
+zplkit was called `node-zpl` before version 2. To upgrade, install `@zplkit/core` and change imports from `node-zpl` to `@zplkit/core`.
+
+## Contributing
+
+Bug reports, ideas and pull requests are welcome. [CONTRIBUTING.md](./CONTRIBUTING.md) explains how to set up the repository and run the tests.
+
+## License
+
+[MIT](./LICENSE)

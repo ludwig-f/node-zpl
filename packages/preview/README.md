@@ -1,6 +1,8 @@
 # @zplkit/preview
 
-`<zpl-preview>` is a web component that shows ZPL labels as images. Rendering happens locally in the browser with [`@zplkit/render`](../render), so label data never leaves the page. Because it's a standard custom element, it works the same in plain HTML, React, Vue, Svelte and Angular.
+[![npm](https://img.shields.io/npm/v/@zplkit/preview)](https://www.npmjs.com/package/@zplkit/preview)
+
+`<zpl-preview>` is a web component that shows ZPL labels as images. Rendering happens locally in the browser with [`@zplkit/render`](https://github.com/ludwig-f/zplkit/tree/main/packages/render), so label data never leaves the page. Because it's a standard custom element, it works the same in plain HTML, React, Vue, Svelte and Angular.
 
 ```bash
 npm install @zplkit/preview
@@ -18,7 +20,7 @@ Importing the package registers the element:
 <zpl-preview zpl="^XA^PW400^LL200^FO20,20^A0,40^FDHello^FS^XZ"></zpl-preview>
 ```
 
-Set the `zpl` property instead of the attribute to pass a [zplkit](https://github.com/ludwig-f/zplkit/tree/main/packages/zpl#readme) `Label`, or anything else with a `toZPL()` method:
+Set the `zpl` property instead of the attribute to pass a `Label` from [`@zplkit/core`](https://github.com/ludwig-f/zplkit/tree/main/packages/zpl#readme), or anything else with a `toZPL()` method:
 
 ```ts
 import { Label, mm } from "@zplkit/core";

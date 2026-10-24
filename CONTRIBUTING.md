@@ -1,80 +1,89 @@
 # Contributing to zplkit
 
-First off, thank you for considering contributing to `zplkit`.
+Thanks for helping out! Bug reports, ideas, docs fixes and pull requests are all welcome.
 
-## Where do I go from here?
+## Reporting a bug or asking for a feature
 
-If you've noticed a bug or have a feature request, create an issue! It's generally best if you get confirmation of your bug or approval for your feature request this way before starting to code.
+[Open an issue](https://github.com/ludwig-f/zplkit/issues). For a label that comes out wrong, include the ZPL and what you expected; a photo of the printed label helps a lot.
 
-## Fork & create a branch
+For bigger changes, like a new package or API, open an issue to discuss it before writing the code.
 
-If this is something you think you can fix, then fork `zplkit` and create a branch with a descriptive name.
+## Setting up
 
-A good branch name would be (where issue #1337 is the ticket you're working on):
-
-```bash
-git checkout -b 1337-add-postnet-bar-code
-```
-
-## Get the test suite running
-
-Make sure you're testing your changes. The repository is a [pnpm](https://pnpm.io) workspace with one package per folder in `packages/`, tested with `vitest`:
+You need Node 22 or newer and [pnpm](https://pnpm.io). With Corepack, `corepack enable` installs the pnpm version the repository uses.
 
 ```bash
+git clone https://github.com/ludwig-f/zplkit.git
+cd zplkit
 pnpm install
-pnpm test    # all packages
-pnpm lint
 pnpm build
+pnpm test
 ```
 
-## Implement your fix or feature
+The repository is a pnpm workspace:
 
-At this point, you're ready to make your changes!
+| Folder | What's in it |
+| --- | --- |
+| `packages/zpl` | `@zplkit/core`: the builder, JSX, parser and linter |
+| `packages/render` | `@zplkit/render`: the renderer |
+| `packages/preview` | `@zplkit/preview`: the `<zpl-preview>` web component |
+| `apps/site` | The docs site and playground, built with Next.js and Fumadocs |
+| `scripts` | Scripts for the repository, like the generated command table |
 
-## Make a Pull Request
+Packages use each other's `build` folders, so run `pnpm build` after changing one that another depends on.
 
-If you've gotten this far, you should make sure that your local main branch is up to date with `zplkit`s main branch:
+## Working on the code
 
 ```bash
-git remote add upstream git@github.com:ludwig-f/zplkit
-git switch main
-git pull upstream main
+pnpm test                         # all packages
+pnpm --filter @zplkit/core test   # one package
+pnpm lint
+pnpm fix                          # format with Prettier
+pnpm --filter @zplkit/site dev    # the docs site and playground
 ```
 
-Then update your feature branch from your local copy of main and push it!
+Write a test for each change, in the `*.test.ts` file next to the code. A commit hook runs the tests, ESLint and Prettier before each commit.
+
+### Adding a command
+
+A new ZPL command usually touches:
+
+1. `packages/zpl/src/ast.ts`, `parse.ts` and `serialize.ts`, with a case in `src/__fixtures__/commands.ts` that tests both parsing and serializing.
+2. A builder method in `Label.ts` and a JSX element in `jsx.ts`, if the command draws something.
+3. The renderer in `packages/render`, and `src/support.ts` once it's drawn.
+
+Then run `pnpm build && pnpm commands`, which updates the [supported commands table](https://zpl.fingal.dev/docs/commands) in the docs and the core README. CI fails if it's out of date.
+
+### Renderer accuracy
+
+Renderer tests expect the exact dots a printer prints, measured from reference renders. `packages/render/scripts/compare.mjs` compares a whole label with references and writes a diff image:
 
 ```bash
-git switch 1337-add-postnet-bar-code
-git rebase main
-git push -u origin 1337-add-postnet-bad-code
+pnpm --filter @zplkit/render build
+node packages/render/scripts/compare.mjs --diff 4 6 8 label.zpl
 ```
 
-Finally got to GitHub and [make a Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) 🚀
+When references disagree, Zebra's ZPL II Programming Guide or a real printout decides.
 
-## Keep your Pull Request updated
+## Pull requests
 
-If a maintainer asks you to "rebase" your PR, they're saying that a lot of code has changed and that you need to update your branch so it's easier to merge.
+1. Fork the repository and create a branch from `main`.
+2. Make your change with tests, and keep each pull request to one change.
+3. Write commit messages as [Conventional Commits](https://www.conventionalcommits.org), like `fix(render): keep thin strokes in small text`. Release notes are generated from them, so `feat` and `fix` commits show up in the changelog.
+4. Open the pull request against `main`. CI runs the linter, formatting check, build and tests.
 
-To learn more about rebasing in Git, there are a lot of good resources but here's the suggested workflow:
+A maintainer reviews it, and merges it once CI passes and it's approved.
 
-```bash
-git switch 1337-add-postnet-bar-code
-git pull --rebase upstream main
-git push --force-with-lease 1337-add-postnet-bar-code
-```
+## Releases
 
-## Merging a PR (maintainers only)
+Releases are automated with [release-please](https://github.com/googleapis/release-please). It keeps a release pull request open on `main` with the next versions and changelogs; merging it tags the releases and publishes the packages to npm with [trusted publishing](https://docs.npmjs.com/trusted-publishers), so no token is stored in the repository.
 
-A PR can only be merged into main by a maintainer if:
+To add a new package to releases:
 
-- It is passing CI.
-- It has been approved by at least one maintainer.
-- It has no request changes.
-- It is up to date with current main.
+1. Add it to `release-please-config.json` (with `"initial-version"` for its first version) and to `.release-please-manifest.json` at `"0.0.0"`.
+2. Publish it once by hand, since npm only allows trusted publishing for packages that exist: `npm publish --access public --tag next` with a prerelease version.
+3. Add the release workflow as its trusted publisher: `npm trust github <package> --file release-please.yaml --repo ludwig-f/zplkit --allow-publish`.
 
-Any maintainer is allowed to merge a PR if all of these conditions are met.
+## License
 
-## Releasing a new package
-
-Packages that aren't ready to publish are marked `"private": true` in their `package.json` and left out of `release-please-config.json`. To release one, remove `"private"`, add the package to `release-please-config.json` (with `"initial-version"` for its first version) and add it to `.release-please-manifest.json` at `"0.0.0"`.
-
+By contributing, you agree that your contributions are licensed under the [MIT License](./LICENSE).

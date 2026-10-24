@@ -77,7 +77,7 @@ const commands = {
   "~HD": "Head Diagnostic",
   "^HF": "Host Format",
   "^HG": "Host Graphic",
-  "^HH": "Configuratin Label Return",
+  "^HH": "Configuration Label Return",
   "~HI": "Host Identification",
   "~HM": "Host RAM Status",
   "~HS": "Host Status Return",

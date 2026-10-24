@@ -610,5 +610,20 @@ const parse = (zpl: string): ParseResult => {
   return { commands, diagnostics };
 };
 
+/**
+ * Commands parse() reads into typed nodes, and the prefix and delimiter
+ * changes it applies while parsing. Used to generate the docs' command
+ * table; not part of the public API.
+ */
+const parsedCommands: readonly string[] = [
+  ...Object.keys(parsers),
+  "^CC",
+  "~CC",
+  "^CD",
+  "~CD",
+  "^CT",
+  "~CT",
+];
+
 export type { Diagnostic, ParseResult };
-export { parse };
+export { parse, parsedCommands };
