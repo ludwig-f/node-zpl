@@ -4,6 +4,7 @@
     "label",
     "jsx",
     "parsing",
+    "convert",
     "printer",
     "render",
     "preview",

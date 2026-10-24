@@ -5,6 +5,7 @@ import "@zplkit/preview/react";
 import "./styles.css";
 import Editor from "./Editor";
 import Bench from "./Bench";
+import CodePanel from "./CodePanel";
 import examples from "./examples";
 import { analyze } from "./analyze";
 import { decodeShare, encodeShare } from "./share";
@@ -121,6 +122,7 @@ export default function Playground() {
   const [images, setImages] = useState<string[]>([]);
   const [notice, setNotice] = useState<string>();
   const [tab, setTab] = useState<Tab>("Editor");
+  const [showCode, setShowCode] = useState(false);
   const [render, setRender] = useState<{ busy: boolean; ms?: number }>({
     busy: true,
   });
@@ -306,6 +308,9 @@ export default function Playground() {
             </option>
           ))}
         </select>
+        <button type="button" onClick={() => setShowCode(true)}>
+          Show as code
+        </button>
         <button type="button" onClick={share}>
           Share link
         </button>
@@ -399,6 +404,15 @@ export default function Playground() {
           </div>
         </section>
       </div>
+
+      <CodePanel
+        open={showCode}
+        onClose={() => setShowCode(false)}
+        zpl={zpl}
+        dpmm={dpmm}
+        labelSize={labelSize}
+        onCopied={setNotice}
+      />
 
       <div className="notice" role="status" aria-live="polite">
         {notice}
