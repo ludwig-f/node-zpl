@@ -1,4 +1,4 @@
 {
   "title": "API reference",
-  "pages": ["label", "jsx", "parsing", "printer", "render", "preview"]
+  "pages": ["label", "jsx", "parsing", "printer", "render", "preview", "types"]
 }

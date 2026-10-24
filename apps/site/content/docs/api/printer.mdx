@@ -11,13 +11,21 @@ import { PrinterSetup } from "@zplkit/core";
 
 Builds ZPL that changes the printer or stores things on it, rather than printing a label. Its methods chain, and `toZPL()` returns the ZPL to send. See [Printing](/docs/printing).
 
-### storeGraphic(options)
+### storeGraphic
+
+```ts
+setup.storeGraphic(options: StoreGraphicOptions): this
+```
 
 Stores an image (`~DG`), to print it on labels with `storedGraphic()`.
 
 <auto-type-table cwd path="../../packages/zpl/src/options.ts" name="StoreGraphicOptions" />
 
-### storeFont(options)
+### storeFont
+
+```ts
+setup.storeFont(options: StoreFontOptions): this
+```
 
 Stores a TrueType font (`~DU`), to use with `text({ font: { file: "R:NAME.TTF" } })`.
 
@@ -38,7 +46,11 @@ import { ImageConverter } from "@zplkit/core/image";
 
 Converts PNG and JPEG images to ZPL graphics. It runs in Node only, so it has its own entry point.
 
-`await new ImageConverter().toZPL(image)` takes a PNG or JPEG file as a `Uint8Array`, or pixels:
+```ts
+converter.toZPL(image: Uint8Array | Pixels): Promise<ZplImage>
+```
+
+`toZPL` takes a PNG or JPEG file as a `Uint8Array`, or pixels:
 
 <auto-type-table cwd path="../../packages/zpl/src/ImageConverter.ts" name="Pixels" />
 

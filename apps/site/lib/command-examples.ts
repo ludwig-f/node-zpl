@@ -15,8 +15,14 @@ const lastValue = (zpl: string, command: string): number | undefined => {
   return value === undefined ? undefined : Number(value);
 };
 
-/** The raster cropped to its ink plus a margin, or undefined when blank */
-const crop = (raster: Raster): Raster | undefined => {
+/** Where an example's image sits on its label, in dots */
+type Crop = { left: number; top: number; width: number; height: number };
+
+/**
+ * The ink with the same margin on every side, so it's centered, padding
+ * with blank dots past the label's edges. Undefined when nothing prints.
+ */
+const crop = (raster: Raster): { raster: Raster; crop: Crop } | undefined => {
   const { width, height, ink } = raster;
   let left = width;
   let right = -1;
@@ -34,21 +40,26 @@ const crop = (raster: Raster): Raster | undefined => {
   }
   if (right < 0) return undefined;
 
-  left = Math.max(0, left - MARGIN);
-  top = Math.max(0, top - MARGIN);
-  right = Math.min(width - 1, right + MARGIN);
-  bottom = Math.min(height - 1, bottom + MARGIN);
-  const cropped = new Raster(right - left + 1, bottom - top + 1);
-  for (let y = 0; y < cropped.height; y++) {
-    cropped.ink.set(
-      ink.subarray((top + y) * width + left, (top + y) * width + right + 1),
-      y * cropped.width
-    );
+  const box = {
+    left: left - MARGIN,
+    top: top - MARGIN,
+    width: right - left + 1 + 2 * MARGIN,
+    height: bottom - top + 1 + 2 * MARGIN,
+  };
+  const cropped = new Raster(box.width, box.height);
+  for (let y = 0; y < box.height; y++) {
+    const sourceY = box.top + y;
+    if (sourceY < 0 || sourceY >= height) continue;
+    for (let x = 0; x < box.width; x++) {
+      const sourceX = box.left + x;
+      if (sourceX < 0 || sourceX >= width) continue;
+      cropped.ink[y * box.width + x] = ink[sourceY * width + sourceX];
+    }
   }
-  return cropped;
+  return { raster: cropped, crop: box };
 };
 
-type Example = { file: string; width: number; height: number; png: Uint8Array };
+type Example = Crop & { file: string; png: Uint8Array };
 
 let cache: Promise<Map<string, Example>> | undefined;
 
@@ -77,10 +88,9 @@ export const commandExamples = (): Promise<Map<string, Example>> =>
       if (!cropped) continue;
 
       examples.set(command.code, {
+        ...cropped.crop,
         file: `${anchorOf(command.code)}.png`,
-        width: cropped.width,
-        height: cropped.height,
-        png: await encodePng(cropped),
+        png: await encodePng(cropped.raster),
       });
     }
     return examples;

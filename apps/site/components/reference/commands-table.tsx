@@ -1,142 +1,48 @@
 "use client";
 
 import { Fragment, useState } from "react";
-import type { ImgHTMLAttributes } from "react";
 import { ChevronRight } from "lucide-react";
 import data from "@/content/commands.json";
-import details from "@/content/command-details.json";
 import { anchorOf, categoryAnchor } from "./anchor";
+import { detailsOf } from "./command-details";
+import type { Command } from "./command-details";
+import { apiFor } from "./api-links";
+import { Mark } from "./mark";
+import type { Support } from "./mark";
 
-type Command = (typeof data.commands)[number];
-type Support = "yes" | "partial" | "no";
 type Mode = "All" | "Supported" | "Not yet";
-type Details = {
-  summary: string;
-  syntax: string;
-  params?: [string, string][];
-  example?: string;
-};
-
-const detailsOf = (code: string) =>
-  (details as unknown as Record<string, Details | undefined>)[code];
-
-/** An example's image, rendered at build time, by command code */
-type Examples = Record<string, { file: string; width: number; height: number }>;
-
 const isSupported = (command: Command) => command.support !== "no";
 
-/** Like a checkbox: checked, indeterminate for partly, or empty */
-function Mark({ value }: { value: Support }) {
-  const box =
-    "inline-flex size-[18px] items-center justify-center rounded-[4px]";
-  if (value === "yes") {
-    return (
-      <span
-        role="img"
-        aria-label="Supported"
-        className={`${box} bg-ok text-[12px] font-extrabold text-bg`}
-      >
-        ✓
-      </span>
-    );
-  }
-  if (value === "partial") {
-    return (
-      <span
-        role="img"
-        aria-label="Partly supported"
-        className={`${box} bg-warn`}
-      >
-        <span className="h-[2px] w-2 rounded-full bg-bg" />
-      </span>
-    );
-  }
-  return (
-    <span
-      role="img"
-      aria-label="Not yet"
-      className={`${box} border-[1.5px] border-rule-strong`}
-    />
-  );
-}
-
-/** An image that fades in once it has loaded, instead of popping in */
-function FadeInImage(props: ImgHTMLAttributes<HTMLImageElement>) {
-  const [loaded, setLoaded] = useState(false);
-  return (
-    <img
-      {...props}
-      // Cached images can finish loading before React listens for it
-      ref={(image) => {
-        if (image?.complete) setLoaded(true);
-      }}
-      onLoad={() => setLoaded(true)}
-      className={`${
-        props.className ?? ""
-      } transition-opacity duration-200 motion-reduce:transition-none ${
-        loaded ? "opacity-100" : "opacity-0"
-      }`}
-    />
-  );
-}
-
-function CommandDetails({
-  command,
-  image,
-}: {
-  command: Command;
-  image?: Examples[string];
-}) {
+/** The supported commands, generated from the code, with a filter */
+/** What a row's panel shows: the summary, and where to read more */
+function CommandSummary({ command }: { command: Command }) {
   const info = detailsOf(command.code);
   if (!info) return null;
+  const api = command.support !== "no" ? apiFor[command.code] : undefined;
   return (
-    <div className="flex max-w-[64ch] flex-col gap-3 pb-4 pt-1 text-[14px] leading-[1.55]">
+    <div className="flex max-w-[68ch] flex-col gap-2 pb-4 pt-1 text-[14px] leading-[1.55]">
       <p className="text-ink-2">{info.summary}</p>
-      <code className="w-fit rounded-[3px] bg-code-inline px-1.5 py-0.5 font-mono text-[13px] text-ink">
-        {info.syntax}
-      </code>
-      {info.params && info.params.length > 0 && (
-        <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1">
-          {info.params.map(([name, description]) => (
-            <Fragment key={name}>
-              <dt className="font-mono text-[13px] font-semibold text-ink">
-                {name}
-              </dt>
-              <dd className="text-muted">{description}</dd>
-            </Fragment>
-          ))}
-        </dl>
-      )}
-      {info.example && (
-        <pre className="overflow-x-auto rounded-md border border-rule-strong bg-code px-3 py-2.5 font-mono text-[13px] leading-[1.7] text-ink">
-          {info.example}
-        </pre>
-      )}
-      {image && (
-        <figure className="flex flex-col gap-1.5">
-          {/* The paper only dims in dark mode, so what's shown is what prints */}
-          <div className="w-fit max-w-full overflow-hidden rounded-[6px] bg-paper shadow-label">
-            <FadeInImage
-              src={`/reference/examples/${image.file}`}
-              alt={`What the ${command.code} example prints`}
-              width={image.width}
-              height={image.height}
-              loading="lazy"
-              className="block h-auto max-w-full mix-blend-multiply"
-              style={{ width: image.width * 0.75 }}
-            />
-          </div>
-          <figcaption className="font-mono text-[11.5px] text-muted">
-            Rendered by @zplkit/render at 203 dpi
-          </figcaption>
-        </figure>
-      )}
+      <p className="flex flex-wrap gap-x-4 gap-y-1">
+        <a
+          href={`/reference/${anchorOf(command.code)}`}
+          className="font-semibold text-accent hover:underline"
+        >
+          Parameters and example
+        </a>
+        {api && (
+          <a
+            href={`/docs/api/label#${api.method.toLowerCase()}`}
+            className="font-mono text-[13px] text-accent hover:underline"
+          >
+            label.{api.method}()
+          </a>
+        )}
+      </p>
     </div>
   );
 }
 
-/** The supported commands, generated from the code, with a filter */
-export function CommandsTable({ examples }: { examples: Examples }) {
+export function CommandsTable() {
   const [query, setQuery] = useState("");
   const [mode, setMode] = useState<Mode>("All");
   const [open, setOpen] = useState<Set<string>>(new Set());
@@ -325,8 +231,8 @@ export function CommandsTable({ examples }: { examples: Examples }) {
                                 <span className="-ms-1.5 w-5" />
                               )}
                               <a
-                                href={`#${anchorOf(command.code)}`}
-                                className="font-mono text-sm font-semibold text-ink hover:text-accent"
+                                href={`/reference/${anchorOf(command.code)}`}
+                                className="font-mono text-sm font-semibold text-ink underline decoration-rule-strong underline-offset-[3px] hover:text-accent hover:decoration-accent"
                               >
                                 {command.code}
                               </a>
@@ -343,7 +249,12 @@ export function CommandsTable({ examples }: { examples: Examples }) {
                             </div>
                           </td>
                           <td className="hidden border-b border-rule px-3 py-[7px] align-top @[640px]:table-cell">
-                            {command.name}
+                            <a
+                              href={`/reference/${anchorOf(command.code)}`}
+                              className="hover:text-accent hover:underline"
+                            >
+                              {command.name}
+                            </a>
                           </td>
                           <td className="border-b border-rule px-3 py-[7px] text-center align-top">
                             <Mark value={command.support as Support} />
@@ -370,10 +281,7 @@ export function CommandsTable({ examples }: { examples: Examples }) {
                                 }`}
                               >
                                 <div className="min-h-0 overflow-hidden px-3 @[640px]:ps-[42px]">
-                                  <CommandDetails
-                                    command={command}
-                                    image={examples[command.code]}
-                                  />
+                                  <CommandSummary command={command} />
                                 </div>
                               </div>
                             </td>

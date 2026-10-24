@@ -3,7 +3,6 @@ import Link from "next/link";
 import data from "@/content/commands.json";
 import { CommandsTable } from "@/components/reference/commands-table";
 import { categoryAnchor } from "@/components/reference/anchor";
-import { commandExamples } from "@/lib/command-examples";
 
 export const metadata: Metadata = {
   title: "Supported commands",
@@ -14,15 +13,7 @@ const supported = data.commands.filter(
   (command) => command.support !== "no"
 ).length;
 
-export default async function ReferencePage() {
-  // Only what the table needs; the images are served as files
-  const examples = Object.fromEntries(
-    [...(await commandExamples())].map(([code, { file, width, height }]) => [
-      code,
-      { file, width, height },
-    ])
-  );
-
+export default function ReferencePage() {
   return (
     <div className="@container w-full [--fd-header-height:3.5rem]">
       <div className="mx-auto grid max-w-[1280px] gap-x-10 px-[clamp(16px,4cqi,48px)] @[1000px]:grid-cols-[220px_minmax(0,1fr)]">
@@ -66,8 +57,9 @@ export default async function ReferencePage() {
               draws it if it draws anything. Other commands are kept as they are
               by <code className="font-mono text-[0.9em]">parse()</code> and can
               be added with{" "}
-              <code className="font-mono text-[0.9em]">raw()</code>. Open a
-              command to see what it does.
+              <code className="font-mono text-[0.9em]">raw()</code>. Open a row
+              for a summary, or a command&apos;s page for its parameters and an
+              example.
             </p>
             <p className="max-w-[40em] text-pretty text-muted">
               Every parameter and edge case is in{" "}
@@ -80,7 +72,7 @@ export default async function ReferencePage() {
               .
             </p>
           </div>
-          <CommandsTable examples={examples} />
+          <CommandsTable />
         </main>
       </div>
     </div>

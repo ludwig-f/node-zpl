@@ -9,7 +9,11 @@ import { parse, lint } from "@zplkit/core";
 
 [Parsing ZPL](/docs/parsing) and [Linting](/docs/linting) explain how to use them, and every rule.
 
-## parse(zpl)
+## parse
+
+```ts
+parse(zpl: string): ParseResult
+```
 
 Reads ZPL into command nodes. Supported commands become typed nodes, and everything else is kept as `Raw` nodes, so no input is lost. Returns a `ParseResult`:
 
@@ -19,7 +23,11 @@ Reads ZPL into command nodes. Supported commands become typed nodes, and everyth
 
 <auto-type-table cwd path="../../packages/zpl/src/parse.ts" name="Diagnostic" />
 
-## lint(commands, media?)
+## lint
+
+```ts
+lint(commands: readonly Command[], media?: LintMedia): LintDiagnostic[]
+```
 
 Finds problems the printer wouldn't report in commands from `parse()` or `label.commands`, and returns a list of `LintDiagnostic`s. `media` is the printer's media size, for labels that don't set `^PW` or `^LL`:
 
@@ -29,6 +37,10 @@ Finds problems the printer wouldn't report in commands from `parse()` or `label.
 
 <auto-type-table cwd path="../../packages/zpl/src/lint.ts" name="LintDiagnostic" />
 
-## serialize(commands, options?)
+## serialize
+
+```ts
+serialize(commands: Command[], options?: { minify?: boolean }): string
+```
 
 Turns command nodes back into ZPL. Pass `{ minify: false }` to put each command on its own line.
