@@ -1,9 +1,9 @@
 ---
-title: Building labels
-description: Draw text, boxes, barcodes and images with typed method calls.
+title: Method calls
+description: Build labels with chained, typed method calls, without JSX.
 ---
 
-`Label` builds a label one element at a time. Each method returns the label, so calls can be chained, and `toZPL()` returns the finished ZPL.
+Without [JSX](/docs/jsx), `Label` builds a label one element at a time. Each method returns the label, so calls can be chained, and `toZPL()` returns the finished ZPL. Both produce the same commands, and units, escaping and images work the same way.
 
 ```ts
 import { Label, Orientation, mm, dots } from "@zplkit/core";

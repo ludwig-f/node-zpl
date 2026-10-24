@@ -1,4 +1,4 @@
-// Expectations come from Labelary renders of fonts A to H at 8 dpmm
+// Expectations come from reference renders of fonts A to H at 8 dpmm
 import { describe, test, expect } from "vitest";
 import { renderLabels } from "./render.js";
 

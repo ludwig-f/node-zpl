@@ -1,21 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
+import { ChevronRight } from "lucide-react";
 import data from "@/content/commands.json";
+import details from "@/content/command-details.json";
 import { categoryAnchor } from "./anchor";
 
 type Command = (typeof data.commands)[number];
-type Mode = "All" | "Drawn" | "Gaps";
-type Drawn = "yes" | "no" | "partial" | "n/a";
+type Support = "yes" | "partial" | "no";
+type Mode = "All" | "Supported" | "Not yet";
+type Details = {
+  summary: string;
+  syntax: string;
+  params?: [string, string][];
+  example?: string;
+};
+
+const detailsOf = (code: string) =>
+  (details as unknown as Record<string, Details | undefined>)[code];
 
 /** The anchor for a command: #BC for ^BC, #tilde-CC for ~CC */
 const anchorOf = (code: string) =>
   code.startsWith("~") ? `tilde-${code.slice(1)}` : code.slice(1);
 
-const isGap = (command: Command) =>
-  !command.parsed || command.drawn === "no" || command.drawn === "partial";
+const isSupported = (command: Command) => command.support !== "no";
 
-function Mark({ value }: { value: Drawn }) {
+function Mark({ value }: { value: Support }) {
   if (value === "yes") {
     return (
       <span
@@ -29,53 +39,89 @@ function Mark({ value }: { value: Drawn }) {
   if (value === "partial") {
     return (
       <span className="inline-flex h-5 items-center rounded-[3px] bg-warn-soft px-1.5 font-mono text-[11.5px] font-semibold text-warn">
-        partial
-      </span>
-    );
-  }
-  if (value === "n/a") {
-    return (
-      <span
-        aria-label="Nothing to draw"
-        className="font-mono text-xs font-medium text-muted"
-      >
-        n/a
+        partly
       </span>
     );
   }
   return (
-    <span aria-label="Not yet" className="text-muted">
-      —
+    <span className="font-mono text-[11.5px] font-medium text-muted">
+      not yet
     </span>
   );
 }
 
-/**
- * The supported commands, generated from the code, with a filter. The page
- * passes the same tables in Markdown as children, for its Markdown export;
- * they aren't rendered.
- */
+function CommandDetails({ command }: { command: Command }) {
+  const info = detailsOf(command.code);
+  if (!info) return null;
+  return (
+    <div className="flex max-w-[64ch] flex-col gap-3 py-1 text-[14px] leading-[1.55]">
+      <p className="text-ink-2">{info.summary}</p>
+      <code className="w-fit rounded-[3px] bg-code-inline px-1.5 py-0.5 font-mono text-[13px] text-ink">
+        {info.syntax}
+      </code>
+      {info.params && info.params.length > 0 && (
+        <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1">
+          {info.params.map(([name, description]) => (
+            <Fragment key={name}>
+              <dt className="font-mono text-[13px] font-semibold text-ink">
+                {name}
+              </dt>
+              <dd className="text-muted">{description}</dd>
+            </Fragment>
+          ))}
+        </dl>
+      )}
+      {info.example && (
+        <pre className="overflow-x-auto rounded-md border border-rule-strong bg-code px-3 py-2.5 font-mono text-[13px] leading-[1.7] text-ink">
+          {info.example}
+        </pre>
+      )}
+    </div>
+  );
+}
+
+/** The supported commands, generated from the code, with a filter */
 export function CommandsTable() {
   const [query, setQuery] = useState("");
   const [mode, setMode] = useState<Mode>("All");
+  const [open, setOpen] = useState<Set<string>>(new Set());
   // Spaces are ignored, so "barcode" finds Zebra's "bar code"
   const squash = (text: string) => text.toLowerCase().replace(/\s+/g, "");
   const q = squash(query);
 
+  const toggle = (code: string) =>
+    setOpen((current) => {
+      const next = new Set(current);
+      if (next.has(code)) next.delete(code);
+      else next.add(code);
+      return next;
+    });
+
   const matches = (command: Command) => {
     const text = squash(
-      [command.code, command.name, command.note, command.category].join(" ")
+      [
+        command.code,
+        command.name,
+        command.note,
+        command.category,
+        detailsOf(command.code)?.summary,
+      ].join(" ")
     );
     if (q && !text.includes(q)) return false;
-    if (mode === "Drawn") return command.rendered;
-    if (mode === "Gaps") return isGap(command);
+    if (mode === "Supported") return isSupported(command);
+    if (mode === "Not yet") return !isSupported(command);
     return true;
   };
 
   const groups = data.categories
     .map((category) => {
       const all = data.commands.filter((c) => c.category === category);
-      return { category, total: all.length, rows: all.filter(matches) };
+      return {
+        category,
+        total: all.length,
+        supported: all.filter(isSupported).length,
+        rows: all.filter(matches),
+      };
     })
     .filter((group) => group.rows.length);
   const shown = groups.reduce((sum, group) => sum + group.rows.length, 0);
@@ -87,13 +133,7 @@ export function CommandsTable() {
           <Mark value="yes" /> Supported
         </span>
         <span className="flex items-center gap-1.5">
-          <Mark value="partial" /> See notes
-        </span>
-        <span className="flex items-center gap-1.5">
-          <Mark value="no" /> Not yet
-        </span>
-        <span className="flex items-center gap-1.5">
-          <Mark value="n/a" /> Nothing to draw
+          <Mark value="partial" /> Supported, with limits in the notes
         </span>
       </div>
 
@@ -111,13 +151,13 @@ export function CommandsTable() {
           aria-label="Show"
           className="flex overflow-hidden rounded border border-rule-strong"
         >
-          {(["All", "Drawn", "Gaps"] as const).map((label) => (
+          {(["All", "Supported", "Not yet"] as const).map((label) => (
             <button
               key={label}
               role="radio"
               aria-checked={label === mode}
               onClick={() => setMode(label)}
-              className={`h-[38px] border-r border-rule px-3 text-[13px] font-semibold [outline-offset:-2px] last:border-r-0 ${
+              className={`h-[38px] whitespace-nowrap border-r border-rule px-3 text-[13px] font-semibold [outline-offset:-2px] last:border-r-0 ${
                 label === mode ? "bg-ink text-bg" : "bg-raised text-ink"
               }`}
             >
@@ -139,7 +179,7 @@ export function CommandsTable() {
             >
               {group.category}
               <span className="font-mono text-[12.5px] font-medium text-muted">
-                {group.rows.length} of {group.total}
+                {group.supported} of {group.total} supported
               </span>
             </h2>
             <div className="rounded-md border border-rule-strong">
@@ -147,10 +187,9 @@ export function CommandsTable() {
                 <thead>
                   <tr className="text-left">
                     {[
-                      ["Command", "@[640px]:w-24"],
-                      ["Name", "hidden w-[30%] @[640px]:table-cell"],
-                      ["Read/write", "w-[92px] text-center"],
-                      ["Drawn", "w-[76px] text-center"],
+                      ["Command", "w-[120px] @[640px]:w-28"],
+                      ["Name", "hidden w-[34%] @[640px]:table-cell"],
+                      ["Supported", "w-[96px] text-center"],
                       ["Notes", "hidden @[640px]:table-cell"],
                     ].map(([label, className]) => (
                       <th
@@ -163,44 +202,97 @@ export function CommandsTable() {
                   </tr>
                 </thead>
                 <tbody>
-                  {group.rows.map((command) => (
-                    <tr
-                      key={command.code}
-                      id={anchorOf(command.code)}
-                      className="scroll-mt-40 hover:bg-surface target:bg-accent-soft"
-                    >
-                      <td className="border-b border-rule px-3 py-[7px] align-top">
-                        <a
-                          href={`#${anchorOf(command.code)}`}
-                          className="font-mono text-sm font-semibold text-ink hover:text-accent"
+                  {group.rows.map((command) => {
+                    const expandable = Boolean(detailsOf(command.code));
+                    const expanded = expandable && open.has(command.code);
+                    const detailsId = `details-${anchorOf(command.code)}`;
+                    return (
+                      <Fragment key={command.code}>
+                        <tr
+                          id={anchorOf(command.code)}
+                          onClick={
+                            expandable
+                              ? (event) => {
+                                  // Links and the button handle their own clicks
+                                  if (
+                                    (event.target as HTMLElement).closest(
+                                      "a, button"
+                                    )
+                                  ) {
+                                    return;
+                                  }
+                                  toggle(command.code);
+                                }
+                              : undefined
+                          }
+                          className={`scroll-mt-40 target:bg-accent-soft ${
+                            expandable ? "cursor-pointer hover:bg-surface" : ""
+                          } ${expanded ? "bg-surface" : ""}`}
                         >
-                          {command.code}
-                        </a>
-                        <div className="flex flex-col @[640px]:hidden">
-                          <span className="text-[13.5px] text-muted">
+                          <td className="border-b border-rule px-3 py-[7px] align-top">
+                            <div className="flex items-center gap-1">
+                              {expandable ? (
+                                <button
+                                  type="button"
+                                  onClick={() => toggle(command.code)}
+                                  aria-expanded={expanded}
+                                  aria-controls={detailsId}
+                                  aria-label={`${
+                                    expanded ? "Hide" : "Show"
+                                  } details for ${command.code}`}
+                                  className="-ms-1.5 rounded p-0.5 text-muted hover:text-ink"
+                                >
+                                  <ChevronRight
+                                    aria-hidden="true"
+                                    className={`size-4 transition-transform motion-reduce:transition-none ${
+                                      expanded ? "rotate-90" : ""
+                                    }`}
+                                  />
+                                </button>
+                              ) : (
+                                <span className="-ms-1.5 w-5" />
+                              )}
+                              <a
+                                href={`#${anchorOf(command.code)}`}
+                                className="font-mono text-sm font-semibold text-ink hover:text-accent"
+                              >
+                                {command.code}
+                              </a>
+                            </div>
+                            <div className="flex flex-col ps-[18px] @[640px]:hidden">
+                              <span className="text-[13.5px] text-muted">
+                                {command.name}
+                              </span>
+                              {command.note && (
+                                <span className="text-[12.5px] text-warn">
+                                  {command.note}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="hidden border-b border-rule px-3 py-[7px] align-top @[640px]:table-cell">
                             {command.name}
-                          </span>
-                          {command.note && (
-                            <span className="text-[12.5px] text-warn">
-                              {command.note}
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="hidden border-b border-rule px-3 py-[7px] @[640px]:table-cell">
-                        {command.name}
-                      </td>
-                      <td className="border-b border-rule px-3 py-[7px] text-center">
-                        <Mark value={command.parsed ? "yes" : "no"} />
-                      </td>
-                      <td className="border-b border-rule px-3 py-[7px] text-center">
-                        <Mark value={command.drawn as Drawn} />
-                      </td>
-                      <td className="hidden border-b border-rule px-3 py-[7px] text-[13.5px] text-muted @[640px]:table-cell">
-                        {command.note}
-                      </td>
-                    </tr>
-                  ))}
+                          </td>
+                          <td className="border-b border-rule px-3 py-[7px] text-center align-top">
+                            <Mark value={command.support as Support} />
+                          </td>
+                          <td className="hidden border-b border-rule px-3 py-[7px] align-top text-[13.5px] text-muted @[640px]:table-cell">
+                            {command.note}
+                          </td>
+                        </tr>
+                        {expanded && (
+                          <tr id={detailsId} className="bg-surface">
+                            <td
+                              colSpan={4}
+                              className="border-b border-rule px-3 pb-4 pt-1 @[640px]:ps-[42px]"
+                            >
+                              <CommandDetails command={command} />
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

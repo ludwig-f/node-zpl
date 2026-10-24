@@ -1,0 +1,2610 @@
+{
+  "^A": {
+    "summary": "Picks the font, rotation and size for the next text field. Use it right before ^FD so the text prints in the font you want instead of the default.",
+    "syntax": "^Afo,h,w",
+    "params": [
+      [
+        "f",
+        "Font name: A to Z or 0 to 9"
+      ],
+      [
+        "o",
+        "Orientation: N normal, R 90, I 180, B 270"
+      ],
+      [
+        "h",
+        "Character height, in dots"
+      ],
+      [
+        "w",
+        "Character width, in dots"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^A0N,40,40^FDHello^FS\n^XZ"
+  },
+  "^A@": {
+    "summary": "Selects a font by its file name in printer memory instead of by a one-letter name. Use it for downloaded or custom fonts.",
+    "syntax": "^A@o,h,w,d:o.x",
+    "params": [
+      [
+        "o",
+        "Orientation: N normal, R 90, I 180, B 270"
+      ],
+      [
+        "h",
+        "Character height, in dots"
+      ],
+      [
+        "w",
+        "Character width, in dots"
+      ],
+      [
+        "d:o.x",
+        "Drive, font name and extension, e.g. R:FONT.TTF"
+      ]
+    ],
+    "example": "^XA\n^A@N,40,40,E:TT0003M_.FNT\n^FO50,50^FDNamed font^FS\n^XZ"
+  },
+  "^B0": {
+    "summary": "Creates an Aztec 2D bar code. It is the same as ^BO and takes the same parameters.",
+    "syntax": "^B0a,b,c,d,e,f,g",
+    "params": [
+      [
+        "a",
+        "Orientation: N, R, I or B"
+      ],
+      [
+        "b",
+        "Magnification factor: 1 to 10"
+      ],
+      [
+        "c",
+        "Extended channel interpretation code: Y or N"
+      ],
+      [
+        "d",
+        "Error control and symbol size, 0 is the default"
+      ],
+      [
+        "e",
+        "Menu symbol indicator: Y or N"
+      ],
+      [
+        "f",
+        "Number of symbols for structured append: 1 to 26"
+      ],
+      [
+        "g",
+        "Optional ID field for structured append"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^B0N,6^FDAztec data^FS\n^XZ"
+  },
+  "^B1": {
+    "summary": "Creates a Code 11 bar code, a numeric symbology that also encodes the dash. Used mainly for labeling telecom equipment.",
+    "syntax": "^B1o,e,h,f,g",
+    "params": [
+      [
+        "o",
+        "Orientation: N normal, R 90, I 180, B 270"
+      ],
+      [
+        "e",
+        "Check digit: Y for one digit, N for two"
+      ],
+      [
+        "h",
+        "Bar code height, in dots"
+      ],
+      [
+        "f",
+        "Print interpretation line: Y or N"
+      ],
+      [
+        "g",
+        "Interpretation line above the code: Y or N"
+      ]
+    ],
+    "example": "^XA\n^BY2\n^FO50,50^B1N,N,100,Y,N^FD0123456789^FS\n^XZ"
+  },
+  "^B2": {
+    "summary": "Creates an Interleaved 2 of 5 bar code, a compact numeric code that needs an even number of digits. Common on cartons and shipping cases.",
+    "syntax": "^B2o,h,f,g,e",
+    "params": [
+      [
+        "o",
+        "Orientation: N normal, R 90, I 180, B 270"
+      ],
+      [
+        "h",
+        "Bar code height, in dots"
+      ],
+      [
+        "f",
+        "Print interpretation line: Y or N"
+      ],
+      [
+        "g",
+        "Interpretation line above the code: Y or N"
+      ],
+      [
+        "e",
+        "Calculate and print a Mod 10 check digit: Y or N"
+      ]
+    ],
+    "example": "^XA\n^BY2\n^FO50,50^B2N,100,Y,N,N^FD123456^FS\n^XZ"
+  },
+  "^B3": {
+    "summary": "Creates a Code 39 bar code, which encodes uppercase letters, digits and a few symbols. Widely used in industry and government labeling.",
+    "syntax": "^B3o,e,h,f,g",
+    "params": [
+      [
+        "o",
+        "Orientation: N normal, R 90, I 180, B 270"
+      ],
+      [
+        "e",
+        "Mod 43 check digit: Y or N"
+      ],
+      [
+        "h",
+        "Bar code height, in dots"
+      ],
+      [
+        "f",
+        "Print interpretation line: Y or N"
+      ],
+      [
+        "g",
+        "Interpretation line above the code: Y or N"
+      ]
+    ],
+    "example": "^XA\n^BY2\n^FO50,50^B3N,N,100,Y,N^FDCODE39^FS\n^XZ"
+  },
+  "^B4": {
+    "summary": "Creates a Code 49 bar code, a stacked multi-row symbology that fits a lot of data in a small space.",
+    "syntax": "^B4o,h,f,m",
+    "params": [
+      [
+        "o",
+        "Orientation: N normal, R 90, I 180, B 270"
+      ],
+      [
+        "h",
+        "Row height multiplier: this number times the module width gives each row height in dots"
+      ],
+      [
+        "f",
+        "Interpretation line: N none, A above, B below"
+      ],
+      [
+        "m",
+        "Starting mode: 0 to 5, or A for automatic"
+      ]
+    ],
+    "example": "^XA\n^BY2\n^FO50,50^B4N,20,A,A^FD12345ABCDE^FS\n^XZ"
+  },
+  "^B5": {
+    "summary": "Creates a USPS Planet Code bar code, used on mail pieces to track them through the postal system.",
+    "syntax": "^B5o,h,f,g",
+    "params": [
+      [
+        "o",
+        "Orientation: N normal, R 90, I 180, B 270"
+      ],
+      [
+        "h",
+        "Bar code height, in dots"
+      ],
+      [
+        "f",
+        "Print interpretation line: Y or N"
+      ],
+      [
+        "g",
+        "Interpretation line above the code: Y or N"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^B5N,100,Y,N^FD12345678901^FS\n^XZ"
+  },
+  "^B7": {
+    "summary": "Creates a PDF417 bar code, a stacked 2D symbology that holds large amounts of text or binary data. Common on ID cards and shipping labels.",
+    "syntax": "^B7o,h,s,c,r,t",
+    "params": [
+      [
+        "o",
+        "Orientation: N normal, R 90, I 180, B 270"
+      ],
+      [
+        "h",
+        "Height of each row, in dots"
+      ],
+      [
+        "s",
+        "Security (error correction) level: 1 to 8"
+      ],
+      [
+        "c",
+        "Number of data columns: 1 to 30"
+      ],
+      [
+        "r",
+        "Number of rows: 3 to 90"
+      ],
+      [
+        "t",
+        "Truncate the right row indicators: Y or N"
+      ]
+    ],
+    "example": "^XA\n^BY2\n^FO50,50^B7N,5,5,,,N^FDPDF417 sample data^FS\n^XZ"
+  },
+  "^B8": {
+    "summary": "Creates an EAN-8 bar code, the short retail product code used on small packages. Pass 7 digits and the printer adds the check digit.",
+    "syntax": "^B8o,h,f,g",
+    "params": [
+      [
+        "o",
+        "Orientation: N normal, R 90, I 180, B 270"
+      ],
+      [
+        "h",
+        "Bar code height, in dots"
+      ],
+      [
+        "f",
+        "Print interpretation line: Y or N"
+      ],
+      [
+        "g",
+        "Interpretation line above the code: Y or N"
+      ]
+    ],
+    "example": "^XA\n^BY2\n^FO50,50^B8N,100,Y,N^FD1234567^FS\n^XZ"
+  },
+  "^B9": {
+    "summary": "Creates a UPC-E bar code, a zero-suppressed version of UPC-A for small retail packages.",
+    "syntax": "^B9o,h,f,g,e",
+    "params": [
+      [
+        "o",
+        "Orientation: N normal, R 90, I 180, B 270"
+      ],
+      [
+        "h",
+        "Bar code height, in dots"
+      ],
+      [
+        "f",
+        "Print interpretation line: Y or N"
+      ],
+      [
+        "g",
+        "Interpretation line above the code: Y or N"
+      ],
+      [
+        "e",
+        "Print the check digit: Y or N"
+      ]
+    ],
+    "example": "^XA\n^BY2\n^FO50,50^B9N,100,Y,N,Y^FD1230000045^FS\n^XZ"
+  },
+  "^BA": {
+    "summary": "Creates a Code 93 bar code, a denser alternative to Code 39 that can encode the full ASCII set.",
+    "syntax": "^BAo,h,f,g,e",
+    "params": [
+      [
+        "o",
+        "Orientation: N normal, R 90, I 180, B 270"
+      ],
+      [
+        "h",
+        "Bar code height, in dots"
+      ],
+      [
+        "f",
+        "Print interpretation line: Y or N"
+      ],
+      [
+        "g",
+        "Interpretation line above the code: Y or N"
+      ],
+      [
+        "e",
+        "Print the check digit: Y or N"
+      ]
+    ],
+    "example": "^XA\n^BY2\n^FO50,50^BAN,100,Y,N,N^FD12345ABCDE^FS\n^XZ"
+  },
+  "^BB": {
+    "summary": "Creates a CODABLOCK bar code, a stacked symbology built from rows of Code 39 or Code 128.",
+    "syntax": "^BBo,h,s,c,r,m",
+    "params": [
+      [
+        "o",
+        "Orientation: N normal, R 90, I 180, B 270"
+      ],
+      [
+        "h",
+        "Height of each row, in dots"
+      ],
+      [
+        "s",
+        "Security level: Y or N"
+      ],
+      [
+        "c",
+        "Characters per row"
+      ],
+      [
+        "r",
+        "Number of rows"
+      ],
+      [
+        "m",
+        "Mode: A, E or F"
+      ]
+    ],
+    "example": "^XA\n^BY2\n^FO50,50^BBN,30,,30,44,F^FDCODABLOCK^FS\n^XZ"
+  },
+  "^BC": {
+    "summary": "Creates a Code 128 bar code, a dense symbology that encodes all ASCII characters. It is one of the most common bar codes on shipping and logistics labels.",
+    "syntax": "^BCo,h,f,g,e,m",
+    "params": [
+      [
+        "o",
+        "Orientation: N normal, R 90, I 180, B 270"
+      ],
+      [
+        "h",
+        "Bar code height, in dots"
+      ],
+      [
+        "f",
+        "Print interpretation line: Y or N"
+      ],
+      [
+        "g",
+        "Interpretation line above the code: Y or N"
+      ],
+      [
+        "e",
+        "UCC check digit: Y or N"
+      ],
+      [
+        "m",
+        "Mode: N none, U UCC case, A automatic, D UCC/EAN"
+      ]
+    ],
+    "example": "^XA\n^BY2\n^FO50,50^BCN,100,Y,N,N^FD12345678^FS\n^XZ"
+  },
+  "^BD": {
+    "summary": "Creates a UPS MaxiCode, a fixed-size 2D symbol with a bullseye center used for package sorting.",
+    "syntax": "^BDm,n,t",
+    "params": [
+      [
+        "m",
+        "Mode: 2 to 6, default 2"
+      ],
+      [
+        "n",
+        "Symbol number for structured append: 1 to 8"
+      ],
+      [
+        "t",
+        "Total number of symbols: 1 to 8"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^BD4,1,1^FDMAXICODE DATA^FS\n^XZ"
+  },
+  "^BE": {
+    "summary": "Creates an EAN-13 bar code, the standard retail product code outside North America. Pass 12 digits and the printer adds the check digit.",
+    "syntax": "^BEo,h,f,g",
+    "params": [
+      [
+        "o",
+        "Orientation: N normal, R 90, I 180, B 270"
+      ],
+      [
+        "h",
+        "Bar code height, in dots"
+      ],
+      [
+        "f",
+        "Print interpretation line: Y or N"
+      ],
+      [
+        "g",
+        "Interpretation line above the code: Y or N"
+      ]
+    ],
+    "example": "^XA\n^BY2\n^FO50,50^BEN,100,Y,N^FD123456789012^FS\n^XZ"
+  },
+  "^BF": {
+    "summary": "Creates a MicroPDF417 bar code, a smaller variant of PDF417 for moderate amounts of data.",
+    "syntax": "^BFo,h,m",
+    "params": [
+      [
+        "o",
+        "Orientation: N normal, R 90, I 180, B 270"
+      ],
+      [
+        "h",
+        "Bar code height, in dots"
+      ],
+      [
+        "m",
+        "Mode (columns, rows and error correction): 0 to 33"
+      ]
+    ],
+    "example": "^XA\n^BY2\n^FO50,50^BFN,8,3^FDMICROPDF417^FS\n^XZ"
+  },
+  "^BI": {
+    "summary": "Creates an Industrial 2 of 5 bar code, an older numeric symbology. It is not very dense, so it is mostly used where existing systems require it.",
+    "syntax": "^BIo,h,f,g",
+    "params": [
+      [
+        "o",
+        "Orientation: N normal, R 90, I 180, B 270"
+      ],
+      [
+        "h",
+        "Bar code height, in dots"
+      ],
+      [
+        "f",
+        "Print interpretation line: Y or N"
+      ],
+      [
+        "g",
+        "Interpretation line above the code: Y or N"
+      ]
+    ],
+    "example": "^XA\n^BY2\n^FO50,50^BIN,100,Y,N^FD123456^FS\n^XZ"
+  },
+  "^BJ": {
+    "summary": "Creates a Standard 2 of 5 bar code, a simple numeric symbology.",
+    "syntax": "^BJo,h,f,g",
+    "params": [
+      [
+        "o",
+        "Orientation: N normal, R 90, I 180, B 270"
+      ],
+      [
+        "h",
+        "Bar code height, in dots"
+      ],
+      [
+        "f",
+        "Print interpretation line: Y or N"
+      ],
+      [
+        "g",
+        "Interpretation line above the code: Y or N"
+      ]
+    ],
+    "example": "^XA\n^BY2\n^FO50,50^BJN,100,Y,N^FD123456^FS\n^XZ"
+  },
+  "^BK": {
+    "summary": "Creates an ANSI Codabar bar code, a numeric code with letter start and stop characters. Used by libraries, blood banks and parcel services.",
+    "syntax": "^BKo,e,h,f,g,k,l",
+    "params": [
+      [
+        "o",
+        "Orientation: N normal, R 90, I 180, B 270"
+      ],
+      [
+        "e",
+        "Check digit: fixed at N"
+      ],
+      [
+        "h",
+        "Bar code height, in dots"
+      ],
+      [
+        "f",
+        "Print interpretation line: Y or N"
+      ],
+      [
+        "g",
+        "Interpretation line above the code: Y or N"
+      ],
+      [
+        "k",
+        "Start character: A, B, C or D"
+      ],
+      [
+        "l",
+        "Stop character: A, B, C or D"
+      ]
+    ],
+    "example": "^XA\n^BY2\n^FO50,50^BKN,N,100,Y,N,A,A^FD123456^FS\n^XZ"
+  },
+  "^BL": {
+    "summary": "Creates a LOGMARS bar code, a Code 39 variant used by the U.S. Department of Defense.",
+    "syntax": "^BLo,h,g",
+    "params": [
+      [
+        "o",
+        "Orientation: N normal, R 90, I 180, B 270"
+      ],
+      [
+        "h",
+        "Bar code height, in dots"
+      ],
+      [
+        "g",
+        "Interpretation line above the code: Y or N"
+      ]
+    ],
+    "example": "^XA\n^BY2\n^FO50,50^BLN,100,N^FDLOGMARS^FS\n^XZ"
+  },
+  "^BM": {
+    "summary": "Creates an MSI bar code, a numeric symbology used mainly for shelf labels and inventory.",
+    "syntax": "^BMo,e,h,f,g,e2",
+    "params": [
+      [
+        "o",
+        "Orientation: N normal, R 90, I 180, B 270"
+      ],
+      [
+        "e",
+        "Check digit selection: A none, B one Mod 10, C two Mod 10, D Mod 11 and Mod 10"
+      ],
+      [
+        "h",
+        "Bar code height, in dots"
+      ],
+      [
+        "f",
+        "Print interpretation line: Y or N"
+      ],
+      [
+        "g",
+        "Interpretation line above the code: Y or N"
+      ],
+      [
+        "e2",
+        "Show the check digit in the interpretation line: Y or N"
+      ]
+    ],
+    "example": "^XA\n^BY2\n^FO50,50^BMN,B,100,Y,N,N^FD123456^FS\n^XZ"
+  },
+  "^BO": {
+    "summary": "Creates an Aztec 2D bar code, a square symbol with a bullseye center. It needs no quiet zone and is common on transport tickets.",
+    "syntax": "^BOa,b,c,d,e,f,g",
+    "params": [
+      [
+        "a",
+        "Orientation: N, R, I or B"
+      ],
+      [
+        "b",
+        "Magnification factor: 1 to 10"
+      ],
+      [
+        "c",
+        "Extended channel interpretation code: Y or N"
+      ],
+      [
+        "d",
+        "Error control and symbol size, 0 is the default"
+      ],
+      [
+        "e",
+        "Menu symbol indicator: Y or N"
+      ],
+      [
+        "f",
+        "Number of symbols for structured append: 1 to 26"
+      ],
+      [
+        "g",
+        "Optional ID field for structured append"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^BON,6^FDAztec data^FS\n^XZ"
+  },
+  "^BP": {
+    "summary": "Creates a Plessey bar code, an older numeric symbology used for shelf and inventory labels.",
+    "syntax": "^BPo,e,h,f,g",
+    "params": [
+      [
+        "o",
+        "Orientation: N normal, R 90, I 180, B 270"
+      ],
+      [
+        "e",
+        "Print the check digit: Y or N"
+      ],
+      [
+        "h",
+        "Bar code height, in dots"
+      ],
+      [
+        "f",
+        "Print interpretation line: Y or N"
+      ],
+      [
+        "g",
+        "Interpretation line above the code: Y or N"
+      ]
+    ],
+    "example": "^XA\n^BY2\n^FO50,50^BPN,N,100,Y,N^FD12345^FS\n^XZ"
+  },
+  "^BQ": {
+    "summary": "Creates a QR Code. The field data starts with the error correction level and input mode, e.g. QA, for error correction level Q with automatic input.",
+    "syntax": "^BQa,b,c,d,e",
+    "params": [
+      [
+        "a",
+        "Orientation: N only"
+      ],
+      [
+        "b",
+        "Model: 1 or 2, 2 recommended"
+      ],
+      [
+        "c",
+        "Magnification factor: 1 to 100"
+      ],
+      [
+        "d",
+        "Error correction: H, Q, M or L"
+      ],
+      [
+        "e",
+        "Mask value: 0 to 7"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^BQN,2,5^FDQA,https://example.com^FS\n^XZ"
+  },
+  "^BR": {
+    "summary": "Creates a GS1 DataBar (formerly RSS) bar code. These compact symbols carry GTINs and extra data on small retail items such as produce.",
+    "syntax": "^BRa,b,c,d,e,f",
+    "params": [
+      [
+        "a",
+        "Orientation: N, R, I or B"
+      ],
+      [
+        "b",
+        "Symbology type: 1 to 12, 1 is RSS-14"
+      ],
+      [
+        "c",
+        "Magnification factor: 1 to 10"
+      ],
+      [
+        "d",
+        "Separator height: 1 or 2"
+      ],
+      [
+        "e",
+        "Bar code height, in dots (some types only)"
+      ],
+      [
+        "f",
+        "Segment width for RSS Expanded: even number 2 to 22"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^BRN,1,4,1,100^FD0123456789012^FS\n^XZ"
+  },
+  "^BS": {
+    "summary": "Creates a UPC/EAN 2-digit or 5-digit add-on symbol. Place it next to a UPC or EAN bar code for things like magazine issue numbers.",
+    "syntax": "^BSo,h,f,g",
+    "params": [
+      [
+        "o",
+        "Orientation: N normal, R 90, I 180, B 270"
+      ],
+      [
+        "h",
+        "Bar code height, in dots"
+      ],
+      [
+        "f",
+        "Print interpretation line: Y or N"
+      ],
+      [
+        "g",
+        "Interpretation line above the code: Y or N"
+      ]
+    ],
+    "example": "^XA\n^BY2\n^FO50,50^BSN,60,Y,Y^FD12345^FS\n^XZ"
+  },
+  "^BT": {
+    "summary": "Creates a TLC39 bar code, a Code 39 symbol combined with a MicroPDF417 symbol. It is used in the telecommunications industry.",
+    "syntax": "^BTo,w1,r1,h1,w2,h2",
+    "params": [
+      [
+        "o",
+        "Orientation: N normal, R 90, I 180, B 270"
+      ],
+      [
+        "w1",
+        "Code 39 module width, in dots"
+      ],
+      [
+        "r1",
+        "Code 39 wide to narrow bar ratio"
+      ],
+      [
+        "h1",
+        "Code 39 height, in dots"
+      ],
+      [
+        "w2",
+        "MicroPDF417 module width, in dots"
+      ],
+      [
+        "h2",
+        "MicroPDF417 row height, in dots"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^BTN^FD123456,ABCD12345678901234^FS\n^XZ"
+  },
+  "^BU": {
+    "summary": "Creates a UPC-A bar code, the standard 12-digit retail product code in North America. Pass 11 digits and the printer adds the check digit.",
+    "syntax": "^BUo,h,f,g,e",
+    "params": [
+      [
+        "o",
+        "Orientation: N normal, R 90, I 180, B 270"
+      ],
+      [
+        "h",
+        "Bar code height, in dots"
+      ],
+      [
+        "f",
+        "Print interpretation line: Y or N"
+      ],
+      [
+        "g",
+        "Interpretation line above the code: Y or N"
+      ],
+      [
+        "e",
+        "Print the check digit: Y or N"
+      ]
+    ],
+    "example": "^XA\n^BY2\n^FO50,50^BUN,100,Y,N,Y^FD07000002198^FS\n^XZ"
+  },
+  "^BX": {
+    "summary": "Creates a Data Matrix 2D bar code, a square or rectangular symbol that stores a lot of data in a small area. Common for marking parts and healthcare items.",
+    "syntax": "^BXo,h,s,c,r,f,g,a",
+    "params": [
+      [
+        "o",
+        "Orientation: N normal, R 90, I 180, B 270"
+      ],
+      [
+        "h",
+        "Height of each module, in dots"
+      ],
+      [
+        "s",
+        "Quality level: 0, 50, 80, 100, 140 or 200 (ECC 200)"
+      ],
+      [
+        "c",
+        "Number of columns"
+      ],
+      [
+        "r",
+        "Number of rows"
+      ],
+      [
+        "f",
+        "Format ID: 0 to 6"
+      ],
+      [
+        "g",
+        "Escape sequence control character (quality 200 only): default _ on firmware V60.13.0.12 and later, ~ on older firmware"
+      ],
+      [
+        "a",
+        "Aspect ratio: 1 square, 2 rectangular"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^BXN,10,200^FDDATA MATRIX^FS\n^XZ"
+  },
+  "^BY": {
+    "summary": "Sets the default module width, wide to narrow ratio and height for the bar codes that follow. Put it before a bar code command to control its size.",
+    "syntax": "^BYw,r,h",
+    "params": [
+      [
+        "w",
+        "Module (narrow bar) width in dots: 1 to 10, default 2"
+      ],
+      [
+        "r",
+        "Wide to narrow bar ratio: 2.0 to 3.0, default 3.0"
+      ],
+      [
+        "h",
+        "Bar code height in dots, default 10"
+      ]
+    ],
+    "example": "^XA\n^BY3,2,100\n^FO50,50^BCN^FD12345^FS\n^XZ"
+  },
+  "^BZ": {
+    "summary": "Creates a USPS postal bar code: POSTNET by default, or PLANET or Intelligent Mail with the t parameter. Used to encode ZIP Code and tracking data on mail.",
+    "syntax": "^BZo,h,f,g,t",
+    "params": [
+      [
+        "o",
+        "Orientation: N normal, R 90, I 180, B 270"
+      ],
+      [
+        "h",
+        "Bar code height, in dots"
+      ],
+      [
+        "f",
+        "Print interpretation line: Y or N"
+      ],
+      [
+        "g",
+        "Interpretation line above the code: Y or N"
+      ],
+      [
+        "t",
+        "Postal code type: 0 POSTNET (default), 1 PLANET, 3 USPS Intelligent Mail"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^BZN,40,Y,N^FD12345^FS\n^XZ"
+  },
+  "^CC": {
+    "summary": "Changes the format command prefix from the caret (^) to another character. Use it when your field data needs to contain carets.",
+    "syntax": "^CCx",
+    "params": [
+      [
+        "x",
+        "New caret character, any ASCII character"
+      ]
+    ]
+  },
+  "~CC": {
+    "summary": "Changes the format command prefix from the caret (^) to another character. Same as ^CC, sent as a control command.",
+    "syntax": "~CCx",
+    "params": [
+      [
+        "x",
+        "New caret character, any ASCII character"
+      ]
+    ]
+  },
+  "^CD": {
+    "summary": "Changes the delimiter that separates command parameters from the comma to another character.",
+    "syntax": "^CDa",
+    "params": [
+      [
+        "a",
+        "New delimiter character, any ASCII character. The parameter is required."
+      ]
+    ]
+  },
+  "~CD": {
+    "summary": "Changes the delimiter that separates command parameters from the comma to another character. Same as ^CD, sent as a control command.",
+    "syntax": "~CDa",
+    "params": [
+      [
+        "a",
+        "New delimiter character, any ASCII character. The parameter is required."
+      ]
+    ]
+  },
+  "^CF": {
+    "summary": "Sets the default font and size for text fields that have no ^A command. Use it at the top of a label to avoid repeating ^A on every field.",
+    "syntax": "^CFf,h,w",
+    "params": [
+      [
+        "f",
+        "Default font: A to Z or 0 to 9, default A"
+      ],
+      [
+        "h",
+        "Character height, in dots"
+      ],
+      [
+        "w",
+        "Character width, in dots"
+      ]
+    ],
+    "example": "^XA\n^CF0,40\n^FO50,50^FDFirst line^FS\n^FO50,100^FDSecond line^FS\n^XZ"
+  },
+  "^CI": {
+    "summary": "Selects the character encoding used to read field data. Use ^CI28 to send UTF-8 text with accented or non-Latin characters.",
+    "syntax": "^CIa,s1,d1,s2,d2,...",
+    "params": [
+      [
+        "a",
+        "Character set: e.g. 0 USA, 27 code page 1252, 28 UTF-8"
+      ],
+      [
+        "s1,d1",
+        "Optional pairs that remap a source character to a destination"
+      ]
+    ],
+    "example": "^XA\n^CI28\n^FO50,50^A0N,40,40^FDGrüße, Zürich^FS\n^XZ"
+  },
+  "^CM": {
+    "summary": "Reassigns the letters used to refer to the printer's memory devices (B:, E:, R: and A:).",
+    "syntax": "^CMa,b,c,d,e",
+    "params": [
+      [
+        "a",
+        "Letter to use for B: memory: B, E, R, A or NONE"
+      ],
+      [
+        "b",
+        "Letter to use for E: memory: B, E, R, A or NONE"
+      ],
+      [
+        "c",
+        "Letter to use for R: memory: B, E, R, A or NONE"
+      ],
+      [
+        "d",
+        "Letter to use for A: memory: B, E, R, A or NONE"
+      ],
+      [
+        "e",
+        "Multiple alias: M lets two letters point to the same device (newer firmware only)"
+      ]
+    ]
+  },
+  "^CO": {
+    "summary": "Turns the font cache on or off and sets how much extra memory it gets. The cache keeps scaled font characters ready, which speeds up printing of scalable fonts.",
+    "syntax": "^COa,b,c",
+    "params": [
+      [
+        "a",
+        "Cache on: Y or N"
+      ],
+      [
+        "b",
+        "Additional memory for the cache, in KB"
+      ],
+      [
+        "c",
+        "Cache type: 0 cache buffer, 1 internal buffer"
+      ]
+    ]
+  },
+  "^CT": {
+    "summary": "Changes the control command prefix from the tilde (~) to another character.",
+    "syntax": "^CTa",
+    "params": [
+      [
+        "a",
+        "New tilde character, any ASCII character"
+      ]
+    ]
+  },
+  "~CT": {
+    "summary": "Changes the control command prefix from the tilde (~) to another character. Same as ^CT, sent as a control command.",
+    "syntax": "~CTa",
+    "params": [
+      [
+        "a",
+        "New tilde character, any ASCII character"
+      ]
+    ]
+  },
+  "^CV": {
+    "summary": "Turns bar code data validation on or off. When on, the printer checks that each bar code's data is valid for its symbology and prints an error message instead of a bad code.",
+    "syntax": "^CVa",
+    "params": [
+      [
+        "a",
+        "Validation: Y on, N off (default)"
+      ]
+    ]
+  },
+  "^CW": {
+    "summary": "Assigns a one-letter font name to a font stored in printer memory, so ^A can refer to it. It can also replace one of the built-in font letters.",
+    "syntax": "^CWa,d:o.x",
+    "params": [
+      [
+        "a",
+        "Font letter to assign: A to Z or 0 to 9"
+      ],
+      [
+        "d:o.x",
+        "Drive, name and extension of the font"
+      ]
+    ]
+  },
+  "~DB": {
+    "summary": "Downloads a bitmap font to printer memory so labels can use it.",
+    "syntax": "~DBd:o.x,a,h,w,base,space,#char,©,data",
+    "params": [
+      [
+        "d:o.x",
+        "Drive, name and extension of the font"
+      ],
+      [
+        "a",
+        "Orientation of the native font: N only"
+      ],
+      [
+        "h",
+        "Maximum character height, in dots"
+      ],
+      [
+        "w",
+        "Maximum character width, in dots"
+      ],
+      [
+        "base",
+        "Dots from the top of the cell to the baseline"
+      ],
+      [
+        "space",
+        "Width of the space character, in dots"
+      ],
+      [
+        "#char",
+        "Number of characters in the font"
+      ],
+      [
+        "©",
+        "Copyright holder"
+      ],
+      [
+        "data",
+        "The font character data"
+      ]
+    ]
+  },
+  "~DE": {
+    "summary": "Downloads a character encoding table (.DAT) to printer memory. Use it with ^SE to map characters for TrueType fonts.",
+    "syntax": "~DEd:o.x,s,data",
+    "params": [
+      [
+        "d:o.x",
+        "Drive, name and extension of the table"
+      ],
+      [
+        "s",
+        "Table size, in bytes"
+      ],
+      [
+        "data",
+        "The table data, in hex"
+      ]
+    ]
+  },
+  "^DF": {
+    "summary": "Saves the rest of the format to printer memory as a reusable template instead of printing it. Mark the variable parts with ^FN, then print with ^XF.",
+    "syntax": "^DFd:o.x",
+    "params": [
+      [
+        "d:o.x",
+        "Drive, name and extension of the stored format, e.g. R:LABEL.ZPL"
+      ]
+    ],
+    "example": "^XA\n^DFR:LABEL.ZPL^FS\n^FO50,50^A0N,40,40^FN1^FS\n^XZ"
+  },
+  "~DG": {
+    "summary": "Downloads a graphic image as hex data to printer memory. Print it later with ^XG or ^IM.",
+    "syntax": "~DGd:o.x,t,w,data",
+    "params": [
+      [
+        "d:o.x",
+        "Drive, name and extension of the graphic, e.g. R:LOGO.GRF"
+      ],
+      [
+        "t",
+        "Total number of bytes in the graphic"
+      ],
+      [
+        "w",
+        "Number of bytes per row"
+      ],
+      [
+        "data",
+        "The image as ASCII hex, 1 bits print black"
+      ]
+    ],
+    "example": "~DGR:BOX.GRF,8,1,FF818181818181FF\n^XA\n^FO50,50^XGR:BOX.GRF,1,1^FS\n^XZ"
+  },
+  "~DN": {
+    "summary": "Aborts a graphic download that is in progress, for example after the host sent the wrong amount of data.",
+    "syntax": "~DN"
+  },
+  "~DS": {
+    "summary": "Downloads an Intellifont scalable font to printer memory.",
+    "syntax": "~DSd:o.x,s,data",
+    "params": [
+      [
+        "d:o.x",
+        "Drive, name and extension of the font"
+      ],
+      [
+        "s",
+        "Size of the font data, in bytes"
+      ],
+      [
+        "data",
+        "The font data"
+      ]
+    ]
+  },
+  "~DT": {
+    "summary": "Downloads a bounded TrueType font (256 characters or fewer) to printer memory.",
+    "syntax": "~DTd:o.x,s,data",
+    "params": [
+      [
+        "d:o.x",
+        "Drive, name and extension of the font"
+      ],
+      [
+        "s",
+        "Size of the font data, in bytes"
+      ],
+      [
+        "data",
+        "The font data"
+      ]
+    ]
+  },
+  "~DU": {
+    "summary": "Downloads an unbounded TrueType font (more than 256 characters, e.g. Asian fonts) to printer memory.",
+    "syntax": "~DUd:o.x,s,data",
+    "params": [
+      [
+        "d:o.x",
+        "Drive, name and extension of the font"
+      ],
+      [
+        "s",
+        "Size of the font data, in bytes"
+      ],
+      [
+        "data",
+        "The font data"
+      ]
+    ]
+  },
+  "~DY": {
+    "summary": "Downloads a file such as a graphic, PNG image, or TrueType or OpenType font to printer memory. It is the general purpose download command on newer printers.",
+    "syntax": "~DYd:f,b,x,t,w,data",
+    "params": [
+      [
+        "d",
+        "Destination drive"
+      ],
+      [
+        "f",
+        "File name"
+      ],
+      [
+        "b",
+        "Data format: A ASCII hex or ZB64, B binary, C AR-compressed, P PNG (ZB64 encoded)"
+      ],
+      [
+        "x",
+        "File extension, e.g. G graphic, P PNG, T TrueType"
+      ],
+      [
+        "t",
+        "Total number of bytes in the file"
+      ],
+      [
+        "w",
+        "Bytes per row for .GRF images; ignored for PNG and fonts"
+      ],
+      [
+        "data",
+        "The file data"
+      ]
+    ]
+  },
+  "~EG": {
+    "summary": "Erases all downloaded graphics from printer memory.",
+    "syntax": "~EG"
+  },
+  "^FB": {
+    "summary": "Turns a text field into a block of fixed width that wraps text over several lines. Use it for addresses and descriptions; \\& in the data forces a line break.",
+    "syntax": "^FBa,b,c,d,e",
+    "params": [
+      [
+        "a",
+        "Block width, in dots"
+      ],
+      [
+        "b",
+        "Maximum number of lines, default 1"
+      ],
+      [
+        "c",
+        "Extra space between lines, in dots, default 0"
+      ],
+      [
+        "d",
+        "Justification: L left, C center, R right, J justified"
+      ],
+      [
+        "e",
+        "Hanging indent of lines after the first, in dots"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^A0N,30,30^FB400,3,0,C,0^FDThis longer text wraps onto several centered lines^FS\n^XZ"
+  },
+  "^FC": {
+    "summary": "Sets the characters that mark date and time placeholders in field data, such as %m or %H. The printer's real time clock fills them in at print time.",
+    "syntax": "^FCa,b,c",
+    "params": [
+      [
+        "a",
+        "Primary clock indicator, default %"
+      ],
+      [
+        "b",
+        "Secondary clock indicator"
+      ],
+      [
+        "c",
+        "Third clock indicator"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^A0N,30,30^FC%^FD%m/%d/%Y %H:%M^FS\n^XZ"
+  },
+  "^FD": {
+    "summary": "Holds the data for a field: the text to print or the value to encode in a bar code. It ends at the next ^FS.",
+    "syntax": "^FDa",
+    "params": [
+      [
+        "a",
+        "Data to print, up to 3072 bytes"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^A0N,40,40^FDHello, world^FS\n^XZ"
+  },
+  "^FH": {
+    "summary": "Lets you write characters in field data as hex codes after an indicator character, e.g. _5E for a caret. Use it to include ^, ~ or bytes that are hard to type.",
+    "syntax": "^FHa",
+    "params": [
+      [
+        "a",
+        "Hex indicator character, default _ (underscore)"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^A0N,40,40^FH^FDCaret: _5E^FS\n^XZ"
+  },
+  "^FM": {
+    "summary": "Sets the positions of each symbol when a PDF417 or MicroPDF417 bar code is split into several symbols (structured append).",
+    "syntax": "^FMx1,y1,x2,y2,...",
+    "params": [
+      [
+        "x1,y1",
+        "Position of the first symbol, in dots"
+      ],
+      [
+        "x2,y2",
+        "Position of the second symbol, and so on"
+      ]
+    ]
+  },
+  "^FN": {
+    "summary": "Numbers a field so it can be filled in later. Use it in a template saved with ^DF, then supply the data with ^FN and ^FD after recalling the template with ^XF.",
+    "syntax": "^FN#",
+    "params": [
+      [
+        "#",
+        "Field number"
+      ]
+    ],
+    "example": "^XA\n^DFR:LABEL.ZPL^FS\n^FO50,50^A0N,40,40^FN1^FS\n^XZ\n^XA\n^XFR:LABEL.ZPL^FS\n^FN1^FDHello^FS\n^XZ"
+  },
+  "^FO": {
+    "summary": "Sets where the next field starts, measured from the label home (^LH). The position is the top left corner of the field.",
+    "syntax": "^FOx,y,z",
+    "params": [
+      [
+        "x",
+        "Distance from the left edge, in dots"
+      ],
+      [
+        "y",
+        "Distance from the top, in dots"
+      ],
+      [
+        "z",
+        "Justification: 0 left, 1 right, 2 auto"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^A0N,40,40^FDHello^FS\n^XZ"
+  },
+  "^FP": {
+    "summary": "Prints the text of a field vertically or in reverse order, and can add extra space between characters.",
+    "syntax": "^FPd,g",
+    "params": [
+      [
+        "d",
+        "Direction: H horizontal, V vertical, R reverse"
+      ],
+      [
+        "g",
+        "Extra gap between characters, in dots, default 0"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^A0N,40,40^FPV,5^FDVERT^FS\n^XZ"
+  },
+  "^FR": {
+    "summary": "Prints the field in reverse: it flips dots between black and white wherever the field overlaps something already drawn. Use it for white text on a black box.",
+    "syntax": "^FR",
+    "example": "^XA\n^FO50,50^GB300,100,100^FS\n^FO70,80^A0N,40,40^FR^FDREVERSE^FS\n^XZ"
+  },
+  "^FS": {
+    "summary": "Ends a field. Every field definition, from ^FO to its data, closes with ^FS.",
+    "syntax": "^FS",
+    "example": "^XA\n^FO50,50^A0N,40,40^FDOne field^FS\n^XZ"
+  },
+  "^FT": {
+    "summary": "Sets where the next field starts, like ^FO, but the position is the text baseline (bottom left) instead of the top left corner. Fields without a position continue after the previous one.",
+    "syntax": "^FTx,y,z",
+    "params": [
+      [
+        "x",
+        "Distance from the left edge, in dots"
+      ],
+      [
+        "y",
+        "Distance from the top to the baseline, in dots"
+      ],
+      [
+        "z",
+        "Justification: 0 left, 1 right, 2 auto"
+      ]
+    ],
+    "example": "^XA\n^FT50,100^A0N,40,40^FDOn the baseline^FS\n^XZ"
+  },
+  "^FV": {
+    "summary": "Holds field data like ^FD, but marks the field as variable. With ^MCN, only ^FV fields are cleared between labels, so the rest of the image is reused.",
+    "syntax": "^FVa",
+    "params": [
+      [
+        "a",
+        "Variable field data, up to 3072 bytes"
+      ]
+    ],
+    "example": "^XA\n^MCN\n^FO50,50^A0N,40,40^FDFixed^FS\n^FO50,100^A0N,40,40^FVVariable^FS\n^XZ"
+  },
+  "^FW": {
+    "summary": "Sets the default rotation (and justification) for fields that don't specify their own. Use it to rotate a whole label's text at once.",
+    "syntax": "^FWr,z",
+    "params": [
+      [
+        "r",
+        "Rotation: N normal, R 90, I 180, B 270"
+      ],
+      [
+        "z",
+        "Justification: 0 left, 1 right, 2 auto"
+      ]
+    ],
+    "example": "^XA\n^FWR\n^FO50,50^A0,40,40^FDRotated^FS\n^XZ"
+  },
+  "^FX": {
+    "summary": "Adds a comment to the format. The printer ignores the text that follows, up to the next command.",
+    "syntax": "^FXc",
+    "params": [
+      [
+        "c",
+        "Comment text"
+      ]
+    ],
+    "example": "^XA\n^FX Shipping address block\n^FO50,50^A0N,30,30^FDJane Doe^FS\n^XZ"
+  },
+  "^GB": {
+    "summary": "Draws a box or a line. Use a thickness equal to the height for a filled bar, or a small height for a horizontal line.",
+    "syntax": "^GBw,h,t,c,r",
+    "params": [
+      [
+        "w",
+        "Box width, in dots"
+      ],
+      [
+        "h",
+        "Box height, in dots"
+      ],
+      [
+        "t",
+        "Border thickness, in dots, default 1"
+      ],
+      [
+        "c",
+        "Line color: B black, W white"
+      ],
+      [
+        "r",
+        "Corner rounding: 0 (none) to 8"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^GB300,200,4^FS\n^XZ"
+  },
+  "^GC": {
+    "summary": "Draws a circle at the field origin.",
+    "syntax": "^GCd,t,c",
+    "params": [
+      [
+        "d",
+        "Circle diameter, in dots"
+      ],
+      [
+        "t",
+        "Border thickness, in dots, default 1"
+      ],
+      [
+        "c",
+        "Line color: B black, W white"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^GC150,4^FS\n^XZ"
+  },
+  "^GD": {
+    "summary": "Draws a diagonal line across a box of the given width and height.",
+    "syntax": "^GDw,h,t,c,o",
+    "params": [
+      [
+        "w",
+        "Box width, in dots"
+      ],
+      [
+        "h",
+        "Box height, in dots"
+      ],
+      [
+        "t",
+        "Line thickness, in dots, default 1"
+      ],
+      [
+        "c",
+        "Line color: B black, W white"
+      ],
+      [
+        "o",
+        "Direction: R or / right-leaning, L or \\ left-leaning"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^GD200,100,4,B,R^FS\n^XZ"
+  },
+  "^GE": {
+    "summary": "Draws an ellipse inside a box of the given width and height.",
+    "syntax": "^GEw,h,t,c",
+    "params": [
+      [
+        "w",
+        "Ellipse width, in dots"
+      ],
+      [
+        "h",
+        "Ellipse height, in dots"
+      ],
+      [
+        "t",
+        "Border thickness, in dots, default 1"
+      ],
+      [
+        "c",
+        "Line color: B black, W white"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^GE300,150,4^FS\n^XZ"
+  },
+  "^GF": {
+    "summary": "Draws a bitmap image directly from data in the format, without storing it first. This is the usual way to put a logo or image on a label.",
+    "syntax": "^GFa,b,c,d,data",
+    "params": [
+      [
+        "a",
+        "Data format: A ASCII hex, B binary, C compressed binary"
+      ],
+      [
+        "b",
+        "Number of data bytes sent (equals c for ASCII hex)"
+      ],
+      [
+        "c",
+        "Total bytes in the image"
+      ],
+      [
+        "d",
+        "Bytes per row"
+      ],
+      [
+        "data",
+        "The image data, 1 bits print black"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^GFA,8,8,1,FF818181818181FF^FS\n^XZ"
+  },
+  "^GS": {
+    "summary": "Prints a special symbol: the field data letter picks which one (A registered, B copyright, C trademark, D UL, E CSA).",
+    "syntax": "^GSo,h,w",
+    "params": [
+      [
+        "o",
+        "Orientation: N, R, I or B"
+      ],
+      [
+        "h",
+        "Character height, in dots"
+      ],
+      [
+        "w",
+        "Character width, in dots"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^GSN,40,40^FDB^FS\n^XZ"
+  },
+  "~HB": {
+    "summary": "Asks a battery-powered printer to report its battery status to the host.",
+    "syntax": "~HB"
+  },
+  "~HD": {
+    "summary": "Asks the printer to send printhead diagnostic information to the host.",
+    "syntax": "~HD"
+  },
+  "^HF": {
+    "summary": "Sends a stored format back to the host as ZPL text, so you can see what a ^DF template contains.",
+    "syntax": "^HFd:o.x",
+    "params": [
+      [
+        "d:o.x",
+        "Drive, name and extension of the stored format"
+      ]
+    ]
+  },
+  "^HG": {
+    "summary": "Sends a stored graphic back to the host as hex data.",
+    "syntax": "^HGd:o.x",
+    "params": [
+      [
+        "d:o.x",
+        "Drive, name and extension of the graphic"
+      ]
+    ]
+  },
+  "^HH": {
+    "summary": "Sends the printer's configuration (the same information as the configuration label) to the host as text.",
+    "syntax": "^HH"
+  },
+  "~HI": {
+    "summary": "Asks the printer to identify itself: it returns the model, firmware version, resolution, memory size and installed options.",
+    "syntax": "~HI"
+  },
+  "~HM": {
+    "summary": "Asks the printer to report its RAM status: total, maximum available and currently available memory.",
+    "syntax": "~HM"
+  },
+  "~HS": {
+    "summary": "Asks the printer for its status. It returns three strings that report things like paper out, pause, head open, ribbon out and labels remaining in the batch.",
+    "syntax": "~HS"
+  },
+  "~HU": {
+    "summary": "Returns the printer's ZebraNet Alert settings to the host.",
+    "syntax": "~HU"
+  },
+  "^HV": {
+    "summary": "Sends the data of a numbered field (set with ^FN or ^RF) back to the host, with an optional header. Often used with RFID to check what was read or written.",
+    "syntax": "^HV#,n,h,t,a",
+    "params": [
+      [
+        "#",
+        "Field number to return, 0 to 9999, default 0"
+      ],
+      [
+        "n",
+        "Number of bytes to return: 1 to 256, default 64"
+      ],
+      [
+        "h",
+        "Header text to send before the data"
+      ],
+      [
+        "t",
+        "Termination text to send after the data"
+      ],
+      [
+        "a",
+        "When to respond: F once per format (default), L once per label printed"
+      ]
+    ]
+  },
+  "^HW": {
+    "summary": "Sends a list of the objects stored in printer memory to the host.",
+    "syntax": "^HWd:o.x",
+    "params": [
+      [
+        "d:o.x",
+        "Drive and name pattern to list, wildcards allowed"
+      ]
+    ]
+  },
+  "^HY": {
+    "summary": "Uploads a graphic stored in printer memory to the host.",
+    "syntax": "^HYd:o.x",
+    "params": [
+      [
+        "d:o.x",
+        "Drive, name and extension of the graphic"
+      ]
+    ]
+  },
+  "^HZ": {
+    "summary": "Asks the printer to return description information as XML, such as format settings, the object directory, object data or printer status.",
+    "syntax": "^HZb",
+    "params": [
+      [
+        "b",
+        "What to return: a all, f format settings, l object directory, o object data, r printer status"
+      ]
+    ]
+  },
+  "^ID": {
+    "summary": "Deletes stored objects such as graphics, fonts or formats from printer memory. Wildcards (*) are allowed.",
+    "syntax": "^IDd:o.x",
+    "params": [
+      [
+        "d:o.x",
+        "Drive, name and extension of the object to delete"
+      ]
+    ]
+  },
+  "^IL": {
+    "summary": "Loads a stored image as the background of the label, starting at the top left corner. Fields added after it print on top. Use it with ^IS to build a reusable form.",
+    "syntax": "^ILd:o.x",
+    "params": [
+      [
+        "d:o.x",
+        "Drive, name and extension of the stored image"
+      ]
+    ],
+    "example": "^XA\n^ILR:FORM.GRF\n^FO50,50^A0N,40,40^FDOn top of the form^FS\n^XZ"
+  },
+  "^IM": {
+    "summary": "Places a stored graphic at the field origin, like ^XG but without magnification. Because it skips scaling, it can take less formatting time than ^XG.",
+    "syntax": "^IMd:o.x",
+    "params": [
+      [
+        "d:o.x",
+        "Drive, name and extension of the stored graphic"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^IMR:LOGO.GRF^FS\n^XZ"
+  },
+  "^IS": {
+    "summary": "Saves the label built so far as an image in printer memory. Use it to store a form once, then load it with ^IL on later labels.",
+    "syntax": "^ISd:o.x,p",
+    "params": [
+      [
+        "d:o.x",
+        "Drive, name and extension of the image to save"
+      ],
+      [
+        "p",
+        "Print the label too: Y (default) or N"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^GB400,200,4^FS\n^ISR:FORM.GRF,N\n^XZ"
+  },
+  "~JA": {
+    "summary": "Cancels all formats waiting in the printer's buffer and any batch that is printing. The printer stops after the current label finishes.",
+    "syntax": "~JA"
+  },
+  "^JB": {
+    "summary": "Initializes (erases and formats) a flash memory device.",
+    "syntax": "^JBa",
+    "params": [
+      [
+        "a",
+        "Device: A option flash, B flash card, E internal flash"
+      ]
+    ]
+  },
+  "~JB": {
+    "summary": "Resets (erases) the optional memory on printers that have it.",
+    "syntax": "~JB"
+  },
+  "~JC": {
+    "summary": "Runs a media sensor calibration: the printer feeds labels to learn the label length and set its sensors.",
+    "syntax": "~JC"
+  },
+  "~JD": {
+    "summary": "Turns on communications diagnostics mode. The printer prints every character it receives, with its hex value and any communication errors, which helps debug what the host is sending.",
+    "syntax": "~JD"
+  },
+  "~JE": {
+    "summary": "Turns off communications diagnostics mode started with ~JD and returns the printer to normal operation.",
+    "syntax": "~JE"
+  },
+  "~JF": {
+    "summary": "Sets whether a battery-powered printer pauses when the battery voltage is low.",
+    "syntax": "~JFp",
+    "params": [
+      [
+        "p",
+        "Pause on low voltage: Y (default) or N. N is suggested when running from a car battery adapter"
+      ]
+    ]
+  },
+  "~JG": {
+    "summary": "Prints a graph of the media sensor readings. Use it to see why the printer misdetects labels or gaps.",
+    "syntax": "~JG"
+  },
+  "^JJ": {
+    "summary": "Configures the auxiliary port used to connect an applicator or other external device.",
+    "syntax": "^JJa,b,c,d,e,f"
+  },
+  "~JL": {
+    "summary": "Sets the label length by feeding labels until the printer finds the length. Use it after changing media.",
+    "syntax": "~JL"
+  },
+  "^JM": {
+    "summary": "Sets the print density. ^JMB halves it (for example 8 dots/mm becomes 4), which doubles the size of everything on the label, including ^FO positions. ^JMA (default) is full density. Put it before the first ^FS in the format. The setting stays in effect.",
+    "syntax": "^JMn",
+    "params": [
+      [
+        "n",
+        "A full resolution (default), B half resolution"
+      ]
+    ]
+  },
+  "~JN": {
+    "summary": "Makes the printhead test fatal: if the head test finds a bad element, the printer stops and reports an error.",
+    "syntax": "~JN"
+  },
+  "~JO": {
+    "summary": "Makes the printhead test non-fatal, which is the default. If the head test fails, the printer shows an error and stops printing, but you can press PAUSE to continue without a power cycle (unlike ~JN).",
+    "syntax": "~JO"
+  },
+  "~JP": {
+    "summary": "Cancels the format being processed and puts the printer in Pause Mode. Each further ~JP clears the next format in the buffer. It works like pressing CANCEL on the printer.",
+    "syntax": "~JP"
+  },
+  "~JR": {
+    "summary": "Resets the printer as if it had been power cycled. Unsaved settings are lost.",
+    "syntax": "~JR"
+  },
+  "^JS": {
+    "summary": "Selects which media sensor the printer uses to detect labels.",
+    "syntax": "^JSa",
+    "params": [
+      [
+        "a",
+        "Sensor: A auto, R reflective, T transmissive"
+      ]
+    ]
+  },
+  "~JS": {
+    "summary": "Controls when the printer backfeeds labels after tear-off or peel-off, as a percentage before and after printing.",
+    "syntax": "~JSb",
+    "params": [
+      [
+        "b",
+        "A 100% after printing, B 100% before the next label, N normal (90% after, default), O off, or 10 to 90 in steps of 10 (percent done after printing)"
+      ]
+    ]
+  },
+  "^JT": {
+    "summary": "Sets how often the printer runs its automatic printhead test, counted in labels.",
+    "syntax": "^JT####,a,b,c",
+    "params": [
+      [
+        "####",
+        "Number of labels between head tests: 0000 to 9999. 0000 (default) turns the test off"
+      ],
+      [
+        "a",
+        "Choose the range of elements to test yourself: Y or N (default)"
+      ],
+      [
+        "b",
+        "First element to test when a is Y: 0 to 9999, default 0"
+      ],
+      [
+        "c",
+        "Last element to test when a is Y: 0 to 9999, default 9999"
+      ]
+    ]
+  },
+  "^JU": {
+    "summary": "Saves the current settings to permanent memory, or reloads saved or factory settings.",
+    "syntax": "^JUa",
+    "params": [
+      [
+        "a",
+        "A factory and factory network defaults, F factory defaults, N factory network defaults, R recall last saved, S save current. Reloaded defaults are lost at power off unless saved with ^JUS"
+      ]
+    ]
+  },
+  "^JW": {
+    "summary": "Sets the ribbon tension on printers with adjustable ribbon tension.",
+    "syntax": "^JWt",
+    "params": [
+      [
+        "t",
+        "Tension: L low, M medium, H high"
+      ]
+    ]
+  },
+  "~JX": {
+    "summary": "Cancels a format that was only partly received, for example after the host connection dropped mid-format.",
+    "syntax": "~JX"
+  },
+  "^JZ": {
+    "summary": "Sets whether the printer reprints a label that failed because of an error such as paper out or ribbon out.",
+    "syntax": "^JZa",
+    "params": [
+      [
+        "a",
+        "Reprint after error: Y (default) or N"
+      ]
+    ]
+  },
+  "~KB": {
+    "summary": "Puts a battery-powered printer into battery discharge mode to condition the battery.",
+    "syntax": "~KB"
+  },
+  "^KD": {
+    "summary": "Selects how the date and time are shown on the configuration label and display, for printers with a real time clock.",
+    "syntax": "^KDa",
+    "params": [
+      [
+        "a",
+        "0 version number, 1 to 4 MM/DD/YY or DD/MM/YY in 12 or 24 hour time"
+      ]
+    ]
+  },
+  "^KL": {
+    "summary": "Sets the language shown on the printer's control panel.",
+    "syntax": "^KLa",
+    "params": [
+      [
+        "a",
+        "Language number, e.g. 1 English (default), 2 Spanish, 3 French, 4 German"
+      ]
+    ]
+  },
+  "^KN": {
+    "summary": "Sets the printer's network name and description, which show up on its configuration label and web page. Send ^JUS to save them.",
+    "syntax": "^KNa,b",
+    "params": [
+      [
+        "a",
+        "Printer name, up to 16 characters"
+      ],
+      [
+        "b",
+        "Description, up to 35 characters"
+      ]
+    ]
+  },
+  "^KP": {
+    "summary": "Sets the password that protects the printer's front panel settings.",
+    "syntax": "^KPa,b",
+    "params": [
+      [
+        "a",
+        "Four-digit password: 0000 to 9999"
+      ],
+      [
+        "b",
+        "Password level, S4M printers only: 1 to 4, default 3"
+      ]
+    ]
+  },
+  "^LH": {
+    "summary": "Moves the label home, the 0,0 point that all field positions are measured from. Use it to shift a whole design without editing every ^FO.",
+    "syntax": "^LHx,y",
+    "params": [
+      [
+        "x",
+        "Horizontal offset, in dots, default 0"
+      ],
+      [
+        "y",
+        "Vertical offset, in dots, default 0"
+      ]
+    ],
+    "example": "^XA\n^LH30,30\n^FO20,20^A0N,30,30^FDShifted^FS\n^XZ"
+  },
+  "^LL": {
+    "summary": "Sets the label length (height). It is required for continuous media. Put it before the first ^FS so it affects the current label.",
+    "syntax": "^LLy",
+    "params": [
+      [
+        "y",
+        "Label length, in dots: 1 to 32000"
+      ]
+    ],
+    "example": "^XA\n^PW812\n^LL1218\n^FO50,50^A0N,40,40^FD4x6 label at 203 dpi^FS\n^XZ"
+  },
+  "^LR": {
+    "summary": "Prints every following field in reverse, flipping black and white where fields overlap, as if each had ^FR.",
+    "syntax": "^LRa",
+    "params": [
+      [
+        "a",
+        "Reverse print all fields: Y or N (default)"
+      ]
+    ],
+    "example": "^XA\n^LRY\n^FO50,50^GB300,100,100^FS\n^FO70,80^A0N,40,40^FDREVERSE^FS\n^XZ"
+  },
+  "^LS": {
+    "summary": "Shifts all fields to the left by the given number of dots. Used mainly for compatibility with older printers.",
+    "syntax": "^LSa",
+    "params": [
+      [
+        "a",
+        "Shift left value, in dots: -9999 to 9999, default 0"
+      ]
+    ]
+  },
+  "^LT": {
+    "summary": "Moves the whole label image up or down relative to the top edge of the label. Use it to fix vertical alignment without changing field positions.",
+    "syntax": "^LTx",
+    "params": [
+      [
+        "x",
+        "Offset in dot rows: -120 to 120 on most printers. Negative moves the format toward the top"
+      ]
+    ]
+  },
+  "^MC": {
+    "summary": "Sets whether the label image is cleared after printing. ^MCN keeps the image so the next label only redraws its ^FV fields.",
+    "syntax": "^MCa",
+    "params": [
+      [
+        "a",
+        "Clear the image: Y (default) or N"
+      ]
+    ]
+  },
+  "^MD": {
+    "summary": "Adjusts print darkness relative to the current darkness setting, for the labels that follow.",
+    "syntax": "^MDa",
+    "params": [
+      [
+        "a",
+        "Darkness adjustment: -30 to 30"
+      ]
+    ]
+  },
+  "^MF": {
+    "summary": "Sets what the printer does with the media when it powers up and when the printhead is closed, such as feed a label or calibrate.",
+    "syntax": "^MFp,h",
+    "params": [
+      [
+        "p",
+        "Power up action: F feed, C calibrate, L length, N none, S short calibration"
+      ],
+      [
+        "h",
+        "Head close action: same values as p"
+      ]
+    ]
+  },
+  "^ML": {
+    "summary": "Sets the maximum label length the printer searches through when it calibrates and looks for a gap or mark.",
+    "syntax": "^MLa",
+    "params": [
+      [
+        "a",
+        "Maximum label length, in dot rows"
+      ]
+    ]
+  },
+  "^MM": {
+    "summary": "Sets what the printer does with a label after printing it, such as tear-off, peel-off, rewind or cut.",
+    "syntax": "^MMa,b",
+    "params": [
+      [
+        "a",
+        "Mode: e.g. T tear-off, P peel-off, R rewind, A applicator, C cutter"
+      ],
+      [
+        "b",
+        "Prepeel: Y or N"
+      ]
+    ]
+  },
+  "^MN": {
+    "summary": "Tells the printer what kind of media it is using so it can find the start of each label: continuous, gap (web), or black mark.",
+    "syntax": "^MNa,b",
+    "params": [
+      [
+        "a",
+        "N continuous, Y or W gap/notch (web sensing), M black mark, A auto-detect (G-series only), V continuous with variable length (KR403 only)"
+      ],
+      [
+        "b",
+        "Black mark offset, in dots, default 0. Used only when a is M"
+      ]
+    ]
+  },
+  "^MP": {
+    "summary": "Disables front panel functions, such as darkness or position adjustment, so operators can't change them.",
+    "syntax": "^MPa",
+    "params": [
+      [
+        "a",
+        "e.g. D darkness, P position, C calibration, E enable all"
+      ]
+    ]
+  },
+  "^MT": {
+    "summary": "Selects the printing method: thermal transfer (with a ribbon) or direct thermal (heat-sensitive media, no ribbon).",
+    "syntax": "^MTa",
+    "params": [
+      [
+        "a",
+        "T thermal transfer, D direct thermal"
+      ]
+    ]
+  },
+  "^MU": {
+    "summary": "Sets the units used for positions and sizes: dots, inches or millimeters. It can also convert a format designed for one resolution to another.",
+    "syntax": "^MUa,b,c",
+    "params": [
+      [
+        "a",
+        "Units: D dots (default), I inches, M millimeters"
+      ],
+      [
+        "b",
+        "Format base resolution in dpi"
+      ],
+      [
+        "c",
+        "Desired resolution in dpi"
+      ]
+    ]
+  },
+  "^MW": {
+    "summary": "Turns the printhead cold warning on or off.",
+    "syntax": "^MWa",
+    "params": [
+      [
+        "a",
+        "Cold warning: Y on, N off"
+      ]
+    ]
+  },
+  "~NC": {
+    "summary": "Connects to a specific printer on a shared serial (RS-485) network, selected by its network ID.",
+    "syntax": "~NC###",
+    "params": [
+      [
+        "###",
+        "Network ID of the printer: 001 to 999"
+      ]
+    ]
+  },
+  "^NI": {
+    "summary": "Assigns a network ID number to the printer for use on a shared serial (RS-485) network.",
+    "syntax": "^NI###",
+    "params": [
+      [
+        "###",
+        "Network ID: 001 to 999"
+      ]
+    ]
+  },
+  "~NR": {
+    "summary": "Makes all printers on a shared serial network transparent, so they all receive the data that follows.",
+    "syntax": "~NR"
+  },
+  "^NS": {
+    "summary": "Changes the printer's wired network settings, such as how it gets an IP address, the IP address, subnet mask and gateway.",
+    "syntax": "^NSa,b,c,d,e,f,g,h,i",
+    "params": [
+      [
+        "a",
+        "IP resolution: A all (default), B BOOTP, C DHCP and BOOTP, D DHCP, G gleaning only, R RARP, P permanent"
+      ],
+      [
+        "b",
+        "IP address"
+      ],
+      [
+        "c",
+        "Subnet mask"
+      ],
+      [
+        "d",
+        "Default gateway"
+      ],
+      [
+        "e",
+        "WINS server address"
+      ],
+      [
+        "f",
+        "Connection timeout checking: Y (default) or N"
+      ],
+      [
+        "g",
+        "Timeout in seconds: 0 to 9999, default 300"
+      ],
+      [
+        "h",
+        "ARP broadcast interval in minutes: 0 to 30, default 0 (no ARP sent)"
+      ],
+      [
+        "i",
+        "Base raw port number: 1 to 65535, default 9100"
+      ]
+    ]
+  },
+  "~NT": {
+    "summary": "Makes the currently connected printer on a shared serial network transparent.",
+    "syntax": "~NT"
+  },
+  "^PF": {
+    "summary": "Feeds the media forward without printing (slews) by the given number of dot rows, from the bottom of the label.",
+    "syntax": "^PF#",
+    "params": [
+      [
+        "#",
+        "Number of dot rows to slew"
+      ]
+    ]
+  },
+  "^PH": {
+    "summary": "Feeds a blank label to the start of the next label (the home position), as part of a format.",
+    "syntax": "^PH"
+  },
+  "~PH": {
+    "summary": "Feeds a blank label to the start of the next label (the home position). Same as ^PH, sent as a control command.",
+    "syntax": "~PH"
+  },
+  "^PM": {
+    "summary": "Prints the whole label as a mirror image, flipped left to right.",
+    "syntax": "^PMa",
+    "params": [
+      [
+        "a",
+        "Mirror image: Y or N (default)"
+      ]
+    ],
+    "example": "^XA\n^PMY\n^FO50,50^A0N,40,40^FDMirrored^FS\n^XZ"
+  },
+  "^PO": {
+    "summary": "Rotates the whole label 180 degrees. Use it when labels come out of the printer upside down relative to how you want them.",
+    "syntax": "^POa",
+    "params": [
+      [
+        "a",
+        "N normal (default), I inverted 180 degrees"
+      ]
+    ],
+    "example": "^XA\n^POI\n^FO50,50^A0N,40,40^FDUpside down^FS\n^XZ"
+  },
+  "^PP": {
+    "summary": "Pauses the printer after the current format prints. It is not immediate, so several labels may print before the pause. The printer resumes when the PAUSE button is pressed or ~PS is sent.",
+    "syntax": "^PP"
+  },
+  "~PP": {
+    "summary": "Pauses the printer after the current label finishes printing. The printer resumes when the PAUSE button is pressed or ~PS is sent.",
+    "syntax": "~PP"
+  },
+  "^PQ": {
+    "summary": "Sets how many copies of the label to print, and optionally when to pause and how many times to repeat each serial number.",
+    "syntax": "^PQq,p,r,o,e",
+    "params": [
+      [
+        "q",
+        "Total quantity to print, default 1"
+      ],
+      [
+        "p",
+        "Labels between pauses, 0 means no pause"
+      ],
+      [
+        "r",
+        "Copies of each serial number, default 0"
+      ],
+      [
+        "o",
+        "Override pause count: Y or N"
+      ],
+      [
+        "e",
+        "Cut on error label (RFID void): Y or N"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^A0N,40,40^FDThree copies^FS\n^PQ3\n^XZ"
+  },
+  "^PR": {
+    "summary": "Sets the print, slew and backfeed speeds. Slower speeds usually give better print quality.",
+    "syntax": "^PRp,s,b",
+    "params": [
+      [
+        "p",
+        "Print speed, e.g. 2 to 14 (inches per second) or A to E"
+      ],
+      [
+        "s",
+        "Slew speed, same values"
+      ],
+      [
+        "b",
+        "Backfeed speed, same values"
+      ]
+    ],
+    "example": "^XA\n^PR4\n^FO50,50^A0N,40,40^FDPrinted at 4 ips^FS\n^XZ"
+  },
+  "~PR": {
+    "summary": "Reprints the last label, like the reprint signal on an applicator. Only works when reprint is enabled.",
+    "syntax": "~PR"
+  },
+  "~PS": {
+    "summary": "Resumes printing on a printer that is paused, for example after ^PP or ~PP. It has the same effect as pressing the PAUSE button.",
+    "syntax": "~PS"
+  },
+  "^PW": {
+    "summary": "Sets the print width of the label. Use it so content isn't cut off or placed off the label when the media is narrower than the printhead.",
+    "syntax": "^PWa",
+    "params": [
+      [
+        "a",
+        "Label width, in dots"
+      ]
+    ],
+    "example": "^XA\n^PW812\n^FO50,50^A0N,40,40^FD4 inch wide at 203 dpi^FS\n^XZ"
+  },
+  "~RO": {
+    "summary": "Resets one of the printer's advanced counters, such as a user label counter or an RFID label counter.",
+    "syntax": "~ROc",
+    "params": [
+      [
+        "c",
+        "Counter: 1 or 2 user counters, 3 valid RFID, 4 voided RFID, C head cleaned, R head replaced and head cleaned (C and R on some models only)"
+      ]
+    ]
+  },
+  "^SC": {
+    "summary": "Sets the serial port settings: baud rate, data bits, parity, stop bits and handshake.",
+    "syntax": "^SCa,b,c,d,e,f",
+    "params": [
+      [
+        "a",
+        "Baud rate, e.g. 9600"
+      ],
+      [
+        "b",
+        "Word length: 7 or 8 data bits"
+      ],
+      [
+        "c",
+        "Parity: N none, E even, O odd"
+      ],
+      [
+        "d",
+        "Stop bits: 1 or 2"
+      ],
+      [
+        "e",
+        "Handshake (protocol mode): X XON/XOFF, D DTR/DSR, R RTS, M DTR/DSR XON/XOFF (G-Series only)"
+      ],
+      [
+        "f",
+        "Zebra protocol: A ACK/NAK, N none, Z Zebra"
+      ]
+    ]
+  },
+  "~SD": {
+    "summary": "Sets the print darkness. It does the same as the darkness setting on the front panel.",
+    "syntax": "~SD##",
+    "params": [
+      [
+        "##",
+        "Darkness: 00 to 30"
+      ]
+    ]
+  },
+  "^SE": {
+    "summary": "Selects which stored encoding table (a .DAT file) the printer uses to map characters.",
+    "syntax": "^SEd:o.x",
+    "params": [
+      [
+        "d",
+        "Drive: R:, E:, B: or A:, default R:"
+      ],
+      [
+        "o",
+        "Name of the encoding table, 1 to 8 characters"
+      ],
+      [
+        "x",
+        "Extension, always .DAT"
+      ]
+    ]
+  },
+  "^SF": {
+    "summary": "Makes part of a field's data count up or down on each label printed. A mask says which characters change and how, e.g. D for decimal digits and % to skip a character.",
+    "syntax": "^SFa,b",
+    "params": [
+      [
+        "a",
+        "Mask string: D decimal, H hex, O octal, A alpha, N alphanumeric, % skip"
+      ],
+      [
+        "b",
+        "Increment string, default 1"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^A0N,40,40^FDBL0000^SF%%DDDD,1^FS\n^PQ3\n^XZ"
+  },
+  "^SL": {
+    "summary": "Sets the real time clock mode (print the time when the format was received or the time each label prints) and the language used for printed date and time text.",
+    "syntax": "^SLa,b",
+    "params": [
+      [
+        "a",
+        "Mode: S start time (default), T time now, or 1 to 999 seconds of tolerance"
+      ],
+      [
+        "b",
+        "Language: 1 English, 2 Spanish, 3 French, 4 German, 5 Italian, up to 18 Polish. Default is the language set with ^KL or on the control panel."
+      ]
+    ]
+  },
+  "^SN": {
+    "summary": "Prints a serial number that counts up or down on each label. Use it in place of ^FD, with ^PQ to print a run of labels.",
+    "syntax": "^SNv,n,z",
+    "params": [
+      [
+        "v",
+        "Starting value, up to 12 digits"
+      ],
+      [
+        "n",
+        "Increment, negative to count down, default 1"
+      ],
+      [
+        "z",
+        "Keep leading zeros: Y or N (default)"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^A0N,40,40^SN001,1,Y^FS\n^PQ3\n^XZ"
+  },
+  "^SO": {
+    "summary": "Sets an offset from the real time clock for the secondary or third clock, e.g. to print a best-before date 30 days ahead.",
+    "syntax": "^SOa,b,c,d,e,f,g",
+    "params": [
+      [
+        "a",
+        "Clock: 2 secondary, 3 third"
+      ],
+      [
+        "b",
+        "Months offset"
+      ],
+      [
+        "c",
+        "Days offset"
+      ],
+      [
+        "d",
+        "Years offset"
+      ],
+      [
+        "e",
+        "Hours offset"
+      ],
+      [
+        "f",
+        "Minutes offset"
+      ],
+      [
+        "g",
+        "Seconds offset"
+      ]
+    ]
+  },
+  "^SP": {
+    "summary": "Starts printing the part of the label formatted so far while the printer keeps receiving the rest. It speeds up long labels.",
+    "syntax": "^SPa",
+    "params": [
+      [
+        "a",
+        "Dot row at which to start printing"
+      ]
+    ]
+  },
+  "^SQ": {
+    "summary": "Stops a ZebraNet alert from being sent.",
+    "syntax": "^SQa,b,c"
+  },
+  "^SR": {
+    "summary": "Sets the printhead resistance value. Newer printer models set this automatically.",
+    "syntax": "^SR####",
+    "params": [
+      [
+        "####",
+        "Resistance, four digits: 0488 to 1175. Use a value no higher than the one shown on the printhead, or you may damage it."
+      ]
+    ]
+  },
+  "^SS": {
+    "summary": "Sets the media, web and ribbon sensor values directly. Normally the printer sets these itself during calibration.",
+    "syntax": "^SSw,m,r,l,m2,r2,a,b,c"
+  },
+  "^ST": {
+    "summary": "Sets the date and time of the printer's real time clock.",
+    "syntax": "^STa,b,c,d,e,f,g",
+    "params": [
+      [
+        "a",
+        "Month"
+      ],
+      [
+        "b",
+        "Day"
+      ],
+      [
+        "c",
+        "Year, four digits"
+      ],
+      [
+        "d",
+        "Hour"
+      ],
+      [
+        "e",
+        "Minute"
+      ],
+      [
+        "f",
+        "Second"
+      ],
+      [
+        "g",
+        "Format: A a.m., P p.m., M 24-hour"
+      ]
+    ]
+  },
+  "^SX": {
+    "summary": "Sets up a ZebraNet alert, so the printer notifies a destination such as an email address when a condition like paper out occurs.",
+    "syntax": "^SXa,b,c,d,e,f",
+    "params": [
+      [
+        "a",
+        "Condition type, e.g. paper out or ribbon out"
+      ],
+      [
+        "b",
+        "Destination type"
+      ],
+      [
+        "c",
+        "Alert when the condition is set: Y or N"
+      ],
+      [
+        "d",
+        "Alert when the condition clears: Y or N"
+      ],
+      [
+        "e",
+        "Destination address"
+      ],
+      [
+        "f",
+        "Port number"
+      ]
+    ]
+  },
+  "^SZ": {
+    "summary": "Selects which version of ZPL the printer interprets: ZPL or ZPL II.",
+    "syntax": "^SZa",
+    "params": [
+      [
+        "a",
+        "1 ZPL, 2 ZPL II (default)"
+      ]
+    ]
+  },
+  "~TA": {
+    "summary": "Adjusts where the media stops for tear-off or peel-off, relative to the default position.",
+    "syntax": "~TA###",
+    "params": [
+      [
+        "###",
+        "Offset in dot rows: -120 to 120. Always use three digits (e.g. 020), or the command is ignored."
+      ]
+    ]
+  },
+  "^TO": {
+    "summary": "Copies an object, such as a graphic or format, from one memory device to another. Wildcards (*) are allowed.",
+    "syntax": "^TOs:o.x,d:o.x",
+    "params": [
+      [
+        "s:o.x",
+        "Source drive, name and extension"
+      ],
+      [
+        "d:o.x",
+        "Destination drive, name and extension"
+      ]
+    ]
+  },
+  "~WC": {
+    "summary": "Prints a configuration label that lists the printer's current settings.",
+    "syntax": "~WC"
+  },
+  "^WD": {
+    "summary": "Prints a label listing the objects stored in printer memory, such as fonts, graphics and formats.",
+    "syntax": "^WDd:o.x",
+    "params": [
+      [
+        "d:o.x",
+        "Drive and name pattern to list, wildcards allowed"
+      ]
+    ]
+  },
+  "^XA": {
+    "summary": "Starts a label format. Every label begins with ^XA and ends with ^XZ.",
+    "syntax": "^XA",
+    "example": "^XA\n^FO50,50^A0N,40,40^FDHello^FS\n^XZ"
+  },
+  "^XB": {
+    "summary": "Suppresses the feed to the tear-off or peel-off position after the label, so no backfeed is needed before the next one. Use it to print labels back to back.",
+    "syntax": "^XB"
+  },
+  "^XF": {
+    "summary": "Recalls a format stored with ^DF. Follow it with ^FN and ^FD pairs to fill in the template's numbered fields.",
+    "syntax": "^XFd:o.x",
+    "params": [
+      [
+        "d:o.x",
+        "Drive, name and extension of the stored format, e.g. R:LABEL.ZPL"
+      ]
+    ],
+    "example": "^XA\n^XFR:LABEL.ZPL^FS\n^FN1^FDHello^FS\n^XZ"
+  },
+  "^XG": {
+    "summary": "Prints a stored graphic at the field origin, with optional magnification.",
+    "syntax": "^XGd:o.x,mx,my",
+    "params": [
+      [
+        "d:o.x",
+        "Drive, name and extension of the stored graphic"
+      ],
+      [
+        "mx",
+        "Horizontal magnification: 1 to 10"
+      ],
+      [
+        "my",
+        "Vertical magnification: 1 to 10"
+      ]
+    ],
+    "example": "^XA\n^FO50,50^XGR:LOGO.GRF,1,1^FS\n^XZ"
+  },
+  "^XZ": {
+    "summary": "Ends a label format. The printer prints the label when it reaches ^XZ.",
+    "syntax": "^XZ",
+    "example": "^XA\n^FO50,50^A0N,40,40^FDHello^FS\n^XZ"
+  },
+  "^ZZ": {
+    "summary": "Puts a battery-powered printer (PA400 or PT400) into sleep mode after it has been idle for the given time.",
+    "syntax": "^ZZt,b",
+    "params": [
+      [
+        "t",
+        "Idle seconds before shutdown: 0 to 999999, 0 disables automatic shutdown"
+      ],
+      [
+        "b",
+        "Y shuts down even if labels are still queued, N (default) waits until all labels are printed"
+      ]
+    ]
+  }
+}

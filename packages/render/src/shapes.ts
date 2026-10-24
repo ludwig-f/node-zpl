@@ -1,6 +1,6 @@
 /**
  * Paths for ZPL's graphic elements, in dots. Geometry follows Zebra's ZPL II
- * Programming Guide and was checked against Labelary's renders.
+ * Programming Guide and was checked against reference renders.
  */
 import type { Path, Point } from "./raster.js";
 

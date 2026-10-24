@@ -1,4 +1,4 @@
-// Symbol values decoded from Labelary's bars, check digit last
+// Symbol values decoded from reference bars, check digit last
 import { describe, test, expect } from "vitest";
 import { code128Values, encodeCode128 } from "./code128.js";
 
@@ -28,7 +28,7 @@ describe("code128Values without a mode", () => {
 
 describe("encodeCode128", () => {
   test("turns values into bar and space widths, ending with the stop", () => {
-    // Labelary's bars for ^BCN,50,N^FD12345678 with ^BY1
+    // Reference bars for ^BCN,50,N^FD12345678 with ^BY1
     expect(encodeCode128("12345678", "N").widths.join(",")).toBe(
       "2,1,1,2,1,4,1,2,3,2,2,1,2,2,3,2,1,1,2,2,1,1,3,2,2,2,1,2,3,1,2,1,3,2,1,2,2,2,3,1,1,2,3,1,2,1,3,1,3,1,1,2,2,2,3,1,4,1,1,1,2,3,3,1,1,1,2"
     );

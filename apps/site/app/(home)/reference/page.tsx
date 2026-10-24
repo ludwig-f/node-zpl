@@ -6,10 +6,12 @@ import { categoryAnchor } from "@/components/reference/anchor";
 
 export const metadata: Metadata = {
   title: "Supported commands",
-  description: "Which ZPL commands zplkit reads, writes and draws.",
+  description: "Which ZPL commands zplkit supports, and what each one does.",
 };
 
-const supported = data.commands.filter((command) => command.parsed).length;
+const supported = data.commands.filter(
+  (command) => command.support !== "no"
+).length;
 
 export default function ReferencePage() {
   return (
@@ -41,29 +43,32 @@ export default function ReferencePage() {
               Supported commands
             </h1>
             <p className="max-w-[40em] text-pretty text-muted">
-              zplkit reads and writes {supported} of the {data.commands.length}{" "}
-              commands in Zebra&apos;s ZPL II Programming Guide.{" "}
-              <strong className="text-ink">Read and write</strong> means{" "}
-              <code className="font-mono text-[0.9em]">parse()</code> turns the
-              command into a typed node and labels can be built with it; other
-              commands are kept as raw text and can be added with{" "}
-              <code className="font-mono text-[0.9em]">raw()</code>.{" "}
-              <strong className="text-ink">Drawn</strong> means the{" "}
-              <Link
-                href="/docs/rendering"
-                className="text-accent hover:underline"
-              >
-                renderer
-              </Link>{" "}
-              and the{" "}
+              zplkit supports {supported} of the {data.commands.length} commands
+              in Zebra&apos;s ZPL II Programming Guide. A supported command can
+              be built with zplkit,{" "}
+              <code className="font-mono text-[0.9em]">parse()</code> reads it
+              into a typed node, and the{" "}
               <Link
                 href="/docs/preview"
                 className="text-accent hover:underline"
               >
                 preview
               </Link>{" "}
-              show what it does. Printer settings, like print speed, don&apos;t
-              change the label&apos;s image.
+              draws it if it draws anything. Other commands are kept as they are
+              by <code className="font-mono text-[0.9em]">parse()</code> and can
+              be added with{" "}
+              <code className="font-mono text-[0.9em]">raw()</code>. Open a
+              command to see what it does.
+            </p>
+            <p className="max-w-[40em] text-pretty text-muted">
+              Every parameter and edge case is in{" "}
+              <a
+                href="https://docs.zebra.com/us/en/printers/software/zpl-pg/c-zpl-zpl-commands.html"
+                className="text-accent hover:underline"
+              >
+                Zebra&apos;s ZPL II Programming Guide
+              </a>
+              .
             </p>
           </div>
           <CommandsTable />

@@ -1,9 +1,9 @@
 ---
 title: JSX
-description: Write labels as JSX, in React projects or on their own.
+description: Build labels as JSX, in React projects or on their own.
 ---
 
-Labels can also be written as JSX. It produces the same commands as the method calls, and `build()` returns the same `Label` object, with `toZPL()`, `lint()` and `commands`.
+JSX is the easiest way to build a label: the code is laid out like the label, and conditions and lists are plain JavaScript. `build()` returns a `Label` with `toZPL()`, `lint()` and `commands`.
 
 ```tsx
 import { Label, Text, Box, Code128, build, mm, dots } from "@zplkit/core/jsx";
@@ -30,7 +30,9 @@ const label = build(
 label.toZPL();
 ```
 
-Text and barcode data go in children. The elements are `Text`, `Box`, `Code11`, `Code39`, `Code128`, `EAN13`, `Interleaved2of5`, `PDF417`, `DataMatrix`, `QrCode`, `Aztec`, `MaxiCode`, `Graphic`, `StoredGraphic` and `DefaultFont`, plus `<Field command="…">` for any other command and `<Raw zpl="…" />` for plain ZPL. `false`, `null` and `undefined` children are skipped, and lists from `.map()` work. Elements can be reused in labels with different resolutions, since millimeters are converted when the label is built.
+Lengths take a unit, `mm()` or `dots()`, as described in [units](/docs/building-labels#units). Text and barcode data go in children and are escaped for you. The elements are `Text`, `Box`, `Code11`, `Code39`, `Code128`, `EAN13`, `Interleaved2of5`, `PDF417`, `DataMatrix`, `QrCode`, `Aztec`, `MaxiCode`, `Graphic`, `StoredGraphic` and `DefaultFont`, plus `<Field command="…">` for any other command and `<Raw zpl="…" />` for plain ZPL. `false`, `null` and `undefined` children are skipped, and lists from `.map()` work. Elements can be reused in labels with different resolutions, since millimeters are converted when the label is built.
+
+Prefer plain function calls, or not using JSX in your project? The same labels can be built with [method calls](/docs/building-labels).
 
 ## Your own components
 
@@ -71,4 +73,4 @@ Tell TypeScript or your bundler to use zplkit's JSX runtime:
 
 ### Vue, Svelte and Angular
 
-Their templates aren't JSX, so use the [method calls](/docs/building-labels) in a `.ts` file. If your build tool compiles `.tsx` files (Vite does), you can also keep labels in a `.tsx` file that starts with `/** @jsxImportSource zplkit */`.
+Their templates aren't JSX, so use the [method calls](/docs/building-labels) in a `.ts` file. If your build tool compiles `.tsx` files (Vite does), you can also keep labels in a `.tsx` file that starts with `/** @jsxImportSource @zplkit/core */`.

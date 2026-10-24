@@ -1,4 +1,4 @@
-// Rotated text, as measured on Labelary at 8 dpmm. A rotated field is its
+// Rotated text, as measured from reference renders at 8 dpmm. A rotated field is its
 // unrotated text block turned in whole dots: ^FO puts the turned block's
 // top-left corner at the origin, ^FT turns it about the start of the baseline.
 import { describe, test, expect } from "vitest";
@@ -77,8 +77,8 @@ describe.each([
   });
 });
 
-test("font 0 turned clockwise from ^FO matches Labelary", () => {
-  // Labelary: capitals span x 25..99 for ^A0R,100,100 at ^FO400,400
+test("font 0 turned clockwise from ^FO matches reference renders", () => {
+  // Reference: capitals span x 25..99 for ^A0R,100,100 at ^FO400,400
   expect(ink("^FO400,400^A0R,100,100^FDH^FS").slice(0, 2)).toStrictEqual([
     25, 99,
   ]);

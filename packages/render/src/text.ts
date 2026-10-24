@@ -2,12 +2,12 @@
  * Drawing text in ZPL's built-in fonts with open-licensed stand-ins.
  *
  * Font 0 is scalable: letter shapes come from Archivo, stretched to the
- * advance widths measured from Labelary's font 0, so text takes up the same
+ * advance widths measured from reference renders of font 0, so text takes up the same
  * room as on a printer.
  *
  * Fonts A to H are bitmap fonts with fixed character cells that can only be
  * magnified in whole steps. Letter shapes come from DejaVu Sans Mono, placed
- * in each cell where Labelary prints them.
+ * in each cell where reference renders print them.
  */
 import { parseFont, flattenGlyph } from "./font.js";
 import { font0Advances, font0Data } from "./fonts/font0.js";
@@ -46,7 +46,7 @@ const font0AdvanceTable = () =>
 
 /**
  * A bitmap font's character cell at magnification 1, in dots: from Zebra's
- * ZPL II Programming Guide (cell, gap, baseline) and Labelary (where H's
+ * ZPL II Programming Guide (cell, gap, baseline) and reference renders (where H's
  * ink sits in the cell). Magnified letters are scaled, not their dots, so
  * the ink positions were measured at 10x and are fractions of a dot.
  */

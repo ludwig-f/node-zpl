@@ -124,6 +124,7 @@ suite("parse", () => {
       expect(result.diagnostics).toStrictEqual([
         {
           severity: "warning",
+          rule: "invalid-parameter",
           message: "^FO: x must be a number, got 'abc'",
           span: { start: 0, end: 9 },
         },
@@ -143,6 +144,32 @@ suite("parse", () => {
 
     test("reports nothing for valid input", () => {
       expect(parse("^XA^FO10,10^FDok^FS^XZ").diagnostics).toStrictEqual([]);
+    });
+  });
+
+  describe("ignored text", () => {
+    test("reports text after a command without parameters", () => {
+      const result = parse("^FDHi^FSG^XZ");
+
+      expect(withoutSpans(result.commands)).toStrictEqual([
+        { type: "FieldData", data: "Hi" },
+        { type: "FieldSeparator" },
+        { type: "EndFormat" },
+      ]);
+      expect(result.diagnostics).toStrictEqual([
+        {
+          severity: "warning",
+          rule: "ignored-text",
+          message: "^FS takes no parameters, so the printer ignores 'G'",
+          span: { start: 8, end: 9 },
+        },
+      ]);
+    });
+
+    test("allows spaces and line breaks between commands", () => {
+      expect(
+        parse("^XA \n^FO10,10^FDok^FS  \n^XZ\n").diagnostics
+      ).toStrictEqual([]);
     });
   });
 

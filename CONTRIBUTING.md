@@ -56,12 +56,7 @@ Then run `pnpm build && pnpm commands`, which updates the [supported commands ta
 
 ### Renderer accuracy
 
-Renderer tests expect the exact dots a printer prints, measured from reference renders. `packages/render/scripts/compare.mjs` compares a whole label with references and writes a diff image:
-
-```bash
-pnpm --filter @zplkit/render build
-node packages/render/scripts/compare.mjs --diff 4 6 8 label.zpl
-```
+Renderer tests expect the exact dots a printer prints, measured from reference renders, so a change that moves a field by one dot fails a test.
 
 When references disagree, Zebra's ZPL II Programming Guide or a real printout decides.
 

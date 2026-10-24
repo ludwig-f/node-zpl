@@ -20,7 +20,7 @@ const patterns = [
 
 /**
  * Mod-10 check digit, with digits weighted 3 and 1 from the left (not from
- * the right as in GS1), as Labelary and zebrash both do
+ * the right as in GS1), matching reference renders
  */
 const checkDigitFor = (digits: string) => {
   let sum = 0;

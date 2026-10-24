@@ -1,5 +1,5 @@
-// Text blocks (^FB), as measured on Labelary at 8 dpmm. Font 0's letter
-// shapes differ slightly from Labelary's, so its lines may start a dot early.
+// Text blocks (^FB), as measured from reference renders at 8 dpmm. Font 0's letter
+// shapes differ slightly from the references, so its lines may start a dot early.
 import { describe, test, expect } from "vitest";
 import { renderLabels } from "./render.js";
 
@@ -324,10 +324,10 @@ describe("rotated blocks", () => {
     ]);
   });
 
-  test("match Labelary", () => {
-    // Labelary: upside down, lines at y 70..99 and 120..149
+  test("match reference renders", () => {
+    // Reference: upside down, lines at y 70..99 and 120..149
     expect(field("^FO400,400", "I").slice(2)).toStrictEqual([70, 149]);
-    // Labelary: bottom up, x 0..79 from ^FO and -130..-51 from ^FT
+    // Reference: bottom up, x 0..79 from ^FO and -130..-51 from ^FT
     expect(field("^FO400,400", "B").slice(0, 2)).toStrictEqual([0, 79]);
     expect(field("^FT400,400", "B").slice(0, 2)).toStrictEqual([-130, -51]);
     expect(bounds("^FO400,400^ADB^FB100,3^FDHHHH HHHH^FS")).toStrictEqual([

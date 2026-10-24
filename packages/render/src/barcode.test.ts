@@ -1,4 +1,4 @@
-// Barcode placement, as measured on Labelary at 8 dpmm
+// Barcode placement, as measured from reference renders at 8 dpmm
 import { describe, test, expect } from "vitest";
 import { parse } from "@zplkit/core";
 import { layout } from "./layout.js";
@@ -141,7 +141,7 @@ describe("Code 128", () => {
     });
 
     test("keeps the interpretation line below the bars", () => {
-      // Labelary: turned clockwise, the line is left of the bars
+      // Reference: turned clockwise, the line is left of the bars
       near(
         bounds("^FO100,100^BY2^BCR,100,Y,N^FD12345678^FS"),
         { left: 80, right: 199, top: 100, bottom: 345 },
@@ -171,7 +171,7 @@ describe("EAN-13", () => {
   });
 
   test("prints the digits under the two halves", () => {
-    // Labelary: digits from x 79 to 276, rows 204 to 217
+    // Reference: digits from x 79 to 276, rows 204 to 217
     const raster = render("^FO100,100^BY2^BEN,100,Y,N^FD590123412345^FS");
     // Columns 70..99 left of the bars only hold the first digit
     let top = Infinity;
@@ -199,7 +199,7 @@ describe("Code 11", () => {
   });
 
   test("prints the check digits in the interpretation line", () => {
-    // Labelary: digits from x 149 to 229, between start and stop marks
+    // Reference: digits from x 149 to 229, between start and stop marks
     near(
       parts("^FO100,100^BY2^B1N,N,100,Y,N^FD12345^FS").text,
       {
@@ -321,7 +321,7 @@ describe("PDF417", () => {
       2,
       16,
     ],
-    // Labelary packs some runs of digits into a few more codewords than
+    // Reference renders pack some runs of digits into a few more codewords than
     // bwip-js does (45 digits take 21 or 22, not 20), so those can differ
     [`^B7N,10,0^FD${"1234567890".repeat(25).slice(0, 10)}`, 1, 8],
     [`^B7N,10,0^FD${"1234567890".repeat(25).slice(0, 130)}`, 3, 17],
@@ -359,7 +359,7 @@ describe("Aztec", () => {
   });
 
   test("prefers a compact symbol to a full one of the same size", () => {
-    // Labelary: 23 modules of compact, not full, Aztec; its first row
+    // Reference: 23 modules of compact, not full, Aztec; its first row
     const raster = render(
       "^FO10,10^BON,1^FDhello world hello world hello world^FS"
     );

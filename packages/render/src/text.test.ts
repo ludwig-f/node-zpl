@@ -1,4 +1,4 @@
-// Expectations come from Labelary renders of font 0 at 8 dpmm
+// Expectations come from reference renders of font 0 at 8 dpmm
 import { describe, test, expect } from "vitest";
 import { renderLabels } from "./render.js";
 import { layout } from "./layout.js";
@@ -43,7 +43,7 @@ describe("font 0", () => {
   });
 
   test("letters advance as far as on a printer", () => {
-    // Labelary: H advances 60.9 dots at ^A0N,100,100
+    // Reference: H advances 60.9 dots at ^A0N,100,100
     const one = inkBounds("^FO100,100^A0N,100,100^FDH^FS").width;
     const ten = inkBounds("^FO100,100^A0N,100,100^FDHHHHHHHHHH^FS").width;
     expect(Math.abs(ten - one - 9 * 60.9)).toBeLessThanOrEqual(1);
@@ -69,7 +69,7 @@ describe("font 0", () => {
   });
 
   test("characters font 0 doesn't have advance like a space", () => {
-    // Labelary: a missing glyph prints nothing and advances 29.5
+    // Reference: a missing glyph prints nothing and advances 29.5
     const single = inkBounds("^FO100,100^A0N,100,100^FDH^FS").width;
     const spaced = inkBounds("^FO100,100^A0N,100,100^FDHĀH^FS").width;
     expect(Math.abs(spaced - single - (60.9 + 29.5))).toBeLessThanOrEqual(1);

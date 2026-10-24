@@ -34,7 +34,7 @@ const analyze = (zpl: string, settings: Settings): Problem[] => {
       from: diagnostic.span.start,
       to: diagnostic.span.end,
       severity: diagnostic.severity,
-      rule: "invalid-parameter",
+      rule: diagnostic.rule,
       message: diagnostic.message,
     })),
     ...lint(commands, {

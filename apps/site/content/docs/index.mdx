@@ -8,8 +8,8 @@ ZPL (Zebra Programming Language) is the text format thermal label printers under
 Writing ZPL by hand is fiddly, and printers don't report mistakes: they quietly clamp values, skip fields or print nothing at all. zplkit helps at each step:
 
 <Cards>
-  <Card title="Build labels" href="/docs/building-labels">
-    Typed method calls or JSX, with explicit units and automatic escaping.
+  <Card title="Build labels" href="/docs/jsx">
+    JSX or typed method calls, with explicit units and automatic escaping.
   </Card>
   <Card title="Parse and lint" href="/docs/linting">
     Read existing ZPL and find problems before anything is printed.
@@ -26,7 +26,7 @@ Writing ZPL by hand is fiddly, and printers don't report mistakes: they quietly 
 
 | Package | What it does |
 | --- | --- |
-| `@zplkit/core` | Build labels with method calls or JSX, parse and lint ZPL |
+| `@zplkit/core` | Build labels with JSX or method calls, parse and lint ZPL |
 | `@zplkit/render` | Renders ZPL to images in Node or the browser, the way a printer draws it |
 | `@zplkit/preview` | `<zpl-preview>`, a web component that renders ZPL in the browser |
 
