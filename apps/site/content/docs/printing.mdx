@@ -38,23 +38,46 @@ import { PrinterSetup } from "@zplkit/core";
 const setup = new PrinterSetup().setDarkness(20).toZPL();
 ```
 
+Settings that apply to one label, like how many copies print or its darkness, are [label options](/docs/building-labels#print-settings) instead.
+
+## Print jobs
+
+A `PrintJob` puts setup and labels together in the order the printer should get them, so they go out as one piece of ZPL:
+
+```ts
+import { Label, PrinterSetup, PrintJob, mm } from "@zplkit/core";
+
+const job = new PrintJob(
+  new PrinterSetup().setDarkness(20),
+  new Label({ width: mm(57), height: mm(19), dpmm: 12, copies: 2 }),
+  new Label({ width: mm(57), height: mm(19), dpmm: 12 })
+);
+
+socket.end(job.toZPL());
+```
+
+`job.lint()` checks the whole job, including printer commands that ended up inside a label. A job works anywhere ZPL does, including [`<zpl-preview>`](/docs/preview), which shows one image per label.
+
 ## Storing graphics
 
 Send an image once and recall it by name in every label, instead of including it each time:
 
 ```ts
 import { readFileSync } from "node:fs";
-import { Label, PrinterSetup, mm, dots } from "@zplkit/core";
+import { Label, PrinterSetup, PrintJob, mm, dots } from "@zplkit/core";
 import { ImageConverter } from "@zplkit/core/image";
 
 const graphic = await new ImageConverter().toZPL(readFileSync("logo.png"));
 
 // Once: store it in the printer's RAM (R:) or flash (E:)
-const setup = new PrinterSetup().storeGraphic({ name: "LOGO", graphic, device: "E" }).toZPL();
+const setup = new PrinterSetup().storeGraphic({ name: "LOGO", graphic, device: "E" });
 
 // In every label
-new Label({ width: mm(57), height: mm(19), dpmm: 12 })
+const label = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
   .storedGraphic({ position: { x: dots(0), y: dots(0) }, name: "LOGO", device: "E" });
+
+// The first time, send both together
+new PrintJob(setup, label).toZPL();
 ```
 
 Graphics in RAM are lost when the printer turns off; flash keeps them.

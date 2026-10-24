@@ -1,5 +1,7 @@
 export { default as Label } from "./Label.js";
 export { default as PrinterSetup } from "./PrinterSetup.js";
+export { default as PrintJob } from "./PrintJob.js";
+export type { PrintJobPart, PrintJobOptions } from "./PrintJob.js";
 export { default as ZplError } from "./ZplError.js";
 export { mm, dots } from "./units.js";
 export { serialize, serializeCommand, escapeFieldData } from "./serialize.js";
