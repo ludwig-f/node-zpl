@@ -151,6 +151,12 @@
     0 12px 28px -14px rgb(0 0 0 / 0.45);
 }
 
+/* The docs sidebar sits on the page, divided from it by a rule */
+#nd-sidebar {
+  background: var(--zk-bg);
+  border-color: var(--zk-rule);
+}
+
 /* The neutral theme gives the dark sidebar cool grays of its own */
 .dark #nd-sidebar {
   --color-fd-muted: var(--zk-surface);
