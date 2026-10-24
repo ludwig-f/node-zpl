@@ -40,7 +40,6 @@
   --zk-paper: #ffffff;
   --zk-liner: #e3d9be;
   --zk-platen: #e8e5dc;
-  --zk-slot: #2a2924;
   --zk-dot: rgb(25 24 19 / 0.17);
   --zk-label-edge: rgb(25 24 19 / 0.16);
 }
@@ -77,7 +76,6 @@
   --zk-paper: #e8e5dc;
   --zk-liner: #3a3527;
   --zk-platen: #0e0e0c;
-  --zk-slot: #000000;
   --zk-dot: rgb(236 233 225 / 0.09);
   --zk-label-edge: rgb(0 0 0 / 0.6);
 }
@@ -108,7 +106,6 @@
   --color-paper: var(--zk-paper);
   --color-liner: var(--zk-liner);
   --color-platen: var(--zk-platen);
-  --color-slot: var(--zk-slot);
 
   /* Fumadocs UI */
   --color-fd-background: var(--zk-bg);

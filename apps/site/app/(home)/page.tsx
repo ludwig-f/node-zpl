@@ -288,7 +288,8 @@ export default async function HomePage() {
 
         <figure className="flex min-w-0 flex-[1_1_340px] flex-col gap-3">
           <div className="relative flex h-[400px] justify-center overflow-hidden rounded-lg border border-rule pb-9 bg-platen @[640px]:h-[520px]">
-            <div className="absolute inset-x-0 top-0 z-10 h-3.5 border-b border-rule-strong bg-slot" />
+            {/* The printer's exit: a soft shadow the label feeds out from under */}
+            <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-6 bg-gradient-to-b from-black/25 to-transparent dark:from-black/60" />
             <div className="hidden @[640px]:block">
               <Platen src={labelImage} width={300} alt={labelAlt} feed />
             </div>
