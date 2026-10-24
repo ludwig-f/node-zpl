@@ -21,6 +21,10 @@ Labels built with `Label` or JSX can be checked with `label.lint()`. Each proble
 
 **Errors** stop the label from printing as intended. **Warnings** mean the printer will change something.
 
+<Callout type="warn" title="The printer won't tell you">
+  None of these problems show up as an error on the printer. A skipped field leaves blank space, and a label without `^XZ` leaves the printer waiting. Treat warnings as failed prints.
+</Callout>
+
 ## Media size
 
 Labels that don't set `^PW` and `^LL` take their size from the printer. Pass the media size in dots to check them too:

@@ -214,3 +214,45 @@ html > body[data-scroll-locked] {
     transform: translateY(0);
   }
 }
+
+/* Docs: code blocks, tables and the active sidebar item */
+.prose figure.shiki {
+  border-color: var(--zk-rule-strong);
+  border-radius: 6px;
+  background: var(--zk-code);
+}
+.prose figure.shiki pre {
+  font-size: 0.84375rem;
+  line-height: 1.7;
+}
+
+.prose table {
+  overflow: hidden;
+  border: 1px solid var(--zk-rule-strong);
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 6px;
+  font-size: 0.906rem;
+}
+.prose thead th {
+  border-bottom: 1px solid var(--zk-rule-strong);
+  background: var(--zk-surface);
+  color: var(--zk-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.prose td,
+.prose th {
+  border-bottom: 1px solid var(--zk-rule);
+}
+.prose tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+#nd-sidebar a[data-active="true"] {
+  box-shadow: inset 2px 0 0 var(--zk-accent);
+  font-weight: 700;
+}
