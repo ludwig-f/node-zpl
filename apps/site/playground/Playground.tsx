@@ -9,6 +9,7 @@ import CodePanel from "./CodePanel";
 import examples from "./examples";
 import { analyze } from "./analyze";
 import { decodeShare, encodeShare } from "./share";
+import type { Cursor } from "./Bench";
 import type { EditorHandle } from "./Editor";
 import type { Problem } from "./analyze";
 import type { ShareState } from "./share";
@@ -63,6 +64,13 @@ const lastValue = (zpl: string, command: string): number | undefined => {
 const parseMm = (text: string): number | undefined => {
   const value = Number(text.replace(",", "."));
   return text.trim() && Number.isFinite(value) && value > 0 ? value : undefined;
+};
+
+/** The last label home (^LH) in the ZPL, which ^FO positions are relative to */
+const labelHome = (zpl: string) => {
+  const matches = [...zpl.matchAll(/\^LH(\d+),(\d+)/g)];
+  const last = matches[matches.length - 1];
+  return last ? { x: Number(last[1]), y: Number(last[2]) } : { x: 0, y: 0 };
 };
 
 /** Why the label wouldn't print at all, if it wouldn't */
@@ -123,6 +131,7 @@ export default function Playground() {
   const [notice, setNotice] = useState<string>();
   const [tab, setTab] = useState<Tab>("Editor");
   const [showCode, setShowCode] = useState(false);
+  const [cursor, setCursor] = useState<Cursor>();
   const [render, setRender] = useState<{ busy: boolean; ms?: number }>({
     busy: true,
   });
@@ -200,6 +209,18 @@ export default function Playground() {
           : name.replace(/\.zpl$/, `-${index + 1}.png`);
       link.click();
     });
+  };
+
+  /** Copy a clicked position as the ^FO that puts a field there */
+  const pick = async ({ x, y }: Cursor) => {
+    const home = labelHome(zpl);
+    const origin = `^FO${Math.max(x - home.x, 0)},${Math.max(y - home.y, 0)}`;
+    try {
+      await navigator.clipboard.writeText(origin);
+      setNotice(`Copied ${origin}`);
+    } catch {
+      setNotice(origin);
+    }
   };
 
   const selectProblem = (problem: Problem) => {
@@ -369,10 +390,16 @@ export default function Playground() {
                 ? "Rendering…"
                 : `Rendered in ${render.ms} ms`}
             </span>
-            <span>
-              {Math.round(labelSize.width * dpmm)} ×{" "}
-              {Math.round(labelSize.height * dpmm)} dots
-            </span>
+            {cursor ? (
+              <span title="Click to copy as ^FO">
+                x {cursor.x}, y {cursor.y}
+              </span>
+            ) : (
+              <span>
+                {Math.round(labelSize.width * dpmm)} ×{" "}
+                {Math.round(labelSize.height * dpmm)} dots
+              </span>
+            )}
           </div>
           {blocked && (
             <p className="blocked">
@@ -380,7 +407,12 @@ export default function Playground() {
             </p>
           )}
           <div className={`bench-area${blocked ? " dimmed" : ""}`}>
-            <Bench widthMm={labelSize.width} heightMm={labelSize.height}>
+            <Bench
+              widthMm={labelSize.width}
+              heightMm={labelSize.height}
+              onCursor={setCursor}
+              onPick={pick}
+            >
               <zpl-preview
                 zpl={zpl}
                 width={widthMm}
