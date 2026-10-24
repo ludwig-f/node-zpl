@@ -4,7 +4,7 @@
  * turn with the field like text does: the bottom of the symbol acts as the
  * baseline.
  */
-import bwipjs from "bwip-js";
+import { encodeMatrix } from "./barcodes/bwip.js";
 import { encodeCode11 } from "./barcodes/code11.js";
 import { encodeCode128 } from "./barcodes/code128.js";
 import { encodeCode39 } from "./barcodes/code39.js";
@@ -61,11 +61,8 @@ type Matrix = {
 };
 
 /** Pixels from bwip-js for 2D symbols, with options like "eclevel=Q" */
-const matrix = (bcid: string, text: string, options: string[] = []) => {
-  const [symbol] = bwipjs.raw(bcid, text, options.join(" "));
-  if (!("pixs" in symbol)) throw new Error("expected a 2D symbol");
-  return { modules: symbol.pixs, columns: symbol.pixx };
-};
+const matrix = (bcid: string, text: string, options: string[] = []) =>
+  encodeMatrix(bcid, text, options.join(" "));
 
 /** Default QR magnification for each printhead resolution */
 const qrMagnification = (dpmm: number) =>

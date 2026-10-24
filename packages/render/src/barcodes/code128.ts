@@ -4,7 +4,7 @@
  * says otherwise, and >x codes for start, shift and function characters.
  * Automatic mode leaves choosing subsets to bwip-js.
  */
-import bwipjs from "bwip-js";
+import { encodeLinear } from "./bwip.js";
 import { patterns } from "./code128-patterns.js";
 import type { LinearSymbol } from "./linear.js";
 
@@ -115,10 +115,8 @@ const gs1CheckDigit = (digits: string) => {
 };
 
 /** Bar and space widths from bwip-js, which picks subsets itself */
-const automatic = (text: string, parsefnc = false): number[] => {
-  const [symbol] = bwipjs.raw({ bcid: "code128", text, parsefnc });
-  return "sbs" in symbol ? symbol.sbs : [];
-};
+const automatic = (text: string, parsefnc = false): number[] =>
+  encodeLinear("code128", text, parsefnc ? "parsefnc" : "");
 
 const encodeCode128 = (data: string, mode: Mode = "N"): LinearSymbol => {
   switch (mode) {
