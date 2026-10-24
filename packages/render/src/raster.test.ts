@@ -187,3 +187,55 @@ describe("fillPath with center sampling", () => {
     expect(rows(raster)).toStrictEqual([[1, 0, 0, 1, 1]]);
   });
 });
+
+describe("fillPath with dropout control", () => {
+  const rect = (x0: number, y0: number, x1: number, y1: number): Path => [
+    [
+      [x0, y0],
+      [x1, y0],
+      [x1, y1],
+      [x0, y1],
+    ],
+  ];
+  const dotsOf = (raster: Raster) =>
+    Array.from(raster.ink.entries())
+      .filter(([, ink]) => ink === 1)
+      .map(([i]) => [i % raster.width, Math.floor(i / raster.width)]);
+
+  test("prints a stem narrower than a dot that misses every center", () => {
+    const raster = new Raster(6, 6, "center");
+    fillPath(raster, rect(2.55, 1, 3.3, 4), "B", { dropouts: true });
+    expect(dotsOf(raster)).toStrictEqual([
+      [2, 1],
+      [2, 2],
+      [2, 3],
+    ]);
+  });
+
+  test("prints a thin horizontal stroke too", () => {
+    const raster = new Raster(6, 6, "center");
+    fillPath(raster, rect(1, 2.55, 4, 3.3), "B", { dropouts: true });
+    expect(dotsOf(raster)).toStrictEqual([
+      [1, 2],
+      [2, 2],
+      [3, 2],
+    ]);
+  });
+
+  test("leaves strokes that cover a center alone", () => {
+    const raster = new Raster(6, 6, "center");
+    fillPath(raster, rect(1.2, 1, 2.8, 3), "B", { dropouts: true });
+    expect(dotsOf(raster)).toStrictEqual([
+      [1, 1],
+      [2, 1],
+      [1, 2],
+      [2, 2],
+    ]);
+  });
+
+  test("is off by default", () => {
+    const raster = new Raster(6, 6, "center");
+    fillPath(raster, rect(2.6, 1, 3.4, 4), "B");
+    expect(dotsOf(raster)).toStrictEqual([]);
+  });
+});

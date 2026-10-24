@@ -515,7 +515,7 @@ const drawGlyphs = (
         place(pen + gx * scaleX, baseline - gy * scaleY)
       )
     );
-    if (contours.length) fillPath(raster, contours, color);
+    if (contours.length) fillPath(raster, contours, color, { dropouts: true });
   }
 };
 

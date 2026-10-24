@@ -104,3 +104,19 @@ describe("bitmap fonts", () => {
     expect(ink("^FO100,100^FDH^FS")).toMatchObject({ x: [0, 4], y: [0, 6] });
   });
 });
+
+describe("thin strokes", () => {
+  test("font A keeps both stems of n at its base size", () => {
+    const [raster] = renderLabels("^XA^FO10,10^AAN^FDn^FS^XZ", size);
+    const rows: number[] = [];
+    for (let y = 0; y < 30; y++) {
+      let count = 0;
+      for (let x = 0; x < 30; x++) {
+        if (raster.ink[y * raster.width + x] >= 0.5) count++;
+      }
+      if (count) rows.push(count);
+    }
+    expect(rows.length).toBeGreaterThanOrEqual(4);
+    for (const count of rows) expect(count).toBeGreaterThanOrEqual(2);
+  });
+});

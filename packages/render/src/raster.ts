@@ -41,7 +41,12 @@ class Raster {
  * cross the row's center line and fill the dots between crossings with a
  * nonzero winding number.
  */
-const fillCenters = (raster: Raster, path: Path, color: Color): void => {
+const fillCenters = (
+  raster: Raster,
+  path: Path,
+  color: Color,
+  dropouts: boolean
+): void => {
   const { width, height } = raster;
   const value = color === "B" ? 1 : 0;
 
@@ -71,11 +76,69 @@ const fillCenters = (raster: Raster, path: Path, color: Color): void => {
       if (winding === 0) continue;
 
       // Dots whose center lies between the two crossings
-      const start = Math.max(0, Math.ceil(crossings[i][0] - 0.5));
-      const end = Math.min(width, Math.ceil(crossings[i + 1][0] - 0.5));
+      const from = crossings[i][0];
+      const to = crossings[i + 1][0];
+      const start = Math.max(0, Math.ceil(from - 0.5));
+      const end = Math.min(width, Math.ceil(to - 0.5));
       if (end > start) {
         raster.ink.fill(value, row * width + start, row * width + end);
+      } else if (dropouts) {
+        dropout(raster, Math.floor((from + to) / 2), row, value);
       }
+    }
+  }
+
+  if (dropouts) fillColumnDropouts(raster, path, value);
+};
+
+const dropout = (raster: Raster, x: number, y: number, value: number) => {
+  if (x < 0 || y < 0 || x >= raster.width || y >= raster.height) return;
+  raster.ink[y * raster.width + x] = value;
+};
+
+/**
+ * Dropout control for strokes thinner than a dot running across the rows:
+ * the same as for each row, down each column's center line
+ */
+const fillColumnDropouts = (raster: Raster, path: Path, value: number) => {
+  let minX = Infinity;
+  let maxX = -Infinity;
+  for (const contour of path) {
+    for (const [x] of contour) {
+      minX = Math.min(minX, x);
+      maxX = Math.max(maxX, x);
+    }
+  }
+
+  const first = Math.max(0, Math.floor(minX));
+  const last = Math.min(raster.width - 1, Math.ceil(maxX));
+  for (let column = first; column <= last; column++) {
+    const xc = column + 0.5;
+    const crossings: [y: number, winding: number][] = [];
+    for (const contour of path) {
+      for (let i = 0; i < contour.length; i++) {
+        const [x0, y0] = contour[i];
+        const [x1, y1] = contour[(i + 1) % contour.length];
+        if ((x0 <= xc && xc < x1) || (x1 <= xc && xc < x0)) {
+          crossings.push([
+            y0 + ((xc - x0) * (y1 - y0)) / (x1 - x0),
+            x0 < x1 ? 1 : -1,
+          ]);
+        }
+      }
+    }
+    if (crossings.length < 2) continue;
+    crossings.sort((a, b) => a[0] - b[0]);
+
+    let winding = 0;
+    for (let i = 0; i < crossings.length - 1; i++) {
+      winding += crossings[i][1];
+      if (winding === 0) continue;
+      const from = crossings[i][0];
+      const to = crossings[i + 1][0];
+      // Only spans that miss every dot center
+      if (Math.ceil(to - 0.5) > Math.ceil(from - 0.5)) continue;
+      dropout(raster, column, Math.floor((from + to) / 2), value);
     }
   }
 };
@@ -197,10 +260,17 @@ const clipEdgeX = (
  * Fill a path with ink (B) or remove ink (W), anti-aliased. Overlapping
  * contours in the same direction don't add up past full ink, and a contour in
  * the opposite direction cuts a hole.
+ * @param options.dropouts With center sampling, print a dot where a stroke
+ * thinner than a dot passes between dot centers, as font rasterizers do
  */
-const fillPath = (raster: Raster, path: Path, color: Color): void => {
+const fillPath = (
+  raster: Raster,
+  path: Path,
+  color: Color,
+  options: { dropouts?: boolean } = {}
+): void => {
   if (raster.sampling === "center") {
-    fillCenters(raster, path, color);
+    fillCenters(raster, path, color, options.dropouts ?? false);
     return;
   }
 
