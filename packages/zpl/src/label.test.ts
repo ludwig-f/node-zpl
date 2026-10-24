@@ -42,6 +42,18 @@ suite("Label", () => {
       );
     });
 
+    test("should set copies, print speed and darkness", () => {
+      const label = new Label({
+        width: mm(10),
+        height: mm(10),
+        dpmm: 12,
+        copies: 3,
+        speed: 4,
+        darkness: -5,
+      });
+      expect(label.toZPL()).toStrictEqual(header + "^PR4^MD-5^PQ3^XZ");
+    });
+
     test("should set the home position", () => {
       const label = new Label({
         width: mm(10),

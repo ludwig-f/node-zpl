@@ -104,6 +104,17 @@ class Params {
     return option;
   }
 
+  /** A print speed: inches per second, or A to E */
+  speed(
+    index: number,
+    name: string
+  ): number | "A" | "B" | "C" | "D" | "E" | undefined {
+    const value = this.string(index);
+    if (value === undefined) return undefined;
+    if (/^[A-E]$/.test(value)) return value as "A" | "B" | "C" | "D" | "E";
+    return this.number(index, name);
+  }
+
   yesNo(index: number, name: string): boolean | undefined {
     const value = this.oneOf(index, name, ["Y", "N"] as const);
     return value === undefined ? undefined : value === "Y";
@@ -524,6 +535,24 @@ const parsers: Record<string, CommandParser> = {
     height: p.number(2, "height"),
     interpretationLine: p.yesNo(3, "interpretationLine"),
     interpretationLineAbove: p.yesNo(4, "interpretationLineAbove"),
+  })),
+  "^PQ": withParams("^PQ", (p) => ({
+    type: "PrintQuantity",
+    quantity: p.number(0, "quantity"),
+    pauseEvery: p.number(1, "pauseEvery"),
+    replicates: p.number(2, "replicates"),
+    overridePause: p.yesNo(3, "overridePause"),
+    cutOnError: p.yesNo(4, "cutOnError"),
+  })),
+  "^PR": withParams("^PR", (p) => ({
+    type: "PrintRate",
+    speed: p.speed(0, "speed"),
+    slew: p.speed(1, "slew"),
+    backfeed: p.speed(2, "backfeed"),
+  })),
+  "^MD": withParams("^MD", (p) => ({
+    type: "MediaDarkness",
+    darkness: p.number(0, "darkness", true),
   })),
   "^BX": withParams("^BX", (p) =>
     // The aspect ratio parameter has no typed node

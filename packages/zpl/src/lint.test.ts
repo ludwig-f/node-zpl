@@ -59,6 +59,26 @@ suite("lint", () => {
       ).toContain("command-outside-format");
     });
 
+    test("printer commands inside a label", () => {
+      const diagnostics = lintLabel(
+        { type: "SetDarkness", darkness: 10 },
+        { type: "Raw", zpl: "~JA" }
+      );
+      expect(diagnostics.map((d) => d.rule)).toStrictEqual([
+        "printer-command-in-label",
+        "printer-command-in-label",
+      ]);
+      expect(diagnostics[0].message).toBe(
+        "~SD acts on the printer as soon as it's read, not when this label prints. Send it before ^XA, for example with PrinterSetup."
+      );
+    });
+
+    test("downloads are fine inside a label", () => {
+      expect(
+        lintLabel({ type: "Raw", zpl: "~DGR:LOGO.GRF,2,1,FFFF" })
+      ).toStrictEqual([]);
+    });
+
     test("control commands are fine outside a format", () => {
       expect(
         rules([{ type: "SetDarkness", darkness: 10 }, ...header, end])
@@ -208,6 +228,19 @@ suite("lint", () => {
         "^GC diameter is 5000, but the printer only accepts 3 to 4095.",
         "^BY module width is 12, but the printer only accepts 1 to 10.",
         "^BY ratio is 3.5, but the printer only accepts 2 to 3.",
+      ]);
+    });
+
+    test("print settings outside the printer's range", () => {
+      const diagnostics = lintLabel(
+        { type: "MediaDarkness", darkness: 40 },
+        { type: "PrintRate", speed: 20 },
+        { type: "PrintQuantity", quantity: 0 }
+      );
+      expect(diagnostics.map((d) => d.message)).toStrictEqual([
+        "^MD darkness is 40, but the printer only accepts -30 to 30.",
+        "^PR speed is 20, but the printer only accepts 1 to 14.",
+        "^PQ quantity is 0, but the printer only accepts 1 to 99999999.",
       ]);
     });
   });

@@ -12,7 +12,8 @@ type LintRule =
   | "value-out-of-range"
   | "ean13-data"
   | "barcode-without-data"
-  | "unknown-command";
+  | "unknown-command"
+  | "printer-command-in-label";
 
 /** A problem lint() found */
 type LintDiagnostic = {
@@ -72,6 +73,13 @@ const ranges: {
     ["ratio", "ratio", 2, 3],
   ],
   SetDarkness: [["darkness", "darkness", 0, 30]],
+  MediaDarkness: [["darkness", "darkness", -30, 30]],
+  PrintRate: [
+    ["speed", "speed", 1, 14],
+    ["slew", "slew speed", 1, 14],
+    ["backfeed", "backfeed speed", 1, 14],
+  ],
+  PrintQuantity: [["quantity", "quantity", 1, 99999999]],
   QrCode: [["magnification", "magnification", 1, 100]],
 };
 
@@ -83,6 +91,9 @@ const codes: { [T in Command["type"]]?: string } = {
   GraphicDiagonal: "^GD",
   BarcodeDefaults: "^BY",
   SetDarkness: "~SD",
+  MediaDarkness: "^MD",
+  PrintRate: "^PR",
+  PrintQuantity: "^PQ",
   QrCode: "^BQ",
 };
 
@@ -121,6 +132,13 @@ const isControlCommand = (command: Command): boolean =>
   command.type === "DownloadFont" ||
   command.type === "DownloadObject" ||
   (command.type === "Raw" && command.zpl.startsWith("~"));
+
+/** Commands that store graphics, fonts and objects on the printer */
+const isDownload = (command: Command): boolean =>
+  command.type === "DownloadGraphic" ||
+  command.type === "DownloadFont" ||
+  command.type === "DownloadObject" ||
+  (command.type === "Raw" && /^~D/.test(command.zpl));
 
 const dots = (count: number): string => `${count} dot${count === 1 ? "" : "s"}`;
 
@@ -206,6 +224,23 @@ const lint = (
       } else {
         return;
       }
+    }
+
+    // Tilde commands act as soon as they're read, so in a label they don't
+    // do what they seem to. Downloads are fine wherever they are.
+    if (
+      formatStart !== undefined &&
+      isControlCommand(command) &&
+      !isDownload(command)
+    ) {
+      const code =
+        command.type === "Raw" ? command.zpl.slice(0, 3) : codes[command.type];
+      report(
+        index,
+        "printer-command-in-label",
+        "warning",
+        `${code} acts on the printer as soon as it's read, not when this label prints. Send it before ^XA, for example with PrinterSetup.`
+      );
     }
 
     if (command.type === "EndFormat") {

@@ -300,6 +300,18 @@ const serializeCommand = (command: Command): string => {
         yn(command.interpretationLine),
         yn(command.interpretationLineAbove)
       )}`;
+    case "PrintQuantity":
+      return `^PQ${params(
+        command.quantity,
+        command.pauseEvery,
+        command.replicates,
+        yn(command.overridePause),
+        yn(command.cutOnError)
+      )}`;
+    case "PrintRate":
+      return `^PR${params(command.speed, command.slew, command.backfeed)}`;
+    case "MediaDarkness":
+      return `^MD${params(command.darkness)}`;
     case "DataMatrix":
       return `^BX${params(
         command.orientation,

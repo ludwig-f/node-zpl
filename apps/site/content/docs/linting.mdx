@@ -78,3 +78,7 @@ lint(commands, { width: 812, length: 406 });
 ### unknown-command
 
 **Warning.** A command doesn't exist in ZPL, often a typo.
+
+### printer-command-in-label
+
+**Warning.** A tilde command, like `~SD` or `~JA`, is inside a label. The printer acts on tilde commands as soon as it reads them, so `~SD` changes the printer's darkness for every label that follows, not just this one. Send them before `^XA`, for example with [`PrinterSetup`](/docs/printing), and use the label's `darkness` option (`^MD`) for this label alone. Downloads like `~DG` are fine anywhere.
