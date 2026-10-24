@@ -8,6 +8,8 @@ import {
   Code39,
   Interleaved2of5,
   PDF417,
+  Aztec,
+  MaxiCode,
   EAN13,
   DataMatrix,
   Graphic,
@@ -65,6 +67,12 @@ suite("jsx", () => {
           <PDF417 x={dots(500)} y={dots(150)} rowHeight={dots(6)} columns={3}>
             pdf
           </PDF417>
+          <Aztec x={dots(20)} y={dots(200)} moduleSize={dots(3)}>
+            az
+          </Aztec>
+          <MaxiCode x={dots(300)} y={dots(200)} mode={4}>
+            mc
+          </MaxiCode>
           <EAN13 x={dots(400)} y={dots(80)} height={mm(5)}>
             590123412345
           </EAN13>
@@ -120,6 +128,8 @@ suite("jsx", () => {
           rowHeight: dots(6),
           columns: 3,
         })
+        .drawAztec({ position: at(20, 200), data: "az", moduleSize: dots(3) })
+        .drawMaxiCode({ position: at(300, 200), data: "mc", mode: 4 })
         .drawEAN13({
           position: at(400, 80),
           data: "590123412345",

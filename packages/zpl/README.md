@@ -205,7 +205,7 @@ const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 - [ ] `^BA` - Code 93 bar code
 - [ ] `^BB` - CODABLOCK bar code
 - [x] `^BC` - Code 128 bar code (subsets A, B, and C)
-- [ ] `^BD` - UPS MaxiCode bar code
+- [x] `^BD` - UPS MaxiCode bar code
 - [x] `^BE` - EAN-13 bar code
 - [ ] `^BF` - MicroPDF417 bar code
 - [ ] `^BI` - Industrial 2 of 5 bar code
@@ -213,7 +213,7 @@ const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 - [ ] `^BK` - ANSI Codabar bar code
 - [ ] `^BL` - LOGMARS bar code
 - [ ] `^BM` - MSI bar code
-- [ ] `^BO` - Aztec bar code
+- [x] `^BO` - Aztec bar code
 - [ ] `^BP` - Plessey bar code
 - [x] `^BQ` - QR Code bar code
 - [ ] `^BR` - RSS (Reduced Space Symbology) bar code
@@ -237,7 +237,7 @@ const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 - [x] `^CW` - Font Identifier
 - [ ] `~DB` - Download Bitmap Font
 - [ ] `~DE` - Download Encoding
-- [ ] `^DF` - Download Format
+- [x] `^DF` - Download Format
 - [x] `~DG` - Download Graphics
 - [ ] `~DN` - Abort Download Graphics
 - [ ] `~DS` - Download Intellifont (Scalable Font)
@@ -250,13 +250,13 @@ const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 - [x] `^FD` - Field Data
 - [x] `^FH` - Field Hexadecimal Indicator
 - [ ] `^FM` - Multiple Field Origin Locations
-- [ ] `^FN` - Field Number
+- [x] `^FN` - Field Number
 - [x] `^FO` - Field Origin
 - [ ] `^FP` - Field Parameter
 - [x] `^FR` - Field Reverse Print
 - [x] `^FS` - Field Separator
 - [x] `^FT` - Field Typeset
-- [ ] `^FV` - Field Variable
+- [x] `^FV` - Field Variable
 - [x] `^FW` - Field Orientation
 - [x] `^FX` - Comment
 - [x] `^GB` - Graphic Box
@@ -264,7 +264,7 @@ const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 - [x] `^GD` - Graphic Diagonal Line
 - [ ] `^GE` - Graphic Ellipse
 - [x] `^GF` - Graphic Field
-- [ ] `^GS` - Graphic Symbol
+- [x] `^GS` - Graphic Symbol
 - [ ] `~HB` - Battery Status
 - [ ] `~HD` - Head Diagnostic
 - [ ] `^HF` - Host Format
@@ -279,7 +279,7 @@ const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 - [ ] `^HY` - Upload Graphics
 - [ ] `^HZ` - Display Description Information
 - [x] `^ID` - Object Delete
-- [ ] `^IL` - Image Load
+- [x] `^IL` - Image Load
 - [ ] `^IM` - Image Move
 - [ ] `^IS` - Image Save
 - [ ] `~JA` - Cancel All
@@ -333,7 +333,7 @@ const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 - [ ] `^PH`: Slew to Home Position
 - [ ] `~PH`: Slew to Home Position
 - [ ] `^PM`: Printing Mirror Image of Label
-- [ ] `^PO`: Print Orientation
+- [x] `^PO`: Print Orientation
 - [ ] `^PP`: Programmable Pause
 - [ ] `~PP`: Programmable Pause
 - [ ] `^PQ`: Print Quantity
@@ -362,7 +362,7 @@ const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 - [ ] `^WD`: Print Directory Label
 - [x] `^XA`: Start Format
 - [ ] `^XB`: Suppress Backfeed
-- [ ] `^XF`: Recall Format
+- [x] `^XF`: Recall Format
 - [x] `^XG`: Recall Graphic
 - [x] `^XZ`: End Format
 - [ ] `^ZZ`: Printer Sleep

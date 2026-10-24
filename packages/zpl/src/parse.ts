@@ -264,6 +264,18 @@ const parsers: Record<string, CommandParser> = {
     indicator: body || undefined,
   }),
   "^FD": (body) => ({ type: "FieldData", data: body }),
+  "^FV": (body) => ({ type: "FieldData", data: body, variable: true }),
+  "^FN": (body) => {
+    const match = /^(\d+)(?:"([^"]*)"?)?$/.exec(body);
+    if (!match) {
+      throw new ParamError(`^FN: expected a field number, got '${body}'`);
+    }
+    return {
+      type: "FieldNumber",
+      number: Number(match[1]),
+      prompt: match[2],
+    };
+  },
   "^FS": () => ({ type: "FieldSeparator" }),
   "^FX": (body) => ({ type: "Comment", text: body }),
   "^GB": withParams("^GB", (p) => ({
@@ -461,6 +473,44 @@ const parsers: Record<string, CommandParser> = {
       data: p.string(5) ?? "",
     };
   },
+  "^PO": withParams("^PO", (p) => ({
+    type: "PrintOrientation",
+    orientation: p.oneOf(0, "orientation", ["N", "I"] as const) ?? "N",
+  })),
+  "^GS": withParams("^GS", (p) => ({
+    type: "GraphicSymbol",
+    orientation: p.oneOf(0, "orientation", orientations),
+    height: p.number(1, "height"),
+    width: p.number(2, "width"),
+  })),
+  "^DF": withParams("^DF", (p) => ({
+    type: "DownloadFormat",
+    ...storedObject("^DF", p.requiredString(0, "object")),
+  })),
+  "^XF": withParams("^XF", (p) => ({
+    type: "RecallFormat",
+    ...storedObject("^XF", p.requiredString(0, "object")),
+  })),
+  "^IL": withParams("^IL", (p) => ({
+    type: "ImageLoad",
+    ...storedObject("^IL", p.requiredString(0, "object")),
+  })),
+  "^BO": withParams("^BO", (p) => ({
+    type: "Aztec",
+    orientation: p.oneOf(0, "orientation", orientations),
+    magnification: p.number(1, "magnification"),
+    extendedChannel: p.yesNo(2, "extendedChannel"),
+    errorControl: p.number(3, "errorControl"),
+    menu: p.yesNo(4, "menu"),
+    symbolCount: p.number(5, "symbolCount"),
+    structuredAppendId: p.string(6),
+  })),
+  "^BD": withParams("^BD", (p) => ({
+    type: "MaxiCode",
+    mode: p.oneOf(0, "mode", [2, 3, 4, 5, 6] as const),
+    symbolNumber: p.number(1, "symbolNumber"),
+    symbolCount: p.number(2, "symbolCount"),
+  })),
   "^ID": withParams("^ID", (p) => ({
     type: "DeleteObject",
     ...storedObject("^ID", p.requiredString(0, "object")),

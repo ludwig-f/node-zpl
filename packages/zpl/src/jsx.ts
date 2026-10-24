@@ -268,6 +268,43 @@ const PDF417 = primitive(
     })
 );
 
+/** Aztec code, with the data as children */
+const Aztec = primitive(
+  (
+    label,
+    {
+      children,
+      ...props
+    }: Position & {
+      moduleSize?: Length;
+      errorControl?: number;
+      orientation?: Orientation;
+      children: TextChildren;
+    }
+  ) =>
+    label.drawAztec({
+      ...props,
+      position: position(props),
+      data: text(children),
+    })
+);
+
+/** MaxiCode, with the data as children */
+const MaxiCode = primitive(
+  (
+    label,
+    {
+      children,
+      ...props
+    }: Position & { mode?: 2 | 3 | 4 | 5 | 6; children: TextChildren }
+  ) =>
+    label.drawMaxiCode({
+      ...props,
+      position: position(props),
+      data: text(children),
+    })
+);
+
 /** EAN-13 barcode, with the 12 data digits as children */
 const EAN13 = primitive((label, { children, ...props }: BarcodeProps) =>
   label.drawEAN13({
@@ -376,6 +413,8 @@ export {
   Code39,
   Interleaved2of5,
   PDF417,
+  Aztec,
+  MaxiCode,
   EAN13,
   DataMatrix,
   QrCode,

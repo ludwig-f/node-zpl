@@ -336,6 +336,33 @@ suite("Label", () => {
     });
   });
 
+  describe("drawAztec", () => {
+    test("should draw an Aztec code on the label", () => {
+      const label = wideLabel().drawAztec({
+        position: at20,
+        data: "hello",
+        moduleSize: dots(4),
+        errorControl: 50,
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^BO,4,,50^FDhello^FS^XZ"
+      );
+    });
+  });
+
+  describe("drawMaxiCode", () => {
+    test("should draw a MaxiCode on the label", () => {
+      const label = wideLabel().drawMaxiCode({
+        position: at20,
+        data: "hello",
+        mode: 4,
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^BD4^FDhello^FS^XZ"
+      );
+    });
+  });
+
   describe("drawCode128", () => {
     test("should draw a Code 128 barcode on the label", () => {
       const label = wideLabel().drawCode128({
