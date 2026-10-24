@@ -1,7 +1,7 @@
 import data from "@/content/commands.json";
 import details from "@/content/command-details.json";
 import { apiFor } from "./api-links";
-import { FadeInImage } from "./fade-in-image";
+import { LiveExample } from "./live-example";
 
 type Command = (typeof data.commands)[number];
 type Param = {
@@ -45,118 +45,89 @@ export function CommandDetails({
   const label =
     "font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-muted";
   return (
-    <div className="@container pb-5 pt-1">
-      {/* Text on the left, what the example prints on the right */}
-      <div className="grid gap-x-8 gap-y-5 text-[14px] leading-[1.55] @[720px]:grid-cols-[minmax(0,1fr)_auto]">
-        <div className="flex min-w-0 max-w-[68ch] flex-col gap-4">
-          <p className="text-ink-2">{info.summary}</p>
+    <div className="@container flex flex-col gap-5 text-[14px] leading-[1.55]">
+      <p className="max-w-[68ch] text-ink-2">{info.summary}</p>
 
-          <div className="flex flex-col gap-1.5">
-            <span className={label}>Format</span>
-            <code className="w-fit rounded-[3px] bg-code-inline px-1.5 py-0.5 font-mono text-[13px] text-ink">
-              {info.syntax}
-            </code>
-          </div>
+      <div className="flex flex-col gap-1.5">
+        <span className={label}>Format</span>
+        <code className="w-fit rounded-[3px] bg-code-inline px-1.5 py-0.5 font-mono text-[13px] text-ink">
+          {info.syntax}
+        </code>
+      </div>
 
-          {params.length > 0 && (
-            <div className="overflow-x-auto rounded-md border border-rule">
-              <table className="w-full border-separate border-spacing-0 text-left text-[13.5px]">
-                <thead>
-                  <tr>
-                    {["Parameter", "Description", hasDefaults && "Default"]
-                      .filter(Boolean)
-                      .map((heading) => (
-                        <th
-                          key={heading as string}
-                          className={`border-b border-rule bg-raised px-3 py-1.5 ${label}`}
-                        >
-                          {heading}
-                        </th>
-                      ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {params.map((param) => (
-                    <tr
-                      key={param.name}
-                      className="align-top [&:last-child>td]:border-b-0"
+      {params.length > 0 && (
+        <div className="max-w-[760px] overflow-x-auto rounded-md border border-rule">
+          <table className="w-full border-separate border-spacing-0 text-left text-[13.5px]">
+            <thead>
+              <tr>
+                {["Parameter", "Description", hasDefaults && "Default"]
+                  .filter(Boolean)
+                  .map((heading) => (
+                    <th
+                      key={heading as string}
+                      className={`border-b border-rule bg-raised px-3 py-1.5 ${label}`}
                     >
-                      <td className="border-b border-rule px-3 py-1.5">
-                        <code className="font-mono text-[13px] font-semibold text-ink">
-                          {param.name}
-                        </code>
-                      </td>
-                      <td className="border-b border-rule px-3 py-1.5 text-ink-2">
-                        {param.description}
-                        {param.values && (
-                          <span className="block text-muted">
-                            {param.values}
-                          </span>
-                        )}
-                      </td>
-                      {hasDefaults && (
-                        <td className="border-b border-rule px-3 py-1.5 text-muted">
-                          {param.default}
-                        </td>
-                      )}
-                    </tr>
+                      {heading}
+                    </th>
                   ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+              </tr>
+            </thead>
+            <tbody>
+              {params.map((param) => (
+                <tr
+                  key={param.name}
+                  className="align-top [&:last-child>td]:border-b-0"
+                >
+                  <td className="border-b border-rule px-3 py-1.5">
+                    <code className="font-mono text-[13px] font-semibold text-ink">
+                      {param.name}
+                    </code>
+                  </td>
+                  <td className="border-b border-rule px-3 py-1.5 text-ink-2">
+                    {param.description}
+                    {param.values && (
+                      <span className="block text-muted">{param.values}</span>
+                    )}
+                  </td>
+                  {hasDefaults && (
+                    <td className="border-b border-rule px-3 py-1.5 text-muted">
+                      {param.default}
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
-          {info.example && (
-            <div className="flex flex-col gap-1.5">
-              <span className={label}>Example</span>
-              <pre className="overflow-x-auto rounded-md border border-rule-strong bg-code px-3 py-2.5 font-mono text-[13px] leading-[1.7] text-ink">
-                {info.example}
-              </pre>
-            </div>
-          )}
+      {info.example && (
+        <LiveExample code={command.code} zpl={info.example} image={image} />
+      )}
 
-          {api && (
-            <p className="text-ink-2">
-              In zplkit:{" "}
+      {api && (
+        <p className="text-ink-2">
+          In zplkit:{" "}
+          <a
+            href={`/docs/api/label#${api.method.toLowerCase()}`}
+            className="font-mono text-[13px] text-accent hover:underline"
+          >
+            label.{api.method}()
+          </a>
+          {api.element && (
+            <>
+              {" "}
+              or{" "}
               <a
-                href={`/docs/api/label#${api.method.toLowerCase()}`}
+                href={`/docs/api/jsx#${api.element.toLowerCase()}`}
                 className="font-mono text-[13px] text-accent hover:underline"
               >
-                label.{api.method}()
+                &lt;{api.element}&gt;
               </a>
-              {api.element && (
-                <>
-                  {" "}
-                  or{" "}
-                  <a
-                    href={`/docs/api/jsx#${api.element.toLowerCase()}`}
-                    className="font-mono text-[13px] text-accent hover:underline"
-                  >
-                    &lt;{api.element}&gt;
-                  </a>
-                </>
-              )}
-            </p>
+            </>
           )}
-        </div>
-
-        {image && (
-          <div className="@[720px]:sticky @[720px]:top-[calc(var(--fd-header-height,0px)+120px)] @[720px]:self-start">
-            {/* The paper only dims in dark mode, so what's shown is what prints */}
-            <div className="w-fit max-w-full overflow-hidden rounded-[6px] bg-paper shadow-label">
-              <FadeInImage
-                src={`/reference/examples/${image.file}`}
-                alt={`What the ${command.code} example prints`}
-                width={image.width}
-                height={image.height}
-                loading="lazy"
-                className="block h-auto max-w-full mix-blend-multiply"
-                style={{ width: image.width * 0.75 }}
-              />
-            </div>
-          </div>
-        )}
-      </div>
+        </p>
+      )}
     </div>
   );
 }

@@ -15,7 +15,11 @@ const lastValue = (zpl: string, command: string): number | undefined => {
   return value === undefined ? undefined : Number(value);
 };
 
-/** The raster cropped to its ink plus a margin, or undefined when blank */
+/**
+ * The label from its top left corner to just past the ink, so the example's
+ * own margins show, or undefined when blank. A live preview of the same size
+ * then shows exactly the same thing.
+ */
 const crop = (raster: Raster): Raster | undefined => {
   const { width, height, ink } = raster;
   let left = width;
@@ -34,8 +38,8 @@ const crop = (raster: Raster): Raster | undefined => {
   }
   if (right < 0) return undefined;
 
-  left = Math.max(0, left - MARGIN);
-  top = Math.max(0, top - MARGIN);
+  left = 0;
+  top = 0;
   right = Math.min(width - 1, right + MARGIN);
   bottom = Math.min(height - 1, bottom + MARGIN);
   const cropped = new Raster(right - left + 1, bottom - top + 1);
