@@ -468,6 +468,9 @@ export default async function HomePage() {
           <Link href="/docs/commands" className="hover:text-ink">
             Reference
           </Link>
+          <Link href="/releases" className="hover:text-ink">
+            Releases
+          </Link>
           <a
             href="https://github.com/ludwig-f/zplkit"
             className="hover:text-ink"
