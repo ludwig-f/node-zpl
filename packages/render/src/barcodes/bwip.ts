@@ -10,14 +10,42 @@
 import {
   azteccode,
   code128,
+  databarexpanded,
+  databarexpandedstacked,
+  databarlimited,
+  databaromni,
+  databarstacked,
+  databarstackedomni,
+  databartruncated,
   datamatrix,
   maxicode,
+  micropdf417,
+  onecode,
   pdf417,
+  planet,
+  postnet,
   qrcode,
 } from "bwip-js";
 import type { Path } from "../raster.js";
 
-const encoders = { azteccode, code128, datamatrix, pdf417, qrcode };
+const encoders = {
+  azteccode,
+  code128,
+  databarexpanded,
+  databarexpandedstacked,
+  databarlimited,
+  databaromni,
+  databarstacked,
+  databarstackedomni,
+  databartruncated,
+  datamatrix,
+  micropdf417,
+  pdf417,
+  qrcode,
+};
+
+/** Encoders for bars of different heights */
+const barEncoders = { onecode, planet, postnet };
 
 type Bcid = keyof typeof encoders;
 type Edge = [x0: number, y0: number, x1: number, y1: number];
@@ -56,9 +84,12 @@ const draw = (bcid: string, text: string, options: string) => {
       width = w;
       height = h;
     },
-    // Bars are lines as wide as the bar, around a point rounded up
+    // Bars are lines as wide as the bar, around their center rounded up,
+    // or for GS1 DataBar, the center of the bar one module narrower
     line(x0: number, y0: number, x1: number, y1: number, lw: number) {
-      const half = Math.ceil(lw / 2);
+      const half = bcid.startsWith("databar")
+        ? Math.floor((lw - 1) / 2)
+        : Math.ceil(lw / 2);
       if (x0 === x1) {
         const left = x0 - half;
         outline([
@@ -186,4 +217,49 @@ const encodeMaxiCode = (text: string, mode: number): Path => {
   );
 };
 
-export { encodeLinear, encodeMatrix, encodeMaxiCode };
+/**
+ * The bars of a postal code, left to right, with their bottoms and tops as
+ * fractions of the tallest bar, measured from the bottom
+ */
+const encodeBars = (bcid: string, text: string, options = "") => {
+  const encoder = barEncoders[bcid as keyof typeof barEncoders];
+  if (!encoder) throw new Error(`bwip-js encoder ${bcid} isn't included`);
+
+  let height = 0;
+  const lines: { x: number; y0: number; y1: number }[] = [];
+  // Drawn large, as bwip-js rounds coordinates to whole pixels
+  encoder({ ...parseOptions(options), bcid, text, scale: 20 }, {
+    setopts() {},
+    scale() {},
+    measure: () => ({ width: 0, ascent: 0, descent: 0 }),
+    init(_w: number, h: number) {
+      height = h;
+    },
+    line(x0: number, y0: number, x1: number, y1: number) {
+      if (x0 === x1) {
+        lines.push({ x: x0, y0: Math.min(y0, y1), y1: Math.max(y0, y1) });
+      }
+    },
+    polygon() {},
+    hexagon() {},
+    ellipse() {},
+    fill() {},
+    clip() {},
+    unclip() {},
+    text() {},
+    end() {},
+  } as never);
+
+  // y grows downwards from the top of the drawing
+  const top = Math.min(...lines.map((line) => line.y0));
+  const bottom = Math.max(...lines.map((line) => line.y1));
+  const span = bottom - top || height;
+  return lines
+    .sort((a, b) => a.x - b.x)
+    .map((line) => ({
+      bottom: (bottom - line.y1) / span,
+      top: (bottom - line.y0) / span,
+    }));
+};
+
+export { encodeBars, encodeLinear, encodeMatrix, encodeMaxiCode };

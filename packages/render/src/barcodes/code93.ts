@@ -88,9 +88,10 @@ const encodeCode93 = (data: string, printCheckDigit: boolean) => {
   // Stop: the start character and a termination bar
   widths.push(...Array.from(START, Number), 1);
 
-  const checks = printCheckDigit
-    ? characters[c] + (k < 43 ? characters[k] : "")
-    : "";
+  // The four shift characters print as a, b, c and d
+  const printed = (value: number) =>
+    value < 43 ? characters[value] : "abcd"[value - 43];
+  const checks = printCheckDigit ? printed(c) + printed(k) : "";
   return { widths, text: text + checks };
 };
 

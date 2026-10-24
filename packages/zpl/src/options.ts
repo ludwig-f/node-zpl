@@ -262,6 +262,84 @@ type CodabarOptions = LinearBarcodeOptions & {
   stop?: "A" | "B" | "C" | "D";
 };
 
+/** What the USPS postal codes take: no width, the printer sizes the bars */
+type PostalOptions = Omit<LinearBarcodeOptions, "printHri"> & {
+  /**
+   * Print the data as text with the bars
+   * @defaultValue false
+   */
+  printHri?: boolean;
+};
+
+/** Options for `postnet()` (^BZ): a ZIP code of 5, 9 or 11 digits */
+type PostnetOptions = PostalOptions;
+
+/** Options for `planet()` (^B5): 11 or 13 digits */
+type PlanetOptions = PostalOptions;
+
+/**
+ * Options for `intelligentMail()` (^BZ type 3): a 20 digit tracking code and
+ * a routing code of 0, 5, 9 or 11 digits
+ */
+type IntelligentMailOptions = BarcodeOptions & {
+  /**
+   * Height of the tallest bars
+   * @defaultValue The height set with ^BY
+   */
+  height?: Length;
+};
+
+/**
+ * Options for `gs1DataBar()` (^BR). For the first five types the data is a
+ * GTIN of up to 13 digits, and the printer adds the check digit. Expanded
+ * takes GS1 element strings without parentheses, like
+ * "010001234567890517251231" for AIs 01 and 17; printers would encode
+ * parentheses as data.
+ */
+type Gs1DataBarOptions = BarcodeOptions & {
+  /**
+   * Which GS1 DataBar
+   * @defaultValue "omnidirectional"
+   */
+  type?:
+    | "omnidirectional"
+    | "truncated"
+    | "stacked"
+    | "stackedOmnidirectional"
+    | "limited"
+    | "expanded";
+  /**
+   * Size of a module, 1 to 10 dots
+   * @defaultValue 2 dots, 3 at 300 dpi and 6 at 600 dpi
+   */
+  moduleSize?: Length;
+  /**
+   * Height of the separator rows in stacked symbols, in modules
+   * @defaultValue 1
+   */
+  separatorHeight?: 1 | 2;
+  /**
+   * Segments per row for Expanded, an even number from 2 to 22
+   * @defaultValue 22
+   */
+  segments?: number;
+};
+
+/** Options for `microPdf417()` (^BF) */
+type MicroPdf417Options = BarcodeOptions & {
+  /**
+   * Height of each row
+   * @defaultValue The height set with ^BY
+   */
+  rowHeight?: Length;
+  /**
+   * 0 to 33, which sets the columns, rows and error correction; the
+   * reference lists them
+   * @defaultValue 0
+   */
+  mode?: number;
+};
+
 /** Options for `pdf417()` (^B7) */
 type Pdf417Options = BarcodeOptions & {
   /**
@@ -402,6 +480,11 @@ export type {
   UpcEanExtensionOptions,
   Code93Options,
   CodabarOptions,
+  PostnetOptions,
+  PlanetOptions,
+  IntelligentMailOptions,
+  Gs1DataBarOptions,
+  MicroPdf417Options,
   Pdf417Options,
   AztecOptions,
   MaxiCodeOptions,

@@ -231,8 +231,9 @@ describe("Code 93", () => {
   });
 
   test("prints the data below the bars", () => {
-    const { bars, text } = parts("^FO100,100^BY2^BAN,100,Y,N^FD12345ABCDE^FS");
-    expect(text!.top).toBeGreaterThan(bars!.bottom);
+    // The bars end at 199
+    const box = bounds("^FO100,100^BY2^BAN,100,Y,N^FD12345ABCDE^FS");
+    expect(box.bottom).toBeGreaterThan(205);
   });
 });
 
@@ -526,8 +527,50 @@ describe("Data Matrix", () => {
   });
 });
 
+describe("postal codes, GS1 DataBar and MicroPDF417", () => {
+  test.each([
+    // Bars a module wide, two and a half modules apart, short ones 0.4 high
+    ["^FO100,100^BY2^BZN,40,N,N^FD12345^FS", 100, 256, 100, 139],
+    ["^FO100,100^BY3^BZN,40,N,N^FD123456789^FS", 100, 458, 100, 139],
+    ["^FO100,100^BY2^BZN,40,,,3^FD00123123456123456789^FS", 100, 421, 100, 139],
+    // GS1 DataBar takes the field's orientation, like other barcodes
+    ["^FO100,100^BRN,1,2^FD12345678901^FS", 102, 291, 100, 165],
+    ["^FO300,100^BR^FD12345678901^FS", 302, 491, 100, 165],
+    ["^FO100,30^BY3^BFN,8,3^FDABCDEFGHIJKLMNOPQRSTUV^FS", 100, 213, 30, 189],
+  ])("%s", (body, left, right, top, bottom) => {
+    expect(bounds(body)).toStrictEqual({ left, right, top, bottom });
+  });
+
+  test("GS1 DataBar Expanded reads AIs from the digits", () => {
+    // AI 01 with a GTIN, then AI 21 with a serial number
+    expect(
+      bounds("^FO50,100^BRN,6,2^FD010001234567890521ABC^FS")
+    ).toStrictEqual({
+      left: 52,
+      right: 449,
+      top: 100,
+      bottom: 167,
+    });
+  });
+
+  test("GS1 DataBar Expanded with parentheses draws a placeholder", () => {
+    // Printers encode the parentheses as data, which we can't. The symbol
+    // would be 34 modules (68 dots) tall; the placeholder is 40.
+    const box = bounds("^FO50,100^BRN,6,2^FD(01)00012345678905^FS");
+    expect(box.top).toBe(100);
+    expect(box.bottom - box.top + 1).toBe(40);
+  });
+
+  test("data a barcode can't encode draws a placeholder", () => {
+    // Intelligent Mail needs 20, 25, 29 or 31 digits
+    const raster = render("^FO100,100^BZN,40,,,3^FD123^FS");
+    expect(raster.ink.some((ink) => ink > 0)).toBe(true);
+  });
+});
+
 describe("barcodes we can't draw yet", () => {
-  const body = "^FO100,100^BY2,3,60^BZN,40,Y^FD12345^FS";
+  // GS1 DataBar composites, with a 2D part after the |
+  const body = "^FO100,100^BY2,3,60^BRN,7^FD12345678901|ABC^FS";
 
   test("don't print their data as text", () => {
     const [label] = layout(parse(`^XA${body}^XZ`).commands);
@@ -535,7 +578,7 @@ describe("barcodes we can't draw yet", () => {
       "placeholder",
     ]);
     expect(label.elements[0]).toMatchObject({
-      code: "^BZ",
+      code: "^BR",
       x: 100,
       y: 100,
       height: 60,
@@ -553,7 +596,7 @@ describe("barcodes we can't draw yet", () => {
   });
 
   test("placeholders are at least 40 dots tall", () => {
-    expect(bounds("^FT100,300^BZ^FD12345^FS")).toMatchObject({
+    expect(bounds("^FT100,300^BRN,7^FD12345^FS")).toMatchObject({
       top: 260,
       bottom: 299,
     });
@@ -561,7 +604,7 @@ describe("barcodes we can't draw yet", () => {
 
   test("placeholders fit their text at higher resolutions", () => {
     // Font D at 24 dpmm is 54 dots tall, between 6-dot lines
-    const [raster] = renderLabels("^XA^FO100,100^BZ^FDx^FS^XZ", {
+    const [raster] = renderLabels("^XA^FO100,100^BRN,7^FDx^FS^XZ", {
       widthMm: 101.6,
       heightMm: 101.6,
       dpmm: 24,
@@ -581,9 +624,9 @@ describe("barcodes we can't draw yet", () => {
     expect(label.elements).toMatchObject([
       { kind: "placeholder", code: "^BC", reason: "invalid" },
     ]);
-    const [other] = layout(parse("^XA^FO10,10^BZ^FD12^FS^XZ").commands);
+    const [other] = layout(parse("^XA^FO10,10^BR,1^FD1|2^FS^XZ").commands);
     expect(other.elements).toMatchObject([
-      { kind: "placeholder", code: "^BZ", reason: "unsupported" },
+      { kind: "placeholder", code: "^BR", reason: "unsupported" },
     ]);
   });
 

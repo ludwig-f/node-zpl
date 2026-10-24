@@ -23,6 +23,11 @@ import type {
   UpcEanExtensionOptions,
   Code93Options,
   CodabarOptions,
+  PostnetOptions,
+  PlanetOptions,
+  IntelligentMailOptions,
+  Gs1DataBarOptions,
+  MicroPdf417Options,
   FieldOptions,
   GraphicOptions,
   Interleaved2of5Options,
@@ -465,6 +470,96 @@ class Label extends ZplContent {
         interpretationLineAbove: options.printHriAbove,
         start: options.start,
         stop: options.stop,
+      },
+      ...this.fieldData(options.data),
+    ]);
+  }
+
+  /**
+   * Draw a USPS POSTNET barcode on the label
+   */
+  public postnet(options: PostnetOptions): this {
+    return this.addField(options.position, [
+      {
+        type: "PostalCode",
+        orientation: options.orientation,
+        height: this.optionalDots(options.height),
+        interpretationLine: options.printHri,
+        interpretationLineAbove: options.printHriAbove,
+      },
+      ...this.fieldData(options.data),
+    ]);
+  }
+
+  /**
+   * Draw a USPS PLANET barcode on the label
+   */
+  public planet(options: PlanetOptions): this {
+    return this.addField(options.position, [
+      {
+        type: "Planet",
+        orientation: options.orientation,
+        height: this.optionalDots(options.height),
+        interpretationLine: options.printHri,
+        interpretationLineAbove: options.printHriAbove,
+      },
+      ...this.fieldData(options.data),
+    ]);
+  }
+
+  /**
+   * Draw a USPS Intelligent Mail barcode on the label
+   */
+  public intelligentMail(options: IntelligentMailOptions): this {
+    return this.addField(options.position, [
+      {
+        type: "PostalCode",
+        orientation: options.orientation,
+        height: this.optionalDots(options.height),
+        postalType: 3,
+      },
+      ...this.fieldData(options.data),
+    ]);
+  }
+
+  /**
+   * Draw a GS1 DataBar on the label
+   */
+  public gs1DataBar(options: Gs1DataBarOptions): this {
+    const types = [
+      "omnidirectional",
+      "truncated",
+      "stacked",
+      "stackedOmnidirectional",
+      "limited",
+      "expanded",
+    ] as const;
+    const symbology = options.type
+      ? ((types.indexOf(options.type) + 1) as 1 | 2 | 3 | 4 | 5 | 6)
+      : undefined;
+    return this.addField(options.position, [
+      {
+        type: "Gs1DataBar",
+        orientation: options.orientation,
+        symbology,
+        magnification: this.optionalDots(options.moduleSize),
+        separatorHeight: options.separatorHeight,
+        segments: options.segments,
+      },
+      ...this.fieldData(options.data),
+    ]);
+  }
+
+  /**
+   * Draw a MicroPDF417 code on the label
+   */
+  public microPdf417(options: MicroPdf417Options): this {
+    return this.addField(options.position, [
+      {
+        type: "MicroPdf417",
+        orientation: options.orientation,
+        rowHeight: this.optionalDots(options.rowHeight),
+        mode: options.mode,
       },
       ...this.fieldData(options.data),
     ]);

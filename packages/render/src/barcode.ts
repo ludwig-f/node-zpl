@@ -4,7 +4,7 @@
  * turn with the field like text does: the bottom of the symbol acts as the
  * baseline.
  */
-import { encodeMatrix, encodeMaxiCode } from "./barcodes/bwip.js";
+import { encodeBars, encodeMatrix, encodeMaxiCode } from "./barcodes/bwip.js";
 import { encodeCode11 } from "./barcodes/code11.js";
 import { encodeCode128 } from "./barcodes/code128.js";
 import { encodeCode39 } from "./barcodes/code39.js";
@@ -31,6 +31,30 @@ import type { Color, Raster } from "./raster.js";
 import type { Face, Place } from "./text.js";
 
 type Barcode = Extract<Element, { kind: "barcode" }>;
+
+/** Each barcode's command, for placeholders */
+const codes: Record<Barcode["symbology"]["type"], string> = {
+  Code11: "^B1",
+  Code128: "^BC",
+  Code39: "^B3",
+  Interleaved2of5: "^B2",
+  Pdf417: "^B7",
+  Ean13: "^BE",
+  Ean8: "^B8",
+  UpcA: "^BU",
+  UpcE: "^B9",
+  UpcEanExtension: "^BS",
+  Code93: "^BA",
+  Codabar: "^BK",
+  PostalCode: "^BZ",
+  Planet: "^B5",
+  Gs1DataBar: "^BR",
+  MicroPdf417: "^BF",
+  DataMatrix: "^BX",
+  QrCode: "^BQ",
+  Aztec: "^BO",
+  MaxiCode: "^BD",
+};
 type Placeholder = Extract<Element, { kind: "placeholder" }>;
 
 /** Gaps between the bars and the interpretation line's character cells */
@@ -42,12 +66,9 @@ const GUARD_EXTENSION = 13;
 
 /**
  * Text under part of the bars, centered on the span from `from` to `to`,
- * starting at `from` when they're equal, or ending at `to` with align "end"
+ * or starting at `from` when they're equal
  */
-type TextPart = { text: string; from: number; to: number; align?: "end" };
-
-/** Gap in modules between UPC's outside digits and the bars */
-const OUTSIDE_GAP = 4;
+type TextPart = { text: string; from: number; to: number };
 
 type Linear = {
   kind: "linear";
@@ -60,6 +81,10 @@ type Linear = {
   text: string;
   /** How the text sits below the bars, if not centered as one line */
   below?: TextPart[];
+  /** Boxes in place of the first and last characters (start and stop) */
+  boxes?: boolean;
+  /** Gap between the bars and text above them, if not GAP_ABOVE */
+  gapAbove?: number;
 };
 
 type Matrix = {
@@ -73,6 +98,181 @@ type Matrix = {
   /** Moves the symbol down from ^FO, or up from ^FT */
   shift?: { origin: number; typeset: number };
 };
+
+/** A postal bar: full height, or one of the shorter kinds */
+type PostalBar = "full" | "short" | "ascender" | "descender" | "tracker";
+
+type Postal = {
+  kind: "postal";
+  bars: PostalBar[];
+  /** Bar width and left edges in dots */
+  barWidth: number;
+  starts: number[];
+  height: number;
+  line?: "below" | "above";
+  text: string;
+};
+
+/**
+ * Left edges of postal bars: two and a half module widths apart, rounded
+ * down, except that at a module width of 3 the first gap is a dot narrower
+ */
+const postalStarts = (count: number, moduleWidth: number) => {
+  const pitch = Math.floor(2.5 * moduleWidth);
+  return Array.from({ length: count }, (_, i) =>
+    i === 0 ? 0 : i * pitch - (moduleWidth === 3 ? 1 : 0)
+  );
+};
+
+/** POSTNET and PLANET bars from bwip-js, tall or short */
+const twoState = (bcid: string, digits: string): PostalBar[] =>
+  encodeBars(bcid, digits, "includecheck").map((bar) =>
+    bar.top > 0.7 ? "full" : "short"
+  );
+
+/** Intelligent Mail's four kinds of bars from bwip-js */
+const fourState = (data: string): PostalBar[] =>
+  encodeBars("onecode", data).map(({ bottom, top }) =>
+    bottom < 0.1
+      ? top > 0.9
+        ? "full"
+        : "descender"
+      : top > 0.9
+      ? "ascender"
+      : "tracker"
+  );
+
+/** Columns and rows of each MicroPDF417 mode, 0 to 33 */
+const microPdf417Modes: [columns: number, rows: number][] = [
+  [1, 11],
+  [1, 14],
+  [1, 17],
+  [1, 20],
+  [1, 24],
+  [1, 28],
+  [2, 8],
+  [2, 11],
+  [2, 14],
+  [2, 17],
+  [2, 20],
+  [2, 23],
+  [2, 26],
+  [3, 6],
+  [3, 8],
+  [3, 10],
+  [3, 12],
+  [3, 15],
+  [3, 20],
+  [3, 26],
+  [3, 32],
+  [3, 38],
+  [3, 44],
+  [4, 6],
+  [4, 8],
+  [4, 10],
+  [4, 12],
+  [4, 15],
+  [4, 20],
+  [4, 26],
+  [4, 32],
+  [4, 38],
+  [4, 44],
+  [4, 4],
+];
+
+/** bwip-js encoders for GS1 DataBar types 1 to 6 */
+const dataBarTypes = [
+  "databaromni",
+  "databartruncated",
+  "databarstacked",
+  "databarstackedomni",
+  "databarlimited",
+  "databarexpanded",
+];
+
+/** Mod-10 check digit, with digits weighted 3 and 1 from the right */
+const gtinCheckDigit = (digits: string) => {
+  let sum = 0;
+  for (let i = 0; i < digits.length; i++) {
+    sum += Number(digits[i]) * ((digits.length - i) % 2 ? 3 : 1);
+  }
+  return String((10 - (sum % 10)) % 10);
+};
+
+/** Lengths of GS1 AIs with predefined lengths, AI included, by first two digits */
+const fixedLengths: Record<string, number> = {
+  "00": 20,
+  "01": 16,
+  "02": 16,
+  "03": 16,
+  "04": 18,
+  "11": 8,
+  "12": 8,
+  "13": 8,
+  "14": 8,
+  "15": 8,
+  "16": 8,
+  "17": 8,
+  "18": 8,
+  "19": 8,
+  "20": 4,
+  "31": 10,
+  "32": 10,
+  "33": 10,
+  "34": 10,
+  "35": 10,
+  "36": 10,
+  "41": 16,
+};
+
+/** How many digits an AI starting with these two digits has */
+const aiLength = (prefix: string) =>
+  /^(23|24|25|40|41|42)$/.test(prefix)
+    ? 3
+    : /^(31|32|33|34|35|36|39|7\d|8\d)$/.test(prefix)
+    ? 4
+    : 2;
+
+/**
+ * GS1 element strings without parentheses, like "010001234567890521ABC",
+ * with them added. Variable-length values run to a GS character or the end.
+ */
+const withParentheses = (data: string) => {
+  let rest = data;
+  let out = "";
+  while (rest) {
+    const prefix = rest.slice(0, 2);
+    const ai = rest.slice(0, aiLength(prefix));
+    const fixed = fixedLengths[prefix];
+    const end =
+      fixed ?? (rest.includes("\x1d") ? rest.indexOf("\x1d") : rest.length);
+    out += `(${ai})${rest.slice(ai.length, end)}`;
+    rest = rest.slice(end);
+    if (rest.startsWith("\x1d")) rest = rest.slice(1);
+  }
+  return out;
+};
+
+/**
+ * GS1 DataBar's data for bwip-js. Types 1 to 5 take a GTIN of up to 13
+ * digits and add the check digit; Expanded takes GS1 element strings
+ * without parentheses around the AIs.
+ */
+const dataBarText = (data: string, symbology: number) => {
+  if (symbology === 6) {
+    // Printers encode parentheses as data characters, which bwip-js can't
+    if (data.includes("(")) {
+      throw new Error("Parentheses in GS1 DataBar Expanded data");
+    }
+    return withParentheses(data);
+  }
+  const digits = data.replace(/\D/g, "").slice(0, 13).padStart(13, "0");
+  return `(01)${digits}${gtinCheckDigit(digits)}`;
+};
+
+/** Default GS1 DataBar module size for each printhead resolution */
+const dataBarMagnification = (dpmm: number) =>
+  dpmm >= 24 ? 6 : dpmm >= 12 ? 3 : 2;
 
 /** Pixels from bwip-js for 2D symbols, with options like "eclevel=Q" */
 const matrix = (bcid: string, text: string, options: string[] = []) =>
@@ -122,7 +322,7 @@ const interpretation = (
   above: boolean | undefined
 ): Linear["line"] => (shown === false ? undefined : above ? "above" : "below");
 
-const encode = (barcode: Barcode, dpmm: number): Linear | Matrix => {
+const encode = (barcode: Barcode, dpmm: number): Linear | Matrix | Postal => {
   const { symbology, data, moduleWidth } = barcode;
   switch (symbology.type) {
     case "Code128": {
@@ -235,16 +435,13 @@ const encode = (barcode: Barcode, dpmm: number): Linear | Matrix => {
           symbology.interpretationLineAbove
         ),
         text: text.slice(0, 11) + check,
-        // The first and last digits sit outside the bars, five under each half
+        // The first digit starts 11 modules left of the bars, like EAN-13's,
+        // the last 2 modules right of them, and five are under each half
         below: [
-          { text: text[0], from: 0, to: -OUTSIDE_GAP * m, align: "end" },
+          { text: text[0], from: -11 * m, to: -11 * m },
           { text: text.slice(1, 6), from: 10 * m, to: 45 * m },
           { text: text.slice(6, 11), from: 50 * m, to: 85 * m },
-          {
-            text: check,
-            from: (95 + OUTSIDE_GAP) * m,
-            to: (95 + OUTSIDE_GAP) * m,
-          },
+          { text: check, from: 97 * m, to: 97 * m },
         ],
       };
     }
@@ -262,15 +459,12 @@ const encode = (barcode: Barcode, dpmm: number): Linear | Matrix => {
           symbology.interpretationLineAbove
         ),
         text: text.slice(0, 7) + check,
-        // The number system and check digit sit outside the bars
+        // The number system and check digit sit outside the bars, as on
+        // UPC-A
         below: [
-          { text: text[0], from: 0, to: -OUTSIDE_GAP * m, align: "end" },
+          { text: text[0], from: -11 * m, to: -11 * m },
           { text: text.slice(1, 7), from: 3 * m, to: 45 * m },
-          {
-            text: check,
-            from: (51 + OUTSIDE_GAP) * m,
-            to: (51 + OUTSIDE_GAP) * m,
-          },
+          { text: check, from: 53 * m, to: 53 * m },
         ],
       };
     }
@@ -286,6 +480,8 @@ const encode = (barcode: Barcode, dpmm: number): Linear | Matrix => {
           symbology.interpretationLineAbove ?? true
         ),
         text,
+        // Right on top of the bars
+        gapAbove: 0,
       };
     }
     case "Code93": {
@@ -301,9 +497,9 @@ const encode = (barcode: Barcode, dpmm: number): Linear | Matrix => {
           symbology.interpretationLine,
           symbology.interpretationLineAbove
         ),
-        // Printers show the start and stop characters as boxes; we leave
-        // their places blank
+        // The start and stop characters print as boxes
         text: ` ${text} `,
+        boxes: true,
       };
     }
     case "Codabar": {
@@ -323,6 +519,61 @@ const encode = (barcode: Barcode, dpmm: number): Linear | Matrix => {
           symbology.interpretationLineAbove
         ),
         text,
+      };
+    }
+    case "PostalCode":
+    case "Planet": {
+      const postalType =
+        symbology.type === "Planet" ? 1 : symbology.postalType ?? 0;
+      const digits = data.replace(/\D/g, "");
+      const bars =
+        postalType === 3
+          ? fourState(digits)
+          : twoState(postalType === 1 ? "planet" : "postnet", digits);
+      return {
+        kind: "postal",
+        bars,
+        barWidth: moduleWidth,
+        starts: postalStarts(bars.length, moduleWidth),
+        height: symbology.height ?? barcode.height,
+        // Postal codes print their digits only when asked
+        line:
+          postalType !== 3 && symbology.interpretationLine
+            ? symbology.interpretationLineAbove
+              ? "above"
+              : "below"
+            : undefined,
+        text: digits,
+      };
+    }
+    case "Gs1DataBar": {
+      const type = symbology.symbology ?? 1;
+      const options =
+        type === 6 && symbology.segments
+          ? [`segments=${symbology.segments}`]
+          : [];
+      const bcid =
+        type === 6 && symbology.segments
+          ? "databarexpandedstacked"
+          : dataBarTypes[type - 1];
+      return {
+        kind: "matrix",
+        ...matrix(bcid, dataBarText(data, type), options),
+        moduleSize: symbology.magnification ?? dataBarMagnification(dpmm),
+      };
+    }
+    case "MicroPdf417": {
+      const [columns, rows] =
+        microPdf417Modes[symbology.mode ?? 0] ?? microPdf417Modes[0];
+      return {
+        kind: "matrix",
+        ...matrix("micropdf417", data, [
+          `columns=${columns}`,
+          `rows=${rows}`,
+          "rowmult=1",
+        ]),
+        moduleSize: moduleWidth,
+        rowHeight: symbology.rowHeight ?? barcode.height,
       };
     }
     case "Pdf417": {
@@ -467,15 +718,9 @@ const drawLinear = (
   if (line === "below" && symbol.below) {
     // Laid out under the bars, between the guards
     const top = barcode.moduleWidth > 2 ? 2 * barcode.moduleWidth : 4;
-    for (const part of symbol.below) {
-      const { text, from, to } = part;
+    for (const { text, from, to } of symbol.below) {
       const advance = advanceOf(face, text);
-      const start =
-        part.align === "end"
-          ? to - advance
-          : from === to
-          ? from
-          : (from + to - advance) / 2;
+      const start = from === to ? from : (from + to - advance) / 2;
       const glyphs = placeLine(face, text, start, top + face.ascent);
       drawGlyphs(raster, glyphs, place, color);
     }
@@ -485,7 +730,86 @@ const drawLinear = (
   const top =
     line === "below"
       ? GAP_BELOW + extension
-      : -height - GAP_ABOVE - face.height;
+      : -height - (symbol.gapAbove ?? GAP_ABOVE) - face.height;
+  const advance = advanceOf(face, symbol.text);
+  const glyphs = placeLine(
+    face,
+    symbol.text,
+    (width - advance) / 2,
+    top + face.ascent
+  );
+  drawGlyphs(raster, glyphs, place, color);
+
+  if (symbol.boxes) {
+    // Outlines a third of the font's height wide and two thirds tall,
+    // standing on the baseline in the middle of the first and last cells
+    const cell = face.advance(" ");
+    const boxWidth = Math.max(3, Math.round(face.height / 3));
+    const boxHeight = Math.max(3, Math.round((2 * face.height) / 3));
+    const lineWidth = Math.max(1, Math.round(face.height / 18));
+    const baseline = top + face.ascent;
+    const start = (width - advance) / 2;
+    for (const left of [start, start + advance - cell]) {
+      const x0 = Math.round(left + (cell - boxWidth) / 2);
+      const x1 = x0 + boxWidth;
+      const y0 = baseline - boxHeight;
+      fillRect(raster, place, x0, y0, x1, y0 + lineWidth, color);
+      fillRect(raster, place, x0, baseline - lineWidth, x1, baseline, color);
+      fillRect(raster, place, x0, y0, x0 + lineWidth, baseline, color);
+      fillRect(raster, place, x1 - lineWidth, y0, x1, baseline, color);
+    }
+  }
+};
+
+/** Rows each kind of postal bar covers, from the top of the tallest */
+const postalRows = (bar: PostalBar, height: number): [number, number] => {
+  // Intelligent Mail: ascenders and descenders two thirds of the height,
+  // the tracker a third, starting where the descenders do
+  const long = Math.floor((2 * height) / 3);
+  const tracker = Math.floor(height / 3);
+  switch (bar) {
+    case "full":
+      return [0, height];
+    case "short":
+      return [height - Math.floor(0.4 * height), height];
+    case "ascender":
+      return [0, long];
+    case "descender":
+      return [height - long, height];
+    case "tracker":
+      return [height - long, height - long + tracker];
+  }
+};
+
+const drawPostal = (
+  raster: Raster,
+  barcode: Barcode,
+  symbol: Postal,
+  dpmm: number,
+  color: Color
+) => {
+  const { bars, starts, barWidth, height, line } = symbol;
+  const width = starts[starts.length - 1] + barWidth;
+  const place = placement(
+    { width, height, ascent: height, lastBaseline: 0 },
+    barcode
+  );
+  bars.forEach((bar, i) => {
+    const [top, bottom] = postalRows(bar, height);
+    fillRect(
+      raster,
+      place,
+      starts[i],
+      top - height,
+      starts[i] + barWidth,
+      bottom - height,
+      color
+    );
+  });
+
+  if (!line) return;
+  const face = interpretationFace(barcode, dpmm);
+  const top = line === "below" ? GAP_BELOW : -height - GAP_ABOVE - face.height;
   const advance = advanceOf(face, symbol.text);
   const glyphs = placeLine(
     face,
@@ -586,9 +910,28 @@ const drawBarcode = (
     drawMaxiCode(raster, barcode, barcode.symbology.mode ?? 2, dpmm, color);
     return;
   }
-  const symbol = encode(barcode, dpmm);
+  let symbol: ReturnType<typeof encode>;
+  try {
+    symbol = encode(barcode, dpmm);
+  } catch {
+    // Data the symbology can't encode, like a postal code of the wrong length
+    drawPlaceholder(
+      raster,
+      {
+        ...barcode,
+        kind: "placeholder",
+        code: codes[barcode.symbology.type],
+        reason: "data",
+      },
+      dpmm,
+      color
+    );
+    return;
+  }
   if (symbol.kind === "linear") {
     drawLinear(raster, barcode, symbol, dpmm, color);
+  } else if (symbol.kind === "postal") {
+    drawPostal(raster, barcode, symbol, dpmm, color);
   } else {
     drawMatrix(raster, barcode, symbol, color);
   }
@@ -607,6 +950,8 @@ const drawPlaceholder = (
   const text =
     placeholder.reason === "invalid"
       ? `${placeholder.code} has invalid parameters`
+      : placeholder.reason === "data"
+      ? `${placeholder.code} can't encode this data`
       : `${placeholder.code} not supported`;
   // Font D, magnified so it stays legible at higher resolutions
   const face = faceFor({

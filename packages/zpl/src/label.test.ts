@@ -340,6 +340,75 @@ suite("Label", () => {
     });
   });
 
+  describe("postal, GS1 DataBar and MicroPDF417", () => {
+    test("postnet", () => {
+      const label = wideLabel().postnet({
+        position: at20,
+        data: "12345",
+        height: dots(40),
+        printHri: true,
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^BZ,40,Y^FD12345^FS^XZ"
+      );
+    });
+
+    test("planet", () => {
+      const label = wideLabel().planet({ position: at20, data: "12345678901" });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^B5^FD12345678901^FS^XZ"
+      );
+    });
+
+    test("intelligentMail", () => {
+      const label = wideLabel().intelligentMail({
+        position: at20,
+        data: "00123123456123456789",
+        height: dots(40),
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^BZ,40,,,3^FD00123123456123456789^FS^XZ"
+      );
+    });
+
+    test("gs1DataBar", () => {
+      const label = wideLabel().gs1DataBar({
+        position: at20,
+        data: "12345678901",
+        type: "stacked",
+        moduleSize: dots(3),
+        orientation: Orientation.Normal,
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^BRN,3,3^FD12345678901^FS^XZ"
+      );
+    });
+
+    test("gs1DataBar expanded with segments", () => {
+      const label = wideLabel().gs1DataBar({
+        position: at20,
+        data: "(01)00012345678905",
+        type: "expanded",
+        segments: 4,
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^BR,6,,,,4^FD(01)00012345678905^FS^XZ"
+      );
+    });
+
+    test("microPdf417", () => {
+      const label = wideLabel().microPdf417({
+        position: at20,
+        data: "ABC",
+        rowHeight: dots(8),
+        mode: 3,
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^BF,8,3^FDABC^FS^XZ"
+      );
+    });
+  });
+
   describe("code11", () => {
     test("should draw a Code 11 barcode on the label", () => {
       const label = wideLabel().code11({
