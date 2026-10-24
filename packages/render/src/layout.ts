@@ -6,6 +6,7 @@
  */
 import { decodeObjectData } from "./data.js";
 import { FontFiles } from "./font-files.js";
+import { expandFormats } from "./formats.js";
 import { decodeGraphicData } from "./graphics.js";
 import type { Command } from "node-zpl";
 import type { Font } from "./font.js";
@@ -95,6 +96,8 @@ type Element = Common &
 
 type LabelLayout = {
   printWidth?: number;
+  /** ^POI: the label prints upside down */
+  inverted?: boolean;
   elements: Element[];
   /** Commands that were understood but aren't drawn yet */
   unsupported: number[];
@@ -266,15 +269,15 @@ const layout = (
     return typeface ? { ...setting, typeface } : { ...setting, font: "0" };
   };
 
-  commands.forEach((command, index) => {
+  for (const { command, index } of expandFormats(commands)) {
     if (command.type === "DownloadFont") {
       // Bounded fonts are converted to Zebra's own format, which we can't read
       if (!command.bounded) fontFiles.download(command, command.data);
-      return;
+      continue;
     }
     if (command.type === "DownloadObject") {
       const { device, name, extension, data } = command;
-      if (command.format !== "A") return;
+      if (command.format !== "A") continue;
       if (extension === "T") {
         fontFiles.download({ device, name, extension: "TTF" }, data);
       } else if (extension === "G" && command.bytesPerRow) {
@@ -289,11 +292,11 @@ const layout = (
           });
         }
       }
-      return;
+      continue;
     }
     if (command.type === "FontIdentifier") {
       identifiers.set(command.font, command);
-      return;
+      continue;
     }
     if (command.type === "DownloadGraphic") {
       stored.set(`${command.device}:${command.name}`, {
@@ -305,7 +308,7 @@ const layout = (
         bytesPerRow: command.bytesPerRow,
         rows: Math.ceil(command.totalBytes / command.bytesPerRow),
       });
-      return;
+      continue;
     }
 
     if (command.type === "StartFormat") {
@@ -318,9 +321,9 @@ const layout = (
       utf8 = false;
       field = newField();
       barcodeDefaults = initialBarcodeDefaults;
-      return;
+      continue;
     }
-    if (!label) return;
+    if (!label) continue;
 
     field.commands.push(index);
     const common = (): Common => ({
@@ -337,6 +340,24 @@ const layout = (
       case "PrintWidth":
         label.printWidth = command.width;
         break;
+      case "PrintOrientation":
+        label.inverted = command.orientation === "I";
+        break;
+      case "ImageLoad": {
+        const graphic = stored.get(`${command.device}:${command.name}`);
+        if (!graphic) break;
+        label.elements.push({
+          x: home.x,
+          y: home.y,
+          reverse: labelReverse,
+          commands: [index],
+          kind: "bitmap",
+          ...graphic,
+          magnificationX: 1,
+          magnificationY: 1,
+        });
+        break;
+      }
       case "LabelHome":
         home = { x: command.x, y: command.y };
         break;
@@ -584,7 +605,7 @@ const layout = (
         break;
       }
     }
-  });
+  }
 
   return labels;
 };

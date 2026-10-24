@@ -158,6 +158,9 @@ const renderLabels = (
       else draw(printed, element, options.dpmm);
     }
 
+    // Upside down: turning the print area half a turn reverses its dots
+    if (label.inverted) printed.ink.reverse();
+
     if (printWidth === width) return printed;
 
     // Center the printed area on the label
