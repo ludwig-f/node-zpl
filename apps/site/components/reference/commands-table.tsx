@@ -203,7 +203,7 @@ export function CommandsTable({ examples }: { examples: Examples }) {
                               )}
                               <a
                                 href={`/reference/${anchorOf(command.code)}`}
-                                className="font-mono text-sm font-semibold text-ink hover:text-accent"
+                                className="font-mono text-sm font-semibold text-ink underline decoration-rule-strong underline-offset-[3px] hover:text-accent hover:decoration-accent"
                               >
                                 {command.code}
                               </a>
@@ -220,7 +220,12 @@ export function CommandsTable({ examples }: { examples: Examples }) {
                             </div>
                           </td>
                           <td className="hidden border-b border-rule px-3 py-[7px] align-top @[640px]:table-cell">
-                            {command.name}
+                            <a
+                              href={`/reference/${anchorOf(command.code)}`}
+                              className="hover:text-accent hover:underline"
+                            >
+                              {command.name}
+                            </a>
                           </td>
                           <td className="border-b border-rule px-3 py-[7px] text-center align-top">
                             <Mark value={command.support as Support} />
@@ -250,6 +255,7 @@ export function CommandsTable({ examples }: { examples: Examples }) {
                                   <CommandDetails
                                     command={command}
                                     image={examples[command.code]}
+                                    showPageLink
                                   />
                                 </div>
                               </div>
