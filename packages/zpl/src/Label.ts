@@ -45,7 +45,8 @@ import type {
 } from "./options.js";
 
 class Label extends ZplContent {
-  protected readonly dpmm: number;
+  /** Dots per millimeter of the printer the label is for */
+  readonly dpmm: number;
 
   /**
    * Construct a new label
