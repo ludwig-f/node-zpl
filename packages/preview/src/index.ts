@@ -3,7 +3,6 @@
  * @zplkit/render. Importing this module registers the element.
  */
 
-/** What the element asks a renderer for */
 /** What a renderer is asked to render */
 type RenderOptions = {
   /** Label width in millimeters */
@@ -61,6 +60,14 @@ const template = `
   :host { display: inline-block; }
   [part="labels"] { display: flex; flex-direction: column; gap: 8px; }
   img { display: block; max-width: 100%; height: auto; background: #fff; }
+  /* With fade, labels fade in when they first appear, not on every change */
+  @keyframes zpl-fade { from { opacity: 0; } }
+  :host([fade]) [data-entering] img {
+    animation: zpl-fade var(--zpl-fade-duration, 200ms) ease-out;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :host([fade]) [data-entering] img { animation: none; }
+  }
   [part="error"] { color: #b3261e; font: 13px/1.4 ui-monospace, monospace; white-space: pre-wrap; }
 </style>
 <div part="labels"></div>
@@ -79,8 +86,8 @@ const Base = (
  *
  * Attributes: `zpl`, `width` and `height` (label size in millimeters, taken
  * from ^PW and ^LL when left out), `dpmm` (dots per millimeter, default 8)
- * and `smoothing` (0 for the printer's exact dots to 1 for fully
- * anti-aliased edges, default 0.4).
+ * `smoothing` (0 for the printer's exact dots to 1 for fully anti-aliased
+ * edges, default 0.4) and `fade` (fade labels in when they first appear).
  *
  * Events: `zpl-render-start` when a render starts, `zpl-render` with
  * `detail.images` (PNG data URLs), the size and resolution used and how long
@@ -88,6 +95,7 @@ const Base = (
  */
 class ZplPreview extends Base {
   static observedAttributes = ["zpl", "width", "height", "dpmm", "smoothing"];
+  // fade only changes the styles, so it isn't observed
 
   #zpl: ZplSource = "";
   #renderId = 0;
@@ -111,6 +119,18 @@ class ZplPreview extends Base {
   set zpl(value: ZplSource) {
     this.#zpl = value;
     this.#schedule();
+  }
+
+  /**
+   * Fade labels in when they first appear, over --zpl-fade-duration (200ms
+   * by default). Later changes to the ZPL don't fade again.
+   */
+  get fade(): boolean {
+    return this.hasAttribute("fade");
+  }
+
+  set fade(value: boolean) {
+    this.toggleAttribute("fade", value);
   }
 
   /** Label width in millimeters */
@@ -259,6 +279,11 @@ class ZplPreview extends Base {
   }
 
   #show(images: string[], error: Error | undefined): void {
+    // Only labels appearing where there were none fade in
+    this.#labels.toggleAttribute(
+      "data-entering",
+      images.length > 0 && this.#labels.childElementCount === 0
+    );
     this.#labels.replaceChildren(
       ...images.map((src, index) => {
         const image = document.createElement("img");

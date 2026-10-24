@@ -382,6 +382,7 @@ export default function Playground() {
                 height={heightMm}
                 dpmm={dpmm}
                 smoothing={smoothing}
+                fade
                 onzpl-render-start={() =>
                   setRender((current) => ({ ...current, busy: true }))
                 }

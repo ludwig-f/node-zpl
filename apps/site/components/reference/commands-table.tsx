@@ -126,14 +126,23 @@ export function CommandsTable({ examples }: { examples: Examples }) {
   const squash = (text: string) => text.toLowerCase().replace(/\s+/g, "");
   const q = squash(query);
 
-  const toggle = (code: string) => {
-    setOpened((current) => new Set(current).add(code));
+  const flip = (code: string) =>
     setOpen((current) => {
       const next = new Set(current);
       if (next.has(code)) next.delete(code);
       else next.add(code);
       return next;
     });
+
+  const toggle = (code: string) => {
+    if (opened.has(code)) {
+      flip(code);
+      return;
+    }
+    // Mount the details collapsed first, then open them once that's been
+    // painted, so the first opening slides like the ones after it
+    setOpened((current) => new Set(current).add(code));
+    requestAnimationFrame(() => requestAnimationFrame(() => flip(code)));
   };
 
   const matches = (command: Command) => {

@@ -19,6 +19,7 @@ type ZplPreviewProps = HTMLAttributes<ZplPreview> &
     height?: number;
     dpmm?: number;
     smoothing?: number;
+    fade?: boolean;
     "onzpl-render-start"?: (event: CustomEvent<RenderStartDetail>) => void;
     "onzpl-render"?: (event: CustomEvent<RenderDetail>) => void;
     "onzpl-error"?: (event: CustomEvent<ErrorDetail>) => void;

@@ -46,6 +46,7 @@ document.querySelector("zpl-preview").zpl = new Label({
 | `height`    | `height`    | `^LL`, else 152.4 | Label height in millimeters                                                           |
 | `dpmm`      | `dpmm`      | 8                 | Dots per millimeter: 6, 8, 12 or 24 for 152, 203, 300 or 600 dpi                      |
 | `smoothing` | `smoothing` | 0.4               | How much to smooth edges, from 0 (the printer's exact dots) to 1 (fully anti-aliased) |
+| `fade`      | `fade`      | off               | Fade labels in when they first appear, over `--zpl-fade-duration` (200 ms by default) |
 
 Thermal printers print hard-edged dots, which look rough on screen. `smoothing` softens the edges by blending the printer's dots with an anti-aliased render. Set it to 0 to see exactly what the printer prints.
 
