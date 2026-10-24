@@ -100,6 +100,20 @@ const commandCases: [Command, string][] = [
   ],
   [{ type: "Code128" }, "^BC"],
   [{ type: "Ean13", orientation: "R", height: 50 }, "^BER,50"],
+  [{ type: "PrintQuantity", quantity: 2 }, "^PQ2"],
+  [
+    {
+      type: "PrintQuantity",
+      quantity: 10,
+      pauseEvery: 5,
+      replicates: 1,
+      overridePause: true,
+    },
+    "^PQ10,5,1,Y",
+  ],
+  [{ type: "PrintRate", speed: 4 }, "^PR4"],
+  [{ type: "PrintRate", speed: "C", slew: 6, backfeed: 2 }, "^PRC,6,2"],
+  [{ type: "MediaDarkness", darkness: -5 }, "^MD-5"],
   [
     {
       type: "Industrial2of5",
@@ -400,7 +414,7 @@ const commandCases: [Command, string][] = [
     { type: "DeleteObject", device: "R", name: "LOGO", extension: "GRF" },
     "^IDR:LOGO.GRF",
   ],
-  [{ type: "Raw", zpl: "^PQ2" }, "^PQ2"],
+  [{ type: "Raw", zpl: "^MMT" }, "^MMT"],
 ];
 
 export default commandCases;

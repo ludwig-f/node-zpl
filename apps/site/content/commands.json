@@ -1004,7 +1004,7 @@
       "code": "^MD",
       "name": "Media Darkness",
       "category": "Printer and media",
-      "support": "no",
+      "support": "yes",
       "drawn": false,
       "note": ""
     },
@@ -1172,7 +1172,7 @@
       "code": "^PQ",
       "name": "Print Quantity",
       "category": "Printer and media",
-      "support": "no",
+      "support": "yes",
       "drawn": false,
       "note": ""
     },
@@ -1180,7 +1180,7 @@
       "code": "^PR",
       "name": "Print Rate",
       "category": "Printer and media",
-      "support": "no",
+      "support": "yes",
       "drawn": false,
       "note": ""
     },

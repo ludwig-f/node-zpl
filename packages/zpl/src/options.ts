@@ -40,6 +40,21 @@ type LabelOptions = {
    * @defaultValue true
    */
   minify?: boolean;
+  /**
+   * How many copies to print (^PQ)
+   * @defaultValue 1
+   */
+  copies?: number;
+  /**
+   * Print speed in inches per second, 1 to 14 depending on the printer (^PR)
+   * @defaultValue The printer's setting
+   */
+  speed?: number;
+  /**
+   * Darkness relative to the printer's setting, -30 to 30 (^MD)
+   * @defaultValue 0
+   */
+  darkness?: number;
 };
 
 /** Options for `setDefaultFont()` and `<DefaultFont>` (^CF) */

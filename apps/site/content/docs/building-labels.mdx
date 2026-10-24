@@ -82,9 +82,20 @@ label.field({
 // ^FO24,24^B8N,100,Y,N^FD1234567^FS
 ```
 
-Labels are built from typed command nodes, which you can read with `label.commands`. Commands with a typed node but no method can be added with `add()`, and anything else as plain ZPL with `raw()`. Neither escapes anything, so keep user input out of `raw()`:
+Labels are built from typed command nodes, which you can read with `label.commands`. Commands with a typed node but no method can be added with `add()`, and anything else as plain ZPL with `raw()`, the escape hatch. Neither escapes anything, so keep user input out of `raw()`:
 
 ```ts
 label.add({ type: "GraphicCircle", diameter: 80, thickness: 4 });
-label.raw("^PQ2"); // print two copies
+label.raw("^MMC"); // cut after each label
 ```
+
+## Print settings
+
+How many copies print, how fast and how dark are options of the label, since ZPL keeps them with the label they apply to:
+
+```ts
+new Label({ width: mm(57), height: mm(19), dpmm: 12, copies: 3, speed: 4, darkness: 5 });
+// ^XA…^PR4^MD5^PQ3…^XZ
+```
+
+Settings that change the printer itself, like its default darkness or stored graphics, are sent before the label with [`PrinterSetup`](/docs/printing). [Lint](/docs/linting#printer-command-in-label) warns when one ends up inside a label.

@@ -79,8 +79,8 @@ suite("parse", () => {
 
   describe("unsupported commands", () => {
     test("keeps unknown commands verbatim", () => {
-      expect(parseCommands("^PQ2,0,1,Y^XZ")).toStrictEqual([
-        { type: "Raw", zpl: "^PQ2,0,1,Y" },
+      expect(parseCommands("^MMT,N^XZ")).toStrictEqual([
+        { type: "Raw", zpl: "^MMT,N" },
         { type: "EndFormat" },
       ]);
     });

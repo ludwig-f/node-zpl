@@ -71,6 +71,17 @@ class Label extends ZplContent {
       }
     );
 
+    // How this label prints, kept with it since ZPL scopes them to the format
+    if (options.speed !== undefined) {
+      this.add({ type: "PrintRate", speed: options.speed });
+    }
+    if (options.darkness !== undefined) {
+      this.add({ type: "MediaDarkness", darkness: options.darkness });
+    }
+    if (options.copies !== undefined) {
+      this.add({ type: "PrintQuantity", quantity: options.copies });
+    }
+
     if (reverse) {
       // With ^LR every field is XORed with what is below it, so a solid black
       // background makes everything drawn on top of it come out white.

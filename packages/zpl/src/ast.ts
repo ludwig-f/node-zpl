@@ -416,6 +416,44 @@ type Plessey = Node<
     interpretationLineAbove?: boolean;
   }
 >;
+/** `^PQq,p,r,o,e`: how many copies print, and pauses between them */
+type PrintQuantity = Node<
+  "PrintQuantity",
+  {
+    /** Copies to print */
+    quantity?: number;
+    /** Pause, and cut on cutters, after this many labels */
+    pauseEvery?: number;
+    /** Copies of each serialized label (^SN) before it counts up */
+    replicates?: number;
+    /** Print without the pauses */
+    overridePause?: boolean;
+    /** Cut after a label that errored */
+    cutOnError?: boolean;
+  }
+>;
+/** A print speed: inches per second, or A to E for 1, 2, 3, 4 and 6 */
+type PrintSpeed = number | "A" | "B" | "C" | "D" | "E";
+/** `^PRa,s,b`: print, slew and backfeed speeds */
+type PrintRate = Node<
+  "PrintRate",
+  {
+    /** Print speed */
+    speed?: PrintSpeed;
+    /** Speed while feeding blank media */
+    slew?: PrintSpeed;
+    /** Speed while backfeeding */
+    backfeed?: PrintSpeed;
+  }
+>;
+/** `^MDa`: darkness relative to the printer's setting, for this label */
+type MediaDarkness = Node<
+  "MediaDarkness",
+  {
+    /** -30 to 30 */
+    darkness?: number;
+  }
+>;
 /** `^BXo,h,s,c,r,f,g,a` */
 type DataMatrix = Node<
   "DataMatrix",
@@ -605,6 +643,9 @@ type Command =
   | Logmars
   | Msi
   | Plessey
+  | PrintQuantity
+  | PrintRate
+  | MediaDarkness
   | DataMatrix
   | QrCode
   | Aztec
@@ -676,6 +717,10 @@ export type {
   Logmars,
   Msi,
   Plessey,
+  PrintQuantity,
+  PrintSpeed,
+  PrintRate,
+  MediaDarkness,
   DataMatrix,
   QrCode,
   Aztec,
