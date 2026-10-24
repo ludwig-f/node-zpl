@@ -267,6 +267,54 @@ suite("Label", () => {
     });
   });
 
+  describe("drawCode39", () => {
+    test("should draw a Code 39 barcode on the label", () => {
+      const label = wideLabel().drawCode39({
+        position: at20,
+        data: "ABC-123",
+        height: mm(9),
+        checkDigit: true,
+        orientation: Orientation.Normal,
+        printHri: true,
+        printHriAbove: false,
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^B3N,Y,108,Y,N^FDABC-123^FS^XZ"
+      );
+    });
+  });
+
+  describe("drawInterleaved2of5", () => {
+    test("should draw an Interleaved 2 of 5 barcode on the label", () => {
+      const label = wideLabel().drawInterleaved2of5({
+        position: at20,
+        data: "123456",
+        height: mm(9),
+        orientation: Orientation.Normal,
+        printHri: false,
+        checkDigit: true,
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^B2N,108,N,,Y^FD123456^FS^XZ"
+      );
+    });
+  });
+
+  describe("drawPDF417", () => {
+    test("should draw a PDF417 barcode on the label", () => {
+      const label = wideLabel().drawPDF417({
+        position: at20,
+        data: "hello",
+        rowHeight: dots(8),
+        securityLevel: 3,
+        columns: 4,
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^B7,8,3,4^FDhello^FS^XZ"
+      );
+    });
+  });
+
   describe("drawCode128", () => {
     test("should draw a Code 128 barcode on the label", () => {
       const label = wideLabel().drawCode128({

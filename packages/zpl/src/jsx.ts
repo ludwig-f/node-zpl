@@ -219,6 +219,50 @@ const Code128 = primitive(
     })
 );
 
+/** Code 39 barcode, with the data as children */
+const Code39 = primitive(
+  (label, { children, ...props }: BarcodeProps & { checkDigit?: boolean }) =>
+    label.drawCode39({
+      ...props,
+      position: position(props),
+      data: text(children),
+    })
+);
+
+/** Interleaved 2 of 5 barcode, with the digits as children */
+const Interleaved2of5 = primitive(
+  (label, { children, ...props }: BarcodeProps & { checkDigit?: boolean }) =>
+    label.drawInterleaved2of5({
+      ...props,
+      position: position(props),
+      data: text(children),
+    })
+);
+
+/** PDF417 barcode, with the data as children */
+const PDF417 = primitive(
+  (
+    label,
+    {
+      children,
+      ...props
+    }: Position & {
+      rowHeight?: Length;
+      securityLevel?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+      columns?: number;
+      rows?: number;
+      truncate?: boolean;
+      orientation?: Orientation;
+      children: TextChildren;
+    }
+  ) =>
+    label.drawPDF417({
+      ...props,
+      position: position(props),
+      data: text(children),
+    })
+);
+
 /** EAN-13 barcode, with the 12 data digits as children */
 const EAN13 = primitive((label, { children, ...props }: BarcodeProps) =>
   label.drawEAN13({
@@ -324,6 +368,9 @@ export {
   Box,
   Code11,
   Code128,
+  Code39,
+  Interleaved2of5,
+  PDF417,
   EAN13,
   DataMatrix,
   QrCode,

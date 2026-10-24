@@ -78,6 +78,9 @@ const codes: { [T in Command["type"]]?: string } = {
 const barcodes = new Set<Command["type"]>([
   "Code11",
   "Code128",
+  "Code39",
+  "Interleaved2of5",
+  "Pdf417",
   "Ean13",
   "DataMatrix",
   "QrCode",

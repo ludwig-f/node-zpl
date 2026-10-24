@@ -101,6 +101,42 @@ const commandCases: [Command, string][] = [
   [{ type: "Code128" }, "^BC"],
   [{ type: "Ean13", orientation: "R", height: 50 }, "^BER,50"],
   [
+    {
+      type: "Code39",
+      orientation: "N",
+      checkDigit: false,
+      height: 100,
+      interpretationLine: true,
+      interpretationLineAbove: false,
+    },
+    "^B3N,N,100,Y,N",
+  ],
+  [{ type: "Code39" }, "^B3"],
+  [
+    {
+      type: "Interleaved2of5",
+      orientation: "R",
+      height: 80,
+      interpretationLine: false,
+      interpretationLineAbove: false,
+      checkDigit: true,
+    },
+    "^B2R,80,N,N,Y",
+  ],
+  [
+    {
+      type: "Pdf417",
+      orientation: "N",
+      rowHeight: 8,
+      securityLevel: 5,
+      columns: 10,
+      rows: 20,
+      truncate: false,
+    },
+    "^B7N,8,5,10,20,N",
+  ],
+  [{ type: "Pdf417", securityLevel: 0 }, "^B7,,0"],
+  [
     { type: "DataMatrix", orientation: "N", height: 9, quality: 200 },
     "^BXN,9,200",
   ],

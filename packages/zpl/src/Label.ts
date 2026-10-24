@@ -330,6 +330,105 @@ class Label extends ZplContent {
   }
 
   /**
+   * Draw a Code 39 barcode on the label
+   * @param options.position Position (x, y) of the barcode
+   * @param options.data Data to encode: digits, capital letters, space and - . $ / + %
+   * @param options.height Height of the barcode - defaults to the ^BY height
+   * @param options.checkDigit Whether to add a Mod-43 check digit - defaults to false
+   * @param options.orientation Orientation of the barcode
+   * @param options.printHri Whether to print the human readable interpretation - defaults to true
+   * @param options.printHriAbove Whether to print the human readable interpretation above the barcode - defaults to false
+   */
+  public drawCode39(options: {
+    position: Position;
+    data: string;
+    height?: Length;
+    checkDigit?: boolean;
+    orientation?: Orientation;
+    printHri?: boolean;
+    printHriAbove?: boolean;
+  }): this {
+    return this.field(options.position, [
+      {
+        type: "Code39",
+        orientation: options.orientation,
+        checkDigit: options.checkDigit,
+        height: this.optionalDots(options.height),
+        interpretationLine: options.printHri,
+        interpretationLineAbove: options.printHriAbove,
+      },
+      ...this.fieldData(options.data),
+    ]);
+  }
+
+  /**
+   * Draw an Interleaved 2 of 5 barcode on the label
+   * @param options.position Position (x, y) of the barcode
+   * @param options.data Digits to encode; the printer adds a leading zero to an odd count
+   * @param options.height Height of the barcode - defaults to the ^BY height
+   * @param options.checkDigit Whether to add a Mod-10 check digit - defaults to false
+   * @param options.orientation Orientation of the barcode
+   * @param options.printHri Whether to print the human readable interpretation - defaults to true
+   * @param options.printHriAbove Whether to print the human readable interpretation above the barcode - defaults to false
+   */
+  public drawInterleaved2of5(options: {
+    position: Position;
+    data: string;
+    height?: Length;
+    checkDigit?: boolean;
+    orientation?: Orientation;
+    printHri?: boolean;
+    printHriAbove?: boolean;
+  }): this {
+    return this.field(options.position, [
+      {
+        type: "Interleaved2of5",
+        orientation: options.orientation,
+        height: this.optionalDots(options.height),
+        interpretationLine: options.printHri,
+        interpretationLineAbove: options.printHriAbove,
+        checkDigit: options.checkDigit,
+      },
+      ...this.fieldData(options.data),
+    ]);
+  }
+
+  /**
+   * Draw a PDF417 barcode on the label
+   * @param options.position Position (x, y) of the barcode
+   * @param options.data Data to encode
+   * @param options.rowHeight Height of each row - defaults to the ^BY height
+   * @param options.securityLevel Error correction level, 0 (detection only) to 8 - defaults to 0
+   * @param options.columns Number of data columns, 1 to 30
+   * @param options.rows Number of rows, 3 to 90
+   * @param options.truncate Whether to leave out the right row indicators and stop pattern - defaults to false
+   * @param options.orientation Orientation of the barcode
+   */
+  public drawPDF417(options: {
+    position: Position;
+    data: string;
+    rowHeight?: Length;
+    securityLevel?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+    columns?: number;
+    rows?: number;
+    truncate?: boolean;
+    orientation?: Orientation;
+  }): this {
+    return this.field(options.position, [
+      {
+        type: "Pdf417",
+        orientation: options.orientation,
+        rowHeight: this.optionalDots(options.rowHeight),
+        securityLevel: options.securityLevel,
+        columns: options.columns,
+        rows: options.rows,
+        truncate: options.truncate,
+      },
+      ...this.fieldData(options.data),
+    ]);
+  }
+
+  /**
    * Draw an EAN-13 barcode on the label
    * @param options.position Position (x, y) of the barcode
    * @param options.data Data to encode, 12 digits (the check digit is added by the printer)

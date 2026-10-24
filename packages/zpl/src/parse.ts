@@ -318,6 +318,33 @@ const parsers: Record<string, CommandParser> = {
     uccCheckDigit: p.yesNo(4, "uccCheckDigit"),
     mode: p.oneOf(5, "mode", ["N", "U", "A", "D"] as const),
   })),
+  "^B3": withParams("^B3", (p) => ({
+    type: "Code39",
+    orientation: p.oneOf(0, "orientation", orientations),
+    checkDigit: p.yesNo(1, "checkDigit"),
+    height: p.number(2, "height"),
+    interpretationLine: p.yesNo(3, "interpretationLine"),
+    interpretationLineAbove: p.yesNo(4, "interpretationLineAbove"),
+  })),
+  "^B2": withParams("^B2", (p) => ({
+    type: "Interleaved2of5",
+    orientation: p.oneOf(0, "orientation", orientations),
+    height: p.number(1, "height"),
+    interpretationLine: p.yesNo(2, "interpretationLine"),
+    interpretationLineAbove: p.yesNo(3, "interpretationLineAbove"),
+    checkDigit: p.yesNo(4, "checkDigit"),
+  })),
+  "^B7": withParams("^B7", (p) => ({
+    type: "Pdf417",
+    orientation: p.oneOf(0, "orientation", orientations),
+    rowHeight: p.number(1, "rowHeight"),
+    securityLevel: p.oneOf(2, "securityLevel", [
+      0, 1, 2, 3, 4, 5, 6, 7, 8,
+    ] as const),
+    columns: p.number(3, "columns"),
+    rows: p.number(4, "rows"),
+    truncate: p.yesNo(5, "truncate"),
+  })),
   "^BE": withParams("^BE", (p) => ({
     type: "Ean13",
     orientation: p.oneOf(0, "orientation", orientations),

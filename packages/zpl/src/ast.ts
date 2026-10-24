@@ -161,6 +161,47 @@ type Code128 = Node<
     mode?: "N" | "U" | "A" | "D";
   }
 >;
+/** `^B3o,e,h,f,g` */
+type Code39 = Node<
+  "Code39",
+  {
+    orientation?: Orientation;
+    /** Adds a Mod-43 check digit */
+    checkDigit?: boolean;
+    height?: number;
+    interpretationLine?: boolean;
+    interpretationLineAbove?: boolean;
+  }
+>;
+/** `^B2o,h,f,g,e` */
+type Interleaved2of5 = Node<
+  "Interleaved2of5",
+  {
+    orientation?: Orientation;
+    height?: number;
+    interpretationLine?: boolean;
+    interpretationLineAbove?: boolean;
+    /** Adds a Mod-10 check digit */
+    checkDigit?: boolean;
+  }
+>;
+/** `^B7o,h,s,c,r,t` */
+type Pdf417 = Node<
+  "Pdf417",
+  {
+    orientation?: Orientation;
+    /** Height of each row in dots */
+    rowHeight?: number;
+    /** Error correction, 0 (detection only) to 8 */
+    securityLevel?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+    /** Data columns, 1 to 30 */
+    columns?: number;
+    /** Rows, 3 to 90 */
+    rows?: number;
+    /** Leaves out the right row indicators and stop pattern */
+    truncate?: boolean;
+  }
+>;
 /** `^BEo,h,f,g` */
 type Ean13 = Node<
   "Ean13",
@@ -251,6 +292,9 @@ type Command =
   | BarcodeDefaults
   | Code11
   | Code128
+  | Code39
+  | Interleaved2of5
+  | Pdf417
   | Ean13
   | DataMatrix
   | QrCode
@@ -292,6 +336,9 @@ export type {
   BarcodeDefaults,
   Code11,
   Code128,
+  Code39,
+  Interleaved2of5,
+  Pdf417,
   Ean13,
   DataMatrix,
   QrCode,

@@ -136,6 +136,31 @@ const serializeCommand = (command: Command): string => {
         yn(command.uccCheckDigit),
         command.mode
       )}`;
+    case "Code39":
+      return `^B3${params(
+        command.orientation,
+        yn(command.checkDigit),
+        command.height,
+        yn(command.interpretationLine),
+        yn(command.interpretationLineAbove)
+      )}`;
+    case "Interleaved2of5":
+      return `^B2${params(
+        command.orientation,
+        command.height,
+        yn(command.interpretationLine),
+        yn(command.interpretationLineAbove),
+        yn(command.checkDigit)
+      )}`;
+    case "Pdf417":
+      return `^B7${params(
+        command.orientation,
+        command.rowHeight,
+        command.securityLevel,
+        command.columns,
+        command.rows,
+        yn(command.truncate)
+      )}`;
     case "Ean13":
       return `^BE${params(
         command.orientation,

@@ -109,7 +109,7 @@ Field data such as text and bar code contents is escaped automatically. Characte
 Elements without their own method can be drawn with `drawField`, which wraps any command in a field and escapes its data:
 
 ```typescript
-label.drawField({ position: { x: mm(2), y: mm(2) }, command: "^B3N,N,100,Y,N", data: "ABC-123" });
+label.drawField({ position: { x: mm(2), y: mm(2) }, command: "^B8N,100,Y,N", data: "1234567" });
 ```
 
 ### Commands as data
@@ -195,11 +195,11 @@ const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 - [ ] `^A@` - Use font name to call font
 - [ ] `^B0` - Aztec bar code parameters
 - [x] `^B1` - Code 11 bar code
-- [ ] `^B2` - Interleaved 2 of 5 bar code
-- [ ] `^B3` - Code 39 bar code
+- [x] `^B2` - Interleaved 2 of 5 bar code
+- [x] `^B3` - Code 39 bar code
 - [ ] `^B4` - Code 49 bar code
 - [ ] `^B5` - Planet Code bar code
-- [ ] `^B7` - PDF417 bar code
+- [x] `^B7` - PDF417 bar code
 - [ ] `^B8` - EAN-8 bar code
 - [ ] `^B9` - UPC-E bar code
 - [ ] `^BA` - Code 93 bar code

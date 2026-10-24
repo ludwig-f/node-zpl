@@ -32,7 +32,8 @@ Every length takes an explicit unit: `mm(10)` for millimeters or `dots(80)` for 
 | --- | --- |
 | `drawText` | Text in a built-in or downloaded font |
 | `drawBox` | Boxes and lines, optionally rounded or white |
-| `drawCode11`, `drawCode128`, `drawEAN13` | Linear barcodes |
+| `drawCode11`, `drawCode39`, `drawCode128`, `drawEAN13`, `drawInterleaved2of5` | Linear barcodes |
+| `drawPDF417` | PDF417 codes |
 | `drawDataMatrix` | Data Matrix codes |
 | `drawQrCode` | QR codes |
 | `drawField` | A field with any command, for elements without a method |
@@ -79,15 +80,15 @@ new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 
 ## Commands without a method
 
-For elements without their own method, `drawField` wraps any command in a field and escapes its data, so user input is still safe. For example, a Code 39 barcode:
+For elements without their own method, `drawField` wraps any command in a field and escapes its data, so user input is still safe. For example, an EAN-8 barcode:
 
 ```ts
 label.drawField({
   position: { x: mm(2), y: mm(2) },
-  command: "^B3N,N,100,Y,N",
-  data: "ABC-123",
+  command: "^B8N,100,Y,N",
+  data: "1234567",
 });
-// ^FO24,24^B3N,N,100,Y,N^FDABC-123^FS
+// ^FO24,24^B8N,100,Y,N^FD1234567^FS
 ```
 
 Labels are built from typed command nodes, which you can read with `label.commands`. Commands with a typed node but no method can be added with `add()`, and anything else as plain ZPL with `raw()`. Neither escapes anything, so keep user input out of `raw()`:
