@@ -12,7 +12,7 @@ import { renderedCommands } from "../packages/render/build/support.js";
 const root = new URL("../", import.meta.url);
 const docsPage = new URL("apps/site/content/docs/commands.mdx", root);
 const readme = new URL("packages/zpl/README.md", root);
-const docsUrl = "https://zpl.fingal.dev/docs/commands";
+const docsUrl = "https://zplkit.fingal.dev/docs/commands";
 
 const groups = {
   "Labels and formats": ["^XA", "^XZ", "^LH", "^LL", "^LR", "^LS", "^LT", "^PW", "^PO", "^PM", "^DF", "^XF", "^MU", "^CC", "~CC", "^CD", "~CD", "^CT", "~CT"],

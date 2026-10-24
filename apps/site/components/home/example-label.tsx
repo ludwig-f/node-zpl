@@ -31,7 +31,7 @@ export const exampleLabel = build(
       {`${order.id}-${order.shelf}`}
     </Code128>
     <DataMatrix x={mm(76)} y={mm(25)} moduleSize={dots(5)}>
-      https://zpl.fingal.dev
+      https://zplkit.fingal.dev
     </DataMatrix>
     {order.express && (
       <Text x={mm(66)} y={mm(5)} height={mm(7)}>
@@ -56,7 +56,7 @@ export const exampleSource = `const label = build(
       {\`\${order.id}-\${order.shelf}\`}
     </Code128>
     <DataMatrix x={mm(76)} y={mm(25)} moduleSize={dots(5)}>
-      https://zpl.fingal.dev
+      https://zplkit.fingal.dev
     </DataMatrix>
     {order.express && (
       <Text x={mm(66)} y={mm(5)} height={mm(7)}>EXPRESS</Text>
