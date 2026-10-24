@@ -1,7 +1,7 @@
 import "server-only";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { packageLabel, parseChangelog } from "./changelog";
+import { packageNames, parseChangelog } from "./changelog";
 import type { PackageDir, Release } from "./changelog";
 
 type PackageRelease = Release & { dir: PackageDir; name: string };
@@ -26,7 +26,7 @@ export async function getReleases(): Promise<PackageRelease[]> {
       return parseChangelog(markdown).map((release) => ({
         ...release,
         dir,
-        name: packageLabel(dir, release.version),
+        name: packageNames[dir],
       }));
     })
   );

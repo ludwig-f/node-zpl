@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { packageLabel, parseChangelog } from "./changelog";
+import { parseChangelog } from "./changelog";
 
 const changelog = `# Changelog
 
@@ -8,7 +8,7 @@ const changelog = `# Changelog
 
 ### ⚠ BREAKING CHANGES
 
-* rename node-zpl to zplkit
+* rename the package
 
 ### Features
 
@@ -47,7 +47,7 @@ describe("parseChangelog", () => {
 
   test("groups changes under their headings, breaking changes first", () => {
     expect(releases[0].sections).toStrictEqual([
-      { title: "Breaking changes", items: ["rename node-zpl to zplkit"] },
+      { title: "Breaking changes", items: ["rename the package"] },
       {
         title: "Features",
         items: [
@@ -63,10 +63,4 @@ describe("parseChangelog", () => {
       },
     ]);
   });
-});
-
-test("versions before 2 were published as node-zpl", () => {
-  expect(packageLabel("zpl", "1.0.5")).toBe("node-zpl");
-  expect(packageLabel("zpl", "2.0.0")).toBe("@zplkit/core");
-  expect(packageLabel("render", "0.1.0")).toBe("@zplkit/render");
 });

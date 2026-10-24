@@ -52,7 +52,7 @@ A new ZPL command usually touches:
 2. A builder method in `Label.ts` and a JSX element in `jsx.ts`, if the command draws something.
 3. The renderer in `packages/render`, and `src/support.ts` once it's drawn.
 
-Then run `pnpm build && pnpm commands`, which updates the [supported commands table](https://zplkit.fingal.dev/docs/commands) in the docs and the core README. CI fails if it's out of date.
+Then run `pnpm build && pnpm commands`, which updates the [supported commands table](https://zplkit.fingal.dev/reference) on the site and the core README. CI fails if it's out of date.
 
 ### Renderer accuracy
 

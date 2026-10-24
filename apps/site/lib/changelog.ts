@@ -24,12 +24,6 @@ const packageNames: Record<PackageDir, string> = {
   preview: "@zplkit/preview",
 };
 
-/** The package's name when the release was published */
-const packageLabel = (dir: PackageDir, version: string) =>
-  dir === "zpl" && Number(version.split(".")[0]) < 2
-    ? "node-zpl"
-    : packageNames[dir];
-
 /** release-please's headings, in plain sentence case, breaking changes first */
 const sectionTitles: Record<string, string> = {
   "⚠ BREAKING CHANGES": "Breaking changes",
@@ -81,4 +75,4 @@ const parseChangelog = (markdown: string): Release[] => {
 };
 
 export type { PackageDir, Release, Section };
-export { packageLabel, packageNames, parseChangelog };
+export { packageNames, parseChangelog };
