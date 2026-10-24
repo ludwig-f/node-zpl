@@ -29,6 +29,7 @@ suite("entry points", () => {
 
   test("the JSX entry exports the elements and build()", () => {
     expect(Object.keys(jsx).sort()).toStrictEqual([
+      "Aztec",
       "Box",
       "Code11",
       "Code128",
@@ -42,6 +43,7 @@ suite("entry points", () => {
       "Graphic",
       "Interleaved2of5",
       "Label",
+      "MaxiCode",
       "Orientation",
       "PDF417",
       "QrCode",

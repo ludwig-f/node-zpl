@@ -7,7 +7,8 @@ It draws:
 - Boxes, circles and diagonal lines (`^GB`, `^GC`, `^GD`) and images (`^GF`, `~DG` or `~DY` with `^XG`), in hex or base64 (`:B64:`, `:Z64:`)
 - Text in font 0 and the bitmap fonts A to H (`^A`, `^CF`), rotated (`^FW`) and wrapped in blocks (`^FB`)
 - Text in TrueType fonts, downloaded (`~DU`, `~DY`) or passed in, and called by name (`^A@`) or letter (`^CW`)
-- Code 128, Code 39, Interleaved 2 of 5, EAN-13, Code 11, PDF417, QR codes and Data Matrix (`^BC`, `^B3`, `^B2`, `^BE`, `^B1`, `^B7`, `^BQ`, `^BX`, `^BY`)
+- Code 128, Code 39, Interleaved 2 of 5, EAN-13, Code 11, PDF417, QR codes, Data Matrix, Aztec and MaxiCode (`^BC`, `^B3`, `^B2`, `^BE`, `^B1`, `^B7`, `^BQ`, `^BX`, `^BO`, `^BD`, `^BY`)
+- Graphic symbols (`^GS`), stored formats (`^DF`, `^XF`, `^FN`), labels printed upside down (`^PO`) and stored images as backgrounds (`^IL`)
 - Reverse printing (`^FR`, `^LR`), label home (`^LH`), print width (`^PW`) and UTF-8 text (`^CI28`)
 
 Other barcodes are drawn as a crossed-out box naming the command. Commands it understands but doesn't draw yet are listed in each label's `layout().unsupported`.

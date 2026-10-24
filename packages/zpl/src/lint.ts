@@ -84,6 +84,8 @@ const barcodes = new Set<Command["type"]>([
   "Ean13",
   "DataMatrix",
   "QrCode",
+  "Aztec",
+  "MaxiCode",
 ]);
 
 /** Commands that act immediately, outside of ^XA … ^XZ */

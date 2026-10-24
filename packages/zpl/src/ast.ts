@@ -101,7 +101,14 @@ type FieldReverse = Node<"FieldReverse">;
 /** `^FHa` */
 type FieldHexIndicator = Node<"FieldHexIndicator", { indicator?: string }>;
 /** `^FD` - data is stored exactly as written, including any ^FH escapes */
-type FieldData = Node<"FieldData", { data: string }>;
+type FieldData = Node<
+  "FieldData",
+  {
+    data: string;
+    /** Written as ^FV, which prints the same as ^FD */
+    variable?: boolean;
+  }
+>;
 /** `^FS` */
 type FieldSeparator = Node<"FieldSeparator">;
 /** `^FX` */
@@ -245,6 +252,38 @@ type DataMatrix = Node<
   }
 >;
 
+/** `^BOa,b,c,d,e,f,g` */
+type Aztec = Node<
+  "Aztec",
+  {
+    orientation?: Orientation;
+    /** Size of each square module in dots, 1 to 10 */
+    magnification?: number;
+    extendedChannel?: boolean;
+    /**
+     * 0 for the default, 1 to 99 for an error correction percentage, 101 to
+     * 104 for compact symbols with that many layers less 100, 201 to 232 for
+     * full-range ones less 200, and 300 for a rune
+     */
+    errorControl?: number;
+    menu?: boolean;
+    /** Symbols in a structured append, 1 to 26 */
+    symbolCount?: number;
+    structuredAppendId?: string;
+  }
+>;
+/** `^BDm,n,t` */
+type MaxiCode = Node<
+  "MaxiCode",
+  {
+    /** 2 and 3 for carrier messages, 4 to 6 for other data */
+    mode?: 2 | 3 | 4 | 5 | 6;
+    /** Position in a structured append, and the number of symbols in it */
+    symbolNumber?: number;
+    symbolCount?: number;
+  }
+>;
+
 /** `^BQa,b,c,d,e` */
 type QrCode = Node<
   "QrCode",
@@ -304,6 +343,30 @@ type DownloadObject = Node<
     data: string;
   }
 >;
+/** `^POa`: I prints the whole label upside down */
+type PrintOrientation = Node<"PrintOrientation", { orientation: "N" | "I" }>;
+/** `^GSo,h,w`: the field data picks a symbol, A ® B © C ™ D UL E CSA */
+type GraphicSymbol = Node<
+  "GraphicSymbol",
+  { orientation?: Orientation; height?: number; width?: number }
+>;
+/** `^DFd:o.x`: stores the rest of the format instead of printing it */
+type DownloadFormat = Node<
+  "DownloadFormat",
+  { device: StorageDevice; name: string; extension: string }
+>;
+/** `^XFd:o.x`: prints a stored format, with data for its numbered fields */
+type RecallFormat = Node<
+  "RecallFormat",
+  { device: StorageDevice; name: string; extension: string }
+>;
+/** `^FNn"prompt"` */
+type FieldNumber = Node<"FieldNumber", { number: number; prompt?: string }>;
+/** `^ILd:o.x`: draws a stored image at the label home */
+type ImageLoad = Node<
+  "ImageLoad",
+  { device: StorageDevice; name: string; extension: string }
+>;
 /** `^IDd:o.x` */
 type DeleteObject = Node<
   "DeleteObject",
@@ -350,6 +413,14 @@ type Command =
   | Ean13
   | DataMatrix
   | QrCode
+  | Aztec
+  | MaxiCode
+  | PrintOrientation
+  | GraphicSymbol
+  | DownloadFormat
+  | RecallFormat
+  | FieldNumber
+  | ImageLoad
   | SetDarkness
   | DownloadGraphic
   | DownloadFont
@@ -398,6 +469,14 @@ export type {
   Ean13,
   DataMatrix,
   QrCode,
+  Aztec,
+  MaxiCode,
+  PrintOrientation,
+  GraphicSymbol,
+  DownloadFormat,
+  RecallFormat,
+  FieldNumber,
+  ImageLoad,
   SetDarkness,
   DownloadGraphic,
   DownloadFont,

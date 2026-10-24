@@ -4,7 +4,7 @@
  * turn with the field like text does: the bottom of the symbol acts as the
  * baseline.
  */
-import { encodeMatrix } from "./barcodes/bwip.js";
+import { encodeMatrix, encodeMaxiCode } from "./barcodes/bwip.js";
 import { encodeCode11 } from "./barcodes/code11.js";
 import { encodeCode128 } from "./barcodes/code128.js";
 import { encodeCode39 } from "./barcodes/code39.js";
@@ -218,6 +218,43 @@ const encode = (barcode: Barcode, dpmm: number): Linear | Matrix => {
         shift: { origin: 10, typeset: 3 * size },
       };
     }
+    case "Aztec": {
+      const control = symbology.errorControl ?? 0;
+      const size = symbology.magnification ?? qrMagnification(dpmm);
+      let options: string[];
+      if (control >= 101 && control <= 104) {
+        options = ["format=compact", `layers=${control - 100}`];
+      } else if (control >= 201 && control <= 232) {
+        options = ["format=full", `layers=${control - 200}`];
+      } else if (control === 300) {
+        options = ["format=rune"];
+      } else {
+        options = control >= 1 && control <= 99 ? [`eclevel=${control}`] : [];
+      }
+      let symbol;
+      if (options.length <= 1) {
+        // Printers use the smallest symbol that fits, compact ones first,
+        // where bwip-js would sometimes pick a full one of the same size
+        for (let layers = 1; layers <= 4 && !symbol; layers++) {
+          try {
+            symbol = matrix("azteccode", data, [
+              ...options,
+              "format=compact",
+              `layers=${layers}`,
+            ]);
+          } catch {
+            // Too much data for this many layers
+          }
+        }
+      }
+      return {
+        kind: "matrix",
+        ...(symbol ?? matrix("azteccode", data, options)),
+        moduleSize: size,
+      };
+    }
+    case "MaxiCode":
+      throw new Error("MaxiCode isn't drawn as a matrix");
     case "DataMatrix": {
       const options = [];
       if (symbology.columns) options.push(`columns=${symbology.columns}`);
@@ -345,12 +382,66 @@ const drawMatrix = (
   }
 };
 
+/**
+ * Zebra's MaxiCode data for modes 2 and 3 starts with the class of service,
+ * country code and postal code (9 digits in mode 2, 6 characters in mode 3);
+ * bwip-js wants them in the carrier message, after its [)> header if any
+ */
+const maxiCodeData = (data: string, mode: number) => {
+  if (mode !== 2 && mode !== 3) return data;
+  const end = 6 + (mode === 2 ? 9 : 6);
+  const service = data.slice(0, 3);
+  const country = data.slice(3, 6);
+  const postal = data.slice(6, end);
+  const rest = data.slice(end);
+  const carrier = `${postal}\x1d${country}\x1d${service}\x1d`;
+  // The header is [)> RS 01 GS and a two-digit year
+  const header = "[)>\x1e01\x1d";
+  const length = /^\d\d/.test(rest.slice(header.length))
+    ? header.length + 2
+    : 0;
+  const hasHeader = rest.startsWith(header) && length > 0;
+  return hasHeader
+    ? rest.slice(0, length) + carrier + rest.slice(length)
+    : carrier + rest;
+};
+
+/** MaxiCode is always about 25 by 24 mm, and can't be turned */
+const drawMaxiCode = (
+  raster: Raster,
+  barcode: Barcode,
+  mode: number,
+  dpmm: number,
+  color: Color
+) => {
+  const width = 25 * dpmm;
+  const height = 24.125 * dpmm;
+  // ^FT puts its bottom a little above y
+  const y = barcode.fromBottom ? barcode.y - (3 * dpmm) / 8 : barcode.y;
+  const place = placement(
+    { width, height, ascent: height, lastBaseline: 0 },
+    { ...barcode, y }
+  );
+  const paths = encodeMaxiCode(maxiCodeData(barcode.data, mode), mode);
+  fillPath(
+    raster,
+    paths.map((path) =>
+      path.map(([u, v]) => place(u * width, v * height - height))
+    ),
+    color
+  );
+};
+
 const drawBarcode = (
   raster: Raster,
   barcode: Barcode,
   dpmm: number,
   color: Color
 ): void => {
+  if (barcode.symbology.type === "MaxiCode") {
+    drawMaxiCode(raster, barcode, barcode.symbology.mode ?? 2, dpmm, color);
+    return;
+  }
   const symbol = encode(barcode, dpmm);
   if (symbol.kind === "linear") {
     drawLinear(raster, barcode, symbol, dpmm, color);

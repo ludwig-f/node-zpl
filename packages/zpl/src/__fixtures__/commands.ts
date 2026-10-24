@@ -239,6 +239,42 @@ const commandCases: [Command, string][] = [
     },
     "~DYE:LOGO,A,G,4,2,FF00FF00",
   ],
+  [{ type: "FieldData", data: "Hello", variable: true }, "^FVHello"],
+  [{ type: "PrintOrientation", orientation: "I" }, "^POI"],
+  [
+    { type: "GraphicSymbol", orientation: "N", height: 60, width: 50 },
+    "^GSN,60,50",
+  ],
+  [{ type: "GraphicSymbol" }, "^GS"],
+  [
+    { type: "DownloadFormat", device: "R", name: "LABEL", extension: "ZPL" },
+    "^DFR:LABEL.ZPL",
+  ],
+  [
+    { type: "RecallFormat", device: "E", name: "LABEL", extension: "ZPL" },
+    "^XFE:LABEL.ZPL",
+  ],
+  [{ type: "FieldNumber", number: 12 }, "^FN12"],
+  [{ type: "FieldNumber", number: 1, prompt: "Name" }, '^FN1"Name"'],
+  [
+    { type: "ImageLoad", device: "R", name: "FORM", extension: "GRF" },
+    "^ILR:FORM.GRF",
+  ],
+  [
+    {
+      type: "Aztec",
+      orientation: "N",
+      magnification: 4,
+      extendedChannel: false,
+      errorControl: 203,
+      menu: false,
+      symbolCount: 1,
+    },
+    "^BON,4,N,203,N,1",
+  ],
+  [{ type: "Aztec" }, "^BO"],
+  [{ type: "MaxiCode", mode: 2, symbolNumber: 1, symbolCount: 1 }, "^BD2,1,1"],
+  [{ type: "MaxiCode" }, "^BD"],
   [
     { type: "DeleteObject", device: "R", name: "LOGO", extension: "GRF" },
     "^IDR:LOGO.GRF",

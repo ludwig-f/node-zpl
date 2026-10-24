@@ -6,6 +6,7 @@
  */
 import { decodeObjectData } from "./data.js";
 import { FontFiles } from "./font-files.js";
+import { expandFormats } from "./formats.js";
 import { decodeGraphicData } from "./graphics.js";
 import type { Command } from "node-zpl";
 import type { Font } from "./font.js";
@@ -83,6 +84,16 @@ type Element = Common &
         fromBottom: boolean;
       }
     | {
+        /** ^GS: A ® B © C ™ D UL E CSA */
+        kind: "symbol";
+        symbol: string;
+        /** Whole-step magnification of the 24-dot symbol font */
+        magX: number;
+        magY: number;
+        orientation: Orientation;
+        fromBottom: boolean;
+      }
+    | {
         kind: "bitmap";
         /** Packed rows of bits, most significant bit first */
         bytes: Uint8Array;
@@ -95,6 +106,8 @@ type Element = Common &
 
 type LabelLayout = {
   printWidth?: number;
+  /** ^POI: the label prints upside down */
+  inverted?: boolean;
   elements: Element[];
   /** Commands that were understood but aren't drawn yet */
   unsupported: number[];
@@ -111,7 +124,9 @@ type BarcodeCommand = Extract<
       | "Pdf417"
       | "Ean13"
       | "DataMatrix"
-      | "QrCode";
+      | "QrCode"
+      | "Aztec"
+      | "MaxiCode";
   }
 >;
 
@@ -142,6 +157,8 @@ type Field = {
   /** ^FH: the character that starts a hex escape in the field data */
   hexIndicator?: string;
   block?: TextBlockOptions;
+  /** ^GS: the field data picks a graphic symbol */
+  symbol?: { height?: number; width?: number; orientation?: Orientation };
   /** The barcode the field data goes into, or the code of one we can't draw */
   barcode?: BarcodeCommand | NonNullable<ReturnType<typeof rawBarcode>>;
   commands: number[];
@@ -189,6 +206,8 @@ const decodeFieldData = (
 
 /** Barcode commands with a typed node, all of which we draw */
 const drawnCodes = new Set([
+  "^BO",
+  "^BD",
   "^B1",
   "^B2",
   "^B3",
@@ -266,15 +285,15 @@ const layout = (
     return typeface ? { ...setting, typeface } : { ...setting, font: "0" };
   };
 
-  commands.forEach((command, index) => {
+  for (const { command, index } of expandFormats(commands)) {
     if (command.type === "DownloadFont") {
       // Bounded fonts are converted to Zebra's own format, which we can't read
       if (!command.bounded) fontFiles.download(command, command.data);
-      return;
+      continue;
     }
     if (command.type === "DownloadObject") {
       const { device, name, extension, data } = command;
-      if (command.format !== "A") return;
+      if (command.format !== "A") continue;
       if (extension === "T") {
         fontFiles.download({ device, name, extension: "TTF" }, data);
       } else if (extension === "G" && command.bytesPerRow) {
@@ -289,11 +308,11 @@ const layout = (
           });
         }
       }
-      return;
+      continue;
     }
     if (command.type === "FontIdentifier") {
       identifiers.set(command.font, command);
-      return;
+      continue;
     }
     if (command.type === "DownloadGraphic") {
       stored.set(`${command.device}:${command.name}`, {
@@ -305,7 +324,7 @@ const layout = (
         bytesPerRow: command.bytesPerRow,
         rows: Math.ceil(command.totalBytes / command.bytesPerRow),
       });
-      return;
+      continue;
     }
 
     if (command.type === "StartFormat") {
@@ -318,9 +337,9 @@ const layout = (
       utf8 = false;
       field = newField();
       barcodeDefaults = initialBarcodeDefaults;
-      return;
+      continue;
     }
-    if (!label) return;
+    if (!label) continue;
 
     field.commands.push(index);
     const common = (): Common => ({
@@ -337,6 +356,24 @@ const layout = (
       case "PrintWidth":
         label.printWidth = command.width;
         break;
+      case "PrintOrientation":
+        label.inverted = command.orientation === "I";
+        break;
+      case "ImageLoad": {
+        const graphic = stored.get(`${command.device}:${command.name}`);
+        if (!graphic) break;
+        label.elements.push({
+          x: home.x,
+          y: home.y,
+          reverse: labelReverse,
+          commands: [index],
+          kind: "bitmap",
+          ...graphic,
+          magnificationX: 1,
+          magnificationY: 1,
+        });
+        break;
+      }
       case "LabelHome":
         home = { x: command.x, y: command.y };
         break;
@@ -414,6 +451,13 @@ const layout = (
       case "FieldOrientation":
         orientation = command.orientation;
         break;
+      case "GraphicSymbol":
+        field.symbol = {
+          height: command.height,
+          width: command.width,
+          orientation: command.orientation,
+        };
+        break;
       case "FieldBlock":
         field.block = {
           width: command.width,
@@ -428,6 +472,30 @@ const layout = (
         break;
       case "FieldData": {
         const data = decodeFieldData(command.data, field.hexIndicator, utf8);
+        if (field.symbol) {
+          // Sizes in 24-dot steps; a missing one takes the other's, and
+          // without either, the default font's
+          let { height, width } = field.symbol;
+          if (height === undefined && width === undefined) {
+            ({ height, width } = defaultFont);
+          }
+          const step = (dots: number | undefined) =>
+            dots === undefined
+              ? undefined
+              : Math.min(10, Math.max(1, Math.round(dots / 24)));
+          const magY = step(height) ?? step(width) ?? 1;
+          const magX = step(width) ?? magY;
+          label.elements.push({
+            ...common(),
+            kind: "symbol",
+            symbol: data.charAt(0),
+            magX,
+            magY,
+            orientation: field.symbol.orientation ?? orientation,
+            fromBottom: field.fromBottom,
+          });
+          break;
+        }
         const { barcode } = field;
         if (barcode) {
           if (barcode.type === "Unsupported") {
@@ -451,7 +519,11 @@ const layout = (
             moduleWidth: barcodeDefaults.moduleWidth,
             ratio: barcodeDefaults.ratio,
             height: barcodeDefaults.height,
-            orientation: barcode.orientation ?? orientation,
+            // MaxiCode can't be turned
+            orientation:
+              barcode.type === "MaxiCode"
+                ? "N"
+                : barcode.orientation ?? orientation,
             fromBottom: field.fromBottom,
             font: field.font,
           });
@@ -573,6 +645,8 @@ const layout = (
       case "Ean13":
       case "DataMatrix":
       case "QrCode":
+      case "Aztec":
+      case "MaxiCode":
         field.barcode = command;
         break;
       case "Raw": {
@@ -584,7 +658,7 @@ const layout = (
         break;
       }
     }
-  });
+  }
 
   return labels;
 };

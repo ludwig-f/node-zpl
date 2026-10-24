@@ -447,6 +447,49 @@ class Label extends ZplContent {
   }
 
   /**
+   * Draw an Aztec code on the label
+   * @param options.position Position (x, y) of the code
+   * @param options.data Data to encode
+   * @param options.moduleSize Size of each square module, 1 to 10 dots - defaults to the printer's
+   * @param options.errorControl Error correction percentage (1 to 99), or 101 to 104 for a compact symbol and 201 to 232 for a full-range one with that many layers
+   * @param options.orientation Orientation of the code
+   */
+  public drawAztec(options: {
+    position: Position;
+    data: string;
+    moduleSize?: Length;
+    errorControl?: number;
+    orientation?: Orientation;
+  }): this {
+    return this.field(options.position, [
+      {
+        type: "Aztec",
+        orientation: options.orientation,
+        magnification: this.optionalDots(options.moduleSize),
+        errorControl: options.errorControl,
+      },
+      ...this.fieldData(options.data),
+    ]);
+  }
+
+  /**
+   * Draw a MaxiCode on the label, a fixed-size code used on parcels
+   * @param options.position Position (x, y) of the code
+   * @param options.data Data to encode; in modes 2 and 3 it starts with the class of service, country code and postal code
+   * @param options.mode 2 or 3 for carrier messages with a numeric or alphanumeric postal code, 4 to 6 for other data - defaults to 2
+   */
+  public drawMaxiCode(options: {
+    position: Position;
+    data: string;
+    mode?: 2 | 3 | 4 | 5 | 6;
+  }): this {
+    return this.field(options.position, [
+      { type: "MaxiCode", mode: options.mode },
+      ...this.fieldData(options.data),
+    ]);
+  }
+
+  /**
    * Draw an EAN-13 barcode on the label
    * @param options.position Position (x, y) of the barcode
    * @param options.data Data to encode, 12 digits (the check digit is added by the printer)

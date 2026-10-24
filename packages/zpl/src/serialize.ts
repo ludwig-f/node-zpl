@@ -93,7 +93,10 @@ const serializeCommand = (command: Command): string => {
     case "FieldHexIndicator":
       return `^FH${command.indicator ?? ""}`;
     case "FieldData":
-      return `^FD${assertNoPrefix(command.data, "Field data")}`;
+      return `${command.variable ? "^FV" : "^FD"}${assertNoPrefix(
+        command.data,
+        "Field data"
+      )}`;
     case "FieldSeparator":
       return "^FS";
     case "Comment":
@@ -223,6 +226,36 @@ const serializeCommand = (command: Command): string => {
         command.totalBytes,
         command.bytesPerRow,
         command.data
+      )}`;
+    case "PrintOrientation":
+      return `^PO${command.orientation}`;
+    case "GraphicSymbol":
+      return `^GS${params(command.orientation, command.height, command.width)}`;
+    case "DownloadFormat":
+      return `^DF${command.device}:${command.name}.${command.extension}`;
+    case "RecallFormat":
+      return `^XF${command.device}:${command.name}.${command.extension}`;
+    case "FieldNumber":
+      return `^FN${command.number}${
+        command.prompt === undefined ? "" : `"${command.prompt}"`
+      }`;
+    case "ImageLoad":
+      return `^IL${command.device}:${command.name}.${command.extension}`;
+    case "Aztec":
+      return `^BO${params(
+        command.orientation,
+        command.magnification,
+        yn(command.extendedChannel),
+        command.errorControl,
+        yn(command.menu),
+        command.symbolCount,
+        command.structuredAppendId
+      )}`;
+    case "MaxiCode":
+      return `^BD${params(
+        command.mode,
+        command.symbolNumber,
+        command.symbolCount
       )}`;
     case "DeleteObject":
       return `^ID${command.device}:${command.name}.${command.extension}`;

@@ -4,6 +4,7 @@ import { boxPath, circlePath, diagonalPath } from "./shapes.js";
 import { layout } from "./layout.js";
 import { drawText } from "./text.js";
 import { drawBarcode, drawPlaceholder } from "./barcode.js";
+import { drawSymbol } from "./symbols.js";
 import type { Command } from "node-zpl";
 import type { Element } from "./layout.js";
 import type { Color } from "./raster.js";
@@ -93,6 +94,9 @@ const draw = (
     case "barcode":
       drawBarcode(raster, element, dpmm, color);
       break;
+    case "symbol":
+      drawSymbol(raster, element, color);
+      break;
     case "placeholder":
       drawPlaceholder(raster, element, dpmm, color);
       break;
@@ -157,6 +161,9 @@ const renderLabels = (
       if (element.reverse) drawReversed(printed, element, options.dpmm);
       else draw(printed, element, options.dpmm);
     }
+
+    // Upside down: turning the print area half a turn reverses its dots
+    if (label.inverted) printed.ink.reverse();
 
     if (printWidth === width) return printed;
 

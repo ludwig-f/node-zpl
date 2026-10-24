@@ -7,9 +7,17 @@
  * Where bwip-js places lines isn't documented, so its version is pinned:
  * bump it only when bwip.test.ts, which compares with raw(), still passes.
  */
-import { code128, datamatrix, pdf417, qrcode } from "bwip-js";
+import {
+  azteccode,
+  code128,
+  datamatrix,
+  maxicode,
+  pdf417,
+  qrcode,
+} from "bwip-js";
+import type { Path } from "../raster.js";
 
-const encoders = { code128, datamatrix, pdf417, qrcode };
+const encoders = { azteccode, code128, datamatrix, pdf417, qrcode };
 
 type Bcid = keyof typeof encoders;
 type Edge = [x0: number, y0: number, x1: number, y1: number];
@@ -126,4 +134,56 @@ const encodeLinear = (bcid: string, text: string, options = "") => {
   return widths;
 };
 
-export { encodeLinear, encodeMatrix };
+/**
+ * MaxiCode's hexagons and bullseye as paths, fitted to a box from 0 to 1 in
+ * each direction. Rings of the bullseye wind in turns, so a nonzero fill
+ * leaves the gaps between them white.
+ */
+const encodeMaxiCode = (text: string, mode: number): Path => {
+  const paths: [number, number][][] = [];
+  maxicode(
+    // Drawn large, as bwip-js rounds coordinates to half pixels
+    { bcid: "maxicode", text, mode, parse: false, scale: 10 } as never,
+    {
+      setopts() {},
+      scale() {},
+      measure: () => ({ width: 0, ascent: 0, descent: 0 }),
+      init() {},
+      line() {},
+      polygon(points: number[][]) {
+        paths.push(points.map(([x, y]) => [x, y]));
+      },
+      hexagon(points: number[][]) {
+        paths.push(points.map(([x, y]) => [x, y]));
+      },
+      ellipse(x: number, y: number, rx: number, ry: number, ccw: boolean) {
+        const steps = 64;
+        const points: [number, number][] = [];
+        for (let i = 0; i < steps; i++) {
+          const angle = ((ccw ? -i : i) / steps) * 2 * Math.PI;
+          points.push([x + rx * Math.cos(angle), y + ry * Math.sin(angle)]);
+        }
+        paths.push(points);
+      },
+      fill() {},
+      clip() {},
+      unclip() {},
+      text() {},
+      end() {},
+    } as never
+  );
+
+  const all = paths.flat();
+  const minX = Math.min(...all.map(([x]) => x));
+  const maxX = Math.max(...all.map(([x]) => x));
+  const minY = Math.min(...all.map(([, y]) => y));
+  const maxY = Math.max(...all.map(([, y]) => y));
+  return paths.map((path) =>
+    path.map(
+      ([x, y]) =>
+        [(x - minX) / (maxX - minX), (y - minY) / (maxY - minY)] as const
+    )
+  );
+};
+
+export { encodeLinear, encodeMatrix, encodeMaxiCode };
