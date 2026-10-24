@@ -84,6 +84,16 @@ type Element = Common &
         fromBottom: boolean;
       }
     | {
+        /** ^GS: A ® B © C ™ D UL E CSA */
+        kind: "symbol";
+        symbol: string;
+        /** Whole-step magnification of the 24-dot symbol font */
+        magX: number;
+        magY: number;
+        orientation: Orientation;
+        fromBottom: boolean;
+      }
+    | {
         kind: "bitmap";
         /** Packed rows of bits, most significant bit first */
         bytes: Uint8Array;
@@ -114,7 +124,9 @@ type BarcodeCommand = Extract<
       | "Pdf417"
       | "Ean13"
       | "DataMatrix"
-      | "QrCode";
+      | "QrCode"
+      | "Aztec"
+      | "MaxiCode";
   }
 >;
 
@@ -145,6 +157,8 @@ type Field = {
   /** ^FH: the character that starts a hex escape in the field data */
   hexIndicator?: string;
   block?: TextBlockOptions;
+  /** ^GS: the field data picks a graphic symbol */
+  symbol?: { height?: number; width?: number; orientation?: Orientation };
   /** The barcode the field data goes into, or the code of one we can't draw */
   barcode?: BarcodeCommand | NonNullable<ReturnType<typeof rawBarcode>>;
   commands: number[];
@@ -192,6 +206,8 @@ const decodeFieldData = (
 
 /** Barcode commands with a typed node, all of which we draw */
 const drawnCodes = new Set([
+  "^BO",
+  "^BD",
   "^B1",
   "^B2",
   "^B3",
@@ -435,6 +451,13 @@ const layout = (
       case "FieldOrientation":
         orientation = command.orientation;
         break;
+      case "GraphicSymbol":
+        field.symbol = {
+          height: command.height,
+          width: command.width,
+          orientation: command.orientation,
+        };
+        break;
       case "FieldBlock":
         field.block = {
           width: command.width,
@@ -449,6 +472,30 @@ const layout = (
         break;
       case "FieldData": {
         const data = decodeFieldData(command.data, field.hexIndicator, utf8);
+        if (field.symbol) {
+          // Sizes in 24-dot steps; a missing one takes the other's, and
+          // without either, the default font's
+          let { height, width } = field.symbol;
+          if (height === undefined && width === undefined) {
+            ({ height, width } = defaultFont);
+          }
+          const step = (dots: number | undefined) =>
+            dots === undefined
+              ? undefined
+              : Math.min(10, Math.max(1, Math.round(dots / 24)));
+          const magY = step(height) ?? step(width) ?? 1;
+          const magX = step(width) ?? magY;
+          label.elements.push({
+            ...common(),
+            kind: "symbol",
+            symbol: data.charAt(0),
+            magX,
+            magY,
+            orientation: field.symbol.orientation ?? orientation,
+            fromBottom: field.fromBottom,
+          });
+          break;
+        }
         const { barcode } = field;
         if (barcode) {
           if (barcode.type === "Unsupported") {
@@ -472,7 +519,11 @@ const layout = (
             moduleWidth: barcodeDefaults.moduleWidth,
             ratio: barcodeDefaults.ratio,
             height: barcodeDefaults.height,
-            orientation: barcode.orientation ?? orientation,
+            // MaxiCode can't be turned
+            orientation:
+              barcode.type === "MaxiCode"
+                ? "N"
+                : barcode.orientation ?? orientation,
             fromBottom: field.fromBottom,
             font: field.font,
           });
@@ -594,6 +645,8 @@ const layout = (
       case "Ean13":
       case "DataMatrix":
       case "QrCode":
+      case "Aztec":
+      case "MaxiCode":
         field.barcode = command;
         break;
       case "Raw": {

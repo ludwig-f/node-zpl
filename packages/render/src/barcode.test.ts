@@ -335,6 +335,93 @@ describe("PDF417", () => {
   });
 });
 
+describe("Aztec", () => {
+  test.each([
+    // Magnification is the module size, 2 by default at 8 dpmm
+    ["^FO100,100^BON,4^FDhello^FS", 100, 159, 100, 159],
+    ["^FO100,100^BO^FDhello^FS", 100, 129, 100, 129],
+    ["^FO100,100^BON,2^FDhello^FS", 100, 129, 100, 129],
+    // The smallest symbol that fits, unless error control asks otherwise
+    [
+      "^FO100,100^BON,4,N,0^FDhello world hello world hello world^FS",
+      100,
+      191,
+      100,
+      191,
+    ],
+    ["^FO100,100^BON,4,N,50^FDhello^FS", 100, 159, 100, 159],
+    ["^FO100,100^BON,4,N,102^FDhello^FS", 100, 175, 100, 175],
+    ["^FO100,100^BON,4,N,203^FDhello^FS", 100, 207, 100, 207],
+    ["^FT100,300^BON,4^FDhello^FS", 100, 159, 240, 299],
+    ["^FO100,100^BOR,4^FDhello^FS", 100, 159, 100, 159],
+  ])("%s", (body, left, right, top, bottom) => {
+    expect(bounds(body)).toStrictEqual({ left, right, top, bottom });
+  });
+
+  test("prefers a compact symbol to a full one of the same size", () => {
+    // Labelary: 23 modules of compact, not full, Aztec; its first row
+    const raster = render(
+      "^FO10,10^BON,1^FDhello world hello world hello world^FS"
+    );
+    const row = Array.from({ length: 23 }, (_, x) =>
+      raster.ink[10 * raster.width + 10 + x] >= 0.5 ? "1" : "0"
+    ).join("");
+    expect(row).toBe("11000101100001100101001");
+  });
+
+  test("draws the modules dot for dot", () => {
+    const raster = render("^FO10,10^BON,1^FDhello^FS");
+    const rows = Array.from({ length: 15 }, (_, y) =>
+      Array.from({ length: 15 }, (_, x) =>
+        raster.ink[(10 + y) * raster.width + 10 + x] >= 0.5 ? "#" : "."
+      ).join("")
+    );
+    expect(rows).toStrictEqual([
+      "..#...#..######",
+      "##..#..#.#...##",
+      "#.##.....#..###",
+      "..###########..",
+      "#..#.......#.##",
+      ".#.#.#####.####",
+      "..##.#...#.#.##",
+      "##.#.#.#.#.####",
+      "...#.#...#.#.##",
+      "##.#.#####.#...",
+      ".#.#.......#...",
+      ".#.##########.#",
+      "#...###.###....",
+      "#..###.###.#.##",
+      "#...#..#..#..#.",
+    ]);
+  });
+});
+
+describe("MaxiCode", () => {
+  // A UPS-style carrier message: class of service 002, country 840, postal
+  // code 100450000, then the rest after [)>
+  const ups =
+    "002840100450000[)>\x1e01\x1d961Z00004951\x1dUPSN\x1d06X610\x1d159\x1d1234567\x1d1/1\x1d\x1dY\x1d634 ALPHA DR\x1dPITTSBURGH\x1dPA\x1e\x04";
+
+  test.each([
+    // Always the same size: about 25 by 24 mm
+    ["^FO100,100^BD4^FDHello MaxiCode^FS", 100, 299, 100, 292],
+    [`^FO100,100^BD2^FD${ups}^FS`, 100, 299, 100, 292],
+    ["^FT100,300^BD4^FDHello MaxiCode^FS", 100, 299, 105, 297],
+  ])("%s", (body, left, right, top, bottom) => {
+    near(bounds(body), { left, right, top, bottom }, 1);
+  });
+
+  test("has a bullseye in the middle", () => {
+    const raster = render("^FO100,100^BD4^FDHello MaxiCode^FS");
+    const dot = (x: number, y: number) =>
+      raster.ink[y * raster.width + x] >= 0.5;
+    // From the center outward: white, then dark and white rings
+    const row = Array.from({ length: 30 }, (_, i) => dot(199 + i, 196));
+    expect(row[0]).toBe(false);
+    expect(row.filter((d, i) => i > 0 && d !== row[i - 1]).length).toBe(6);
+  });
+});
+
 describe("QR code", () => {
   test.each([
     // ^FO places it 10 dots lower; version 1 is 21 modules

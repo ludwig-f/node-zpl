@@ -119,3 +119,30 @@ describe("stored formats", () => {
     expect(label.elements[0].commands).toContain(data);
   });
 });
+
+describe("^GS symbols", () => {
+  test.each([
+    // In 24-dot steps: a ® is 15 dots per step, a ™ 19 by 10
+    ["^FO100,100^GSN,60,60^FDA^FS", [100, 144, 100, 144]],
+    ["^FO100,100^GSN,60,60^FDB^FS", [100, 144, 100, 144]],
+    ["^FO100,100^GSN,60,60^FDC^FS", [100, 156, 100, 129]],
+    ["^FO100,100^GSN,60,60^FDD^FS", [100, 171, 100, 171]],
+    ["^FO100,100^GSN,60,60^FDE^FS", [100, 165, 100, 171]],
+    ["^FO100,100^GSN,30,60^FDA^FS", [100, 144, 100, 114]],
+    // Without a size, the default font's
+    ["^FO100,100^GS^FDA^FS", [100, 114, 100, 114]],
+    ["^CFA,40,40^FO100,100^GS^FDA^FS", [100, 129, 100, 129]],
+    // Only the first character prints
+    ["^FO100,100^GSN,60,60^FDAB^FS", [100, 144, 100, 144]],
+    // ^FT puts the bottom of the 24-dot cell at y
+    ["^FT100,200^GSN,60,60^FDA^FS", [100, 144, 128, 172]],
+    ["^FO100,100^GSR,60,60^FDA^FS", [127, 171, 100, 144]],
+  ])("%s", (body, expected) => {
+    near(bounds(`^XA${body}^XZ`), expected, 1);
+  });
+
+  test("print a symbol, not the letter", () => {
+    const [label] = layout(parse("^XA^FO10,10^GS^FDA^FS^XZ").commands);
+    expect(label.elements).toMatchObject([{ kind: "symbol", symbol: "A" }]);
+  });
+});
