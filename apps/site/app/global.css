@@ -207,3 +207,13 @@ html > body[data-scroll-locked] {
   background: var(--zk-code-inline);
   border-radius: 3px;
 }
+
+/* The hero label feeding out of the printer in whole-dot steps */
+@keyframes feed {
+  from {
+    transform: translateY(-80%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
