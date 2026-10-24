@@ -3,6 +3,9 @@
  * symbologies we don't use. Named encoders only draw, so a drawing that
  * records lines and polygons at one pixel per module turns them back into
  * what bwip-js's raw() returns: module grids and bar widths.
+ *
+ * Where bwip-js places lines isn't documented, so its version is pinned:
+ * bump it only when bwip.test.ts, which compares with raw(), still passes.
  */
 import { code128, datamatrix, pdf417, qrcode } from "bwip-js";
 
