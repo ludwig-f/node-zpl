@@ -1,28 +1,31 @@
 # @zplkit/core
 
-`@zplkit/core` is a ZPL (Zebra Programming Language) generator for TypeScript.
+[![npm](https://img.shields.io/npm/v/@zplkit/core)](https://www.npmjs.com/package/@zplkit/core)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
+
+Build, parse and lint ZPL, the language Zebra label printers speak, from TypeScript.
+
+- **Typed builder and JSX**: write labels with method calls or JSX components, in millimeters or dots, with field data escaped for you.
+- **Parser**: read existing ZPL into typed commands and write it back unchanged.
+- **Linter**: catch the mistakes printers stay quiet about, like values they clamp and labels that never print.
+- **No runtime dependencies** except two small image decoders, used only by `ImageConverter`.
+
+Try it in the [playground](https://zpl.fingal.dev/playground), or read the [docs](https://zpl.fingal.dev/docs).
 
 > [!NOTE]
-> zplkit was called `node-zpl` before version 2. To upgrade, install `@zplkit/core` and change imports from `node-zpl` to `@zplkit/core`.
-
-This library provides a thin (but typed!) wrapper around the ZPL commands as described by Zebra.
-
-> [!NOTE]
-> This library is under active development and does not yet support every single ZPL command. Please check the list below to see the currently supported commands. Contributions are welcome!
+> This package was called `node-zpl` before version 2. To upgrade, install `@zplkit/core` and change imports from `node-zpl` to `@zplkit/core`.
 
 ## Installation
-
-Install `@zplkit/core` using the package manager of your choice. Using `npm`:
 
 ```bash
 npm install @zplkit/core
 ```
 
-`@zplkit/core` is an ES module and needs Node 22 or newer. CommonJS projects can still load it with `require()`, which Node supports for ES modules since 22.12.
+`@zplkit/core` is an ES module and needs Node 22 or newer. CommonJS projects can load it with `require()`, which Node supports for ES modules since 22.12. The builder, JSX, parser and linter also run in the browser.
 
 ## Usage
 
-Here's a basic example of how to use `@zplkit/core` to generate a label with some text and an EAN-13 bar code:
+A label with some text and an EAN-13 barcode:
 
 ```typescript
 import { Label, Orientation, mm, dots } from "@zplkit/core";
@@ -43,7 +46,7 @@ const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 ```
 
 > [!TIP]
-> To preview your generated ZPL you can use [Labelary](https://labelary.com/viewer.html)!
+> To see what a label looks like, paste its ZPL into the [playground](https://zpl.fingal.dev/playground), or render it to an image with [`@zplkit/render`](https://github.com/ludwig-f/zplkit/tree/main/packages/render).
 
 ### JSX
 
@@ -192,199 +195,36 @@ const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
   .toZPL();
 ```
 
-### Supported ZPL Commands
+### Supported commands
 
-- [x] `^A` - Scalable/bitmapped font
-- [x] `^A@` - Use font name to call font
-- [ ] `^B0` - Aztec bar code parameters
-- [x] `^B1` - Code 11 bar code
-- [x] `^B2` - Interleaved 2 of 5 bar code
-- [x] `^B3` - Code 39 bar code
-- [ ] `^B4` - Code 49 bar code
-- [ ] `^B5` - Planet Code bar code
-- [x] `^B7` - PDF417 bar code
-- [ ] `^B8` - EAN-8 bar code
-- [ ] `^B9` - UPC-E bar code
-- [ ] `^BA` - Code 93 bar code
-- [ ] `^BB` - CODABLOCK bar code
-- [x] `^BC` - Code 128 bar code (subsets A, B, and C)
-- [x] `^BD` - UPS MaxiCode bar code
-- [x] `^BE` - EAN-13 bar code
-- [ ] `^BF` - MicroPDF417 bar code
-- [ ] `^BI` - Industrial 2 of 5 bar code
-- [ ] `^BJ` - Standard 2 of 5 bar code
-- [ ] `^BK` - ANSI Codabar bar code
-- [ ] `^BL` - LOGMARS bar code
-- [ ] `^BM` - MSI bar code
-- [x] `^BO` - Aztec bar code
-- [ ] `^BP` - Plessey bar code
-- [x] `^BQ` - QR Code bar code
-- [ ] `^BR` - RSS (Reduced Space Symbology) bar code
-- [ ] `^BS` - UPC/EAN bar code
-- [ ] `^BT` - TLC39 bar code
-- [ ] `^BU` - UPC-A bar code
-- [x] `^BX` - Data Matrix bar code
-- [x] `^BY` - Bar code field default
-- [ ] `^BZ` - POSTNET bar code
-- [ ] `^CC` - Change Caret
-- [ ] `~CC` - Change Caret
-- [ ] `^CD` - Change Delimiter
-- [ ] `~CD` - Change Delimiter
-- [x] `^CF` - Change Alphanumeric Default Font
-- [x] `^CI` - Change International Font/Encoding
-- [ ] `^CM` - Change Memory Letter Designation
-- [ ] `^CO` - Cache On
-- [ ] `^CT` - Change Tilde
-- [ ] `~CT` - Change Tilde
-- [ ] `^CV` - Code Validation
-- [x] `^CW` - Font Identifier
-- [ ] `~DB` - Download Bitmap Font
-- [ ] `~DE` - Download Encoding
-- [x] `^DF` - Download Format
-- [x] `~DG` - Download Graphics
-- [ ] `~DN` - Abort Download Graphics
-- [ ] `~DS` - Download Intellifont (Scalable Font)
-- [x] `~DT` - Download Bounded TrueType font
-- [x] `~DU` - Download Unbounded TrueType font
-- [x] `~DY` - Download Graphics / Native TrueType or OpenType font
-- [ ] `~EG` - Erase Download Graphics
-- [x] `^FB` - Field Block
-- [ ] `^FC` - Field Clock (or Real Time Clock)
-- [x] `^FD` - Field Data
-- [x] `^FH` - Field Hexadecimal Indicator
-- [ ] `^FM` - Multiple Field Origin Locations
-- [x] `^FN` - Field Number
-- [x] `^FO` - Field Origin
-- [ ] `^FP` - Field Parameter
-- [x] `^FR` - Field Reverse Print
-- [x] `^FS` - Field Separator
-- [x] `^FT` - Field Typeset
-- [x] `^FV` - Field Variable
-- [x] `^FW` - Field Orientation
-- [x] `^FX` - Comment
-- [x] `^GB` - Graphic Box
-- [x] `^GC` - Graphic Circle
-- [x] `^GD` - Graphic Diagonal Line
-- [ ] `^GE` - Graphic Ellipse
-- [x] `^GF` - Graphic Field
-- [x] `^GS` - Graphic Symbol
-- [ ] `~HB` - Battery Status
-- [ ] `~HD` - Head Diagnostic
-- [ ] `^HF` - Host Format
-- [ ] `^HG` - Host Graphic
-- [ ] `^HH` - Configuratin Label Return
-- [ ] `~HI` - Host Identification
-- [ ] `~HM` - Host RAM Status
-- [ ] `~HS` - Host Status Return
-- [ ] `~HU` - Return ZebraNet Alert Configuration
-- [ ] `^HV` - Host Verification
-- [ ] `^HW` - Host Directory List
-- [ ] `^HY` - Upload Graphics
-- [ ] `^HZ` - Display Description Information
-- [x] `^ID` - Object Delete
-- [x] `^IL` - Image Load
-- [ ] `^IM` - Image Move
-- [ ] `^IS` - Image Save
-- [ ] `~JA` - Cancel All
-- [ ] `^JB` - Initialize Flash Memory
-- [ ] `~JB` - Reset Optional Memory
-- [ ] `~JC` - Set Media Sensor Calibration
-- [ ] `~JD` - Enable Communications Diagnostics
-- [ ] `~JE` - Disable Diagnostics
-- [ ] `~JF` - Set Battery Condition
-- [ ] `~JG` - Graphing Sensor Calibration
-- [ ] `^JJ` - Set Auxiliary Port
-- [ ] `~JL` - Set Label Length
-- [ ] `^JM` - Set Dots per Millimeter
-- [ ] `~JN` - Head Test Fatal
-- [ ] `~JO` - Head Test Non-Fatal
-- [ ] `~JP`: Pause and Cancel Format
-- [ ] `~JR`: Power On Reset
-- [ ] `^JS`: Sensor Select
-- [ ] `~JS`: Change Backfeed Sequence
-- [ ] `^JT`: Head Test Interval
-- [ ] `^JU`: Configuration Update
-- [ ] `^JW`: Set Ribbon Tension
-- [ ] `~JX`: Cancel Current Partially Input Format
-- [ ] `^JZ`: Reprint After Error
-- [ ] `~KB`: Kill Battery (Battery Discharge Mode)
-- [ ] `^KD`: Select Date and Time Format (for Real Time Clock)
-- [ ] `^KL`: Define Language
-- [ ] `^KN`: Define Printer Name
-- [ ] `^KP`: Set Password
-- [x] `^LH`: Label Home
-- [x] `^LL`: Label Length
-- [x] `^LR`: Label Reverse Print
-- [ ] `^LS`: Label Shift
-- [ ] `^LT`: Label Top
-- [ ] `^MC`: Map Clear
-- [ ] `^MD`: Media Darkness
-- [ ] `^MF`: Media Feed
-- [ ] `^ML`: Maximum Label Length
-- [ ] `^MM`: Print Mode
-- [ ] `^MN`: Media Tracking
-- [ ] `^MP`: Mode Protection
-- [ ] `^MT`: Media Type
-- [ ] `^MU`: Set Units of Measurement
-- [ ] `^MW`: Modify Head Cold Warning
-- [ ] `~NC`: Network Connect
-- [ ] `^NI`: Network ID Number
-- [ ] `~NR`: Set All Printers Transparent
-- [ ] `^NS`: Change Networking Settings
-- [ ] `~NT`: Set Currently Connected Printer Transparent
-- [ ] `^PF`: Slew Given Number of Dot Rows
-- [ ] `^PH`: Slew to Home Position
-- [ ] `~PH`: Slew to Home Position
-- [ ] `^PM`: Printing Mirror Image of Label
-- [x] `^PO`: Print Orientation
-- [ ] `^PP`: Programmable Pause
-- [ ] `~PP`: Programmable Pause
-- [ ] `^PQ`: Print Quantity
-- [ ] `^PR`: Print Rate
-- [ ] `~PR`: Applicator Reprint
-- [ ] `~PS`: Print Start
-- [x] `^PW`: Print Width
-- [ ] `~RO`: Reset Advanced Counter
-- [ ] `^SC`: Set Serial Communications
-- [x] `~SD`: Set Darkness
-- [ ] `^SE`: Select Encoding
-- [ ] `^SF`: Serialization Field (with a standard ^FD String)
-- [ ] `^SL`: Set Mode and Language
-- [ ] `^SN`: Serialization Data
-- [ ] `^SO`: Set Offset (for Real Time Clock)
-- [ ] `^SP`: Start Print
-- [ ] `^SQ`: Halt ZebraNet Alert
-- [ ] `^SR`: Set Printhead Resistance
-- [ ] `^SS`: Set Media Sensors
-- [ ] `^ST`: Set Date and Time (for Real Time Clock)
-- [ ] `^SX`: Set ZebraNet Alert
-- [ ] `^SZ`: Set ZPL Mode
-- [ ] `~TA`: Tear-off Adjust Position
-- [ ] `^TO`: Transfer Object
-- [ ] `~WC`: Print Configuration Label
-- [ ] `^WD`: Print Directory Label
-- [x] `^XA`: Start Format
-- [ ] `^XB`: Suppress Backfeed
-- [x] `^XF`: Recall Format
-- [x] `^XG`: Recall Graphic
-- [x] `^XZ`: End Format
-- [ ] `^ZZ`: Printer Sleep
+<!-- commands:start (generated by scripts/commands.mjs) -->
 
-> [!TIP]
-> If you need an unsupported ZPL command, use the `raw` method available on both `Label` and `PrinterSetup`.
->
-> ```typescript
-> import { PrinterSetup } from "@zplkit/core";
->
-> // Put a battery powered printer to sleep after 10s
-> const zpl = new PrinterSetup().raw("^ZZ10").toZPL();
-> ```
+`@zplkit/core` reads and writes 55 of the 175 commands in Zebra's ZPL II Programming Guide. Other commands are kept as they are by `parse()` and can be added with `raw()`. The [full table](https://zpl.fingal.dev/docs/commands) also shows which ones the renderer draws.
+
+| Category | Supported |
+| --- | --- |
+| Labels and formats (15 of 19) | `^CC` `~CC` `^CD` `~CD` `^CT` `~CT` `^DF` `^LH` `^LL` `^LR` `^PO` `^PW` `^XA` `^XF` `^XZ` |
+| Fields (9 of 14) | `^FD` `^FN` `^FO` `^FR` `^FS` `^FT` `^FV` `^FW` `^FX` |
+| Text and fonts (9 of 13) | `^A` `^A@` `^CF` `^CI` `^CW` `~DT` `~DU` `^FB` `^FH` |
+| Graphics and images (10 of 17) | `~DG` `~DY` `^GB` `^GC` `^GD` `^GF` `^GS` `^ID` `^IL` `^XG` |
+| Barcodes (11 of 30) | `^B1` `^B2` `^B3` `^B7` `^BC` `^BD` `^BE` `^BO` `^BQ` `^BX` `^BY` |
+| Printer and media (1 of 82) | `~SD` |
+
+<!-- commands:end -->
+
+For a command without support yet, use `raw()`, which `Label` and `PrinterSetup` both have:
+
+```typescript
+import { PrinterSetup } from "@zplkit/core";
+
+// Put a battery-powered printer to sleep after 10 seconds
+const zpl = new PrinterSetup().raw("^ZZ10").toZPL();
+```
 
 ## Contributing
 
-Contributions to `@zplkit/core` are always welcome!
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for details on how to get started.
+Contributions are welcome, from bug reports to new commands. See [CONTRIBUTING.md](https://github.com/ludwig-f/zplkit/blob/main/CONTRIBUTING.md) to get started.
 
 ## License
 
-`@zplkit/core` is licensed under the [MIT License](./LICENSE)
+[MIT](./LICENSE)

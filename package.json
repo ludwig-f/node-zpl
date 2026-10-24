@@ -8,6 +8,7 @@
   "scripts": {
     "build": "pnpm -r build",
     "test": "pnpm -r test",
+    "commands": "node scripts/commands.mjs",
     "lint": "eslint packages/*/src apps/site/app apps/site/components apps/site/lib apps/site/playground --ext .ts,.tsx",
     "fix": "prettier \"packages/*/src/**/*.{ts,tsx}\" \"packages/render/scripts/*.mjs\" \"apps/site/{app,components,lib,playground}/**/*.{ts,tsx,css}\" --write",
     "prepare": "husky",
