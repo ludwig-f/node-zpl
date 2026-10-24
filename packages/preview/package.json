@@ -42,7 +42,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@zplkit/render": "workspace:*"
+    "@zplkit/render": "workspace:^"
   },
   "devDependencies": {
     "@types/node": "^20.19.43",

@@ -127,7 +127,7 @@ importers:
   packages/preview:
     dependencies:
       '@zplkit/render':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../render
     devDependencies:
       '@types/node':
@@ -164,7 +164,7 @@ importers:
         specifier: ^0.8.2
         version: 0.8.2
       zplkit:
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../zpl
     devDependencies:
       '@types/node':

@@ -8,6 +8,9 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  # npm trusted publishing: npm checks the workflow's OIDC token instead of
+  # a stored secret
+  id-token: write
 
 jobs:
   release-please:
@@ -26,15 +29,30 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         if: ${{ steps.release.outputs.releases_created == 'true' }}
         with:
-          node-version: 22
+          # Node 24 comes with npm 11, which trusted publishing needs
+          node-version: 24
           cache: pnpm
           registry-url: "https://registry.npmjs.org"
       - run: pnpm install --frozen-lockfile
         if: ${{ steps.release.outputs.releases_created == 'true' }}
       - run: pnpm build
         if: ${{ steps.release.outputs.releases_created == 'true' }}
-      # Publishes every package whose version isn't on npm yet
-      - run: pnpm -r publish --access public --no-git-checks
+      # Publishes every package whose version isn't on npm yet. pnpm packs
+      # them, turning workspace:* dependencies into versions, and npm
+      # publishes with trusted publishing, adding provenance
+      - name: Publish to npm
         if: ${{ steps.release.outputs.releases_created == 'true' }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          for dir in packages/*/; do
+            name=$(node -p "require('./${dir}package.json').name")
+            version=$(node -p "require('./${dir}package.json').version")
+            if [ "$(node -p "require('./${dir}package.json').private === true")" = true ]; then
+              continue
+            fi
+            if npm view "$name@$version" version > /dev/null 2>&1; then
+              echo "$name@$version is already on npm"
+              continue
+            fi
+            tarball=$(cd "$dir" && pnpm pack --pack-destination "$RUNNER_TEMP" | tail -n 1)
+            npm publish "$tarball" --access public
+          done
