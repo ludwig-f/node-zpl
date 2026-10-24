@@ -1,0 +1,52 @@
+---
+title: Printer setup and images
+description: PrinterSetup and ImageConverter from @zplkit/core.
+---
+
+## PrinterSetup
+
+```ts
+import { PrinterSetup } from "@zplkit/core";
+```
+
+Builds ZPL that changes the printer or stores things on it, rather than printing a label. Its methods chain, and `toZPL()` returns the ZPL to send. See [Printing](/docs/printing).
+
+### storeGraphic(options)
+
+Stores an image (`~DG`), to print it on labels with `storedGraphic()`.
+
+<auto-type-table cwd path="../../packages/zpl/src/options.ts" name="StoreGraphicOptions" />
+
+### storeFont(options)
+
+Stores a TrueType font (`~DU`), to use with `text({ font: { file: "R:NAME.TTF" } })`.
+
+<auto-type-table cwd path="../../packages/zpl/src/options.ts" name="StoreFontOptions" />
+
+### Other methods
+
+| Method | Does |
+| --- | --- |
+| `setDarkness(darkness)` | Sets print darkness (`~SD`), 0 to 30 |
+| `deleteGraphic(name, device?)` | Deletes a stored graphic (`^ID`), from R: unless another device is given |
+
+## ImageConverter
+
+```ts
+import { ImageConverter } from "@zplkit/core/image";
+```
+
+Converts PNG and JPEG images to ZPL graphics. It runs in Node only, so it has its own entry point.
+
+`await new ImageConverter().toZPL(image)` takes a PNG or JPEG file as a `Uint8Array`, or pixels:
+
+<auto-type-table cwd path="../../packages/zpl/src/ImageConverter.ts" name="Pixels" />
+
+It returns a `ZplImage`, ready for `graphic()` or `storeGraphic()`:
+
+<auto-type-table cwd path="../../packages/zpl/src/ImageConverter.ts" name="ZplImage" />
+
+| Property | Default | Description |
+| --- | --- | --- |
+| `compress` | `true` | Compress the data with Zebra's run-length scheme |
+| `blacknessLimitPercentage` | `50` | How dark a pixel must be to print, in percent |

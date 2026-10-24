@@ -28,19 +28,7 @@ Every length takes an explicit unit: `mm(10)` for millimeters or `dots(80)` for 
 
 ## Elements
 
-| Method | Draws |
-| --- | --- |
-| `text` | Text in a built-in or downloaded font |
-| `box` | Boxes and lines, optionally rounded or white |
-| `code11`, `code39`, `code128`, `ean13`, `interleaved2of5` | Linear barcodes |
-| `pdf417` | PDF417 codes |
-| `dataMatrix` | Data Matrix codes |
-| `qrCode` | QR codes |
-| `aztec`, `maxiCode` | Aztec codes and MaxiCodes |
-| `field` | A field with any command, for elements without a method |
-| `graphic` | An image, converted with `ImageConverter` |
-| `storedGraphic` | An image stored on the printer |
-| `setDefaultFont` | The font for text that doesn't set one |
+There's a method for each kind of element: `text`, `box`, `graphic` and `storedGraphic`, one per barcode, like `code128`, `ean13` and `qrCode`, and `field` for any other command. The [API reference](/docs/api/label) lists them all with every option.
 
 ## QR codes
 

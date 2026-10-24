@@ -1,11 +1,13 @@
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import type { MDXComponents } from "mdx/types";
 import { Callout } from "@/components/docs/callout";
+import { TypeTable } from "fumadocs-ui/components/type-table";
 
 export function getMDXComponents(components?: MDXComponents) {
   return {
     ...defaultMdxComponents,
     Callout,
+    TypeTable,
     ...components,
   } satisfies MDXComponents;
 }

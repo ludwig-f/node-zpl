@@ -14,15 +14,26 @@ type LintRule =
   | "barcode-without-data"
   | "unknown-command";
 
+/** A problem lint() found */
 type LintDiagnostic = {
+  /** Which check found it; the linting docs explain each one */
   rule: LintRule;
   /** Errors stop the label from printing as intended, warnings change how it prints */
   severity: "error" | "warning";
+  /** What's wrong, in a sentence */
   message: string;
   /** Position of the command in the list */
   index: number;
   /** Position in the source text, for parsed ZPL */
   span?: Span;
+};
+
+/** The printer's media size, for labels that don't set ^PW or ^LL */
+type LintMedia = {
+  /** Media width in dots */
+  width?: number;
+  /** Media length in dots */
+  length?: number;
 };
 
 /**
@@ -107,7 +118,7 @@ const dots = (count: number): string => `${count} dot${count === 1 ? "" : "s"}`;
  */
 const lint = (
   commands: readonly Command[],
-  media: { width?: number; length?: number } = {}
+  media: LintMedia = {}
 ): LintDiagnostic[] => {
   const diagnostics: LintDiagnostic[] = [];
 
@@ -334,5 +345,5 @@ const lint = (
   return diagnostics;
 };
 
-export type { LintDiagnostic, LintRule };
+export type { LintDiagnostic, LintMedia, LintRule };
 export { lint };

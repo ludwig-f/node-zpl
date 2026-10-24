@@ -10,22 +10,20 @@ const toBase64 = (bytes: Uint8Array): string => {
   return btoa(binary);
 };
 
+/** Options for `renderZpl()` */
+type RenderZplOptions = Omit<RenderOptions, "antialias"> & {
+  /** Anti-aliased edges instead of the printer's whole dots */
+  grayscale: boolean;
+};
+
 /**
  * Render ZPL to one base64-encoded PNG per label. The signature matches what
  * @zplkit/preview expects from a renderer, so it can be passed to
  * `configure({ render: renderZpl })`.
- * @param options.grayscale Anti-aliased edges instead of the printer's whole dots
- * @param options.fonts Fonts already on the printer, by path like "E:ARIAL.TTF"
  */
 const renderZpl = async (
   zpl: string,
-  options: {
-    widthMm: number;
-    heightMm: number;
-    dpmm: number;
-    grayscale: boolean;
-    fonts?: Record<string, Uint8Array>;
-  }
+  options: RenderZplOptions
 ): Promise<string[]> => {
   const rasters = renderLabels(zpl, {
     ...options,
@@ -36,7 +34,7 @@ const renderZpl = async (
   );
 };
 
-export type { RenderOptions };
+export type { RenderOptions, RenderZplOptions };
 export type { Path, Point, Color, Sampling } from "./raster.js";
 export type { Element, LabelLayout, LayoutOptions } from "./layout.js";
 export { renderZpl, renderLabels, encodePng };

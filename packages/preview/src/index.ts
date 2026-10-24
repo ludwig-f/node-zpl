@@ -4,9 +4,13 @@
  */
 
 /** What the element asks a renderer for */
+/** What a renderer is asked to render */
 type RenderOptions = {
+  /** Label width in millimeters */
   widthMm: number;
+  /** Label height in millimeters */
   heightMm: number;
+  /** Dots per millimeter: 6, 8, 12 or 24 */
   dpmm: number;
   /** Anti-aliased 8-bit output instead of the printer's 1-bit dots */
   grayscale: boolean;
@@ -20,11 +24,17 @@ type ZplSource = string | { toZPL(): string };
 
 let renderer: Promise<Render> | undefined;
 
-/**
- * Change how previews are rendered
- * @param options.render Use your own renderer, e.g. one that calls an API
- */
-const configure = (options: { render?: Render }): void => {
+/** Options for `configure()` */
+type ConfigureOptions = {
+  /**
+   * Use your own renderer, for example one that calls an API
+   * @defaultValue renderZpl from @zplkit/render, loaded on first use
+   */
+  render?: Render;
+};
+
+/** Change how previews are rendered */
+const configure = (options: ConfigureOptions): void => {
   if (options.render) {
     renderer = Promise.resolve(options.render);
   }
@@ -305,6 +315,7 @@ export type {
   ZplSource,
   Render,
   RenderOptions,
+  ConfigureOptions,
   RenderStartDetail,
   RenderDetail,
   ErrorDetail,

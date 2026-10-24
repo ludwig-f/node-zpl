@@ -2,18 +2,91 @@ import LabelBuilder from "./Label.js";
 import ZplError from "./ZplError.js";
 import { Fragment, jsx } from "./jsx-runtime.js";
 import type { ZplElement, ZplNode } from "./jsx-runtime.js";
-import type { Color, StorageDevice } from "./ast.js";
-import type { Graphic, Orientation, ZebraFontFamily } from "./types.js";
+import type { Orientation, ZebraFontFamily } from "./types.js";
 import type { Length } from "./units.js";
+import type {
+  AztecOptions,
+  BoxOptions,
+  Code11Options,
+  Code128Options,
+  Code39Options,
+  DataMatrixOptions,
+  DefaultFontOptions,
+  Ean13Options,
+  FieldOptions,
+  FontOptions,
+  GraphicOptions,
+  Interleaved2of5Options,
+  LabelOptions,
+  MaxiCodeOptions,
+  Pdf417Options,
+  QrCodeOptions,
+  StoredGraphicOptions,
+} from "./options.js";
 
-type Position = { x: Length; y: Length };
+/** Where an element starts, measured from the label home */
+type Position = {
+  /** Distance from the left */
+  x: Length;
+  /** Distance from the top */
+  y: Length;
+};
 
 /** Text content: strings and numbers are joined, false/null/undefined skipped */
 type TextChild = string | number | boolean | null | undefined;
 type TextChildren = TextChild | TextChild[];
 
-type LabelProps = ConstructorParameters<typeof LabelBuilder>[0] & {
+/** An element's props: a builder method's options, with x and y for position */
+type PositionedProps<O extends { position: unknown }> = Position &
+  Omit<O, "position">;
+
+/** A barcode's props: its options, with x and y, and the data as children */
+type BarcodeProps<O extends { position: unknown; data: string }> = Position &
+  Omit<O, "position" | "data"> & {
+    /** The data to encode; it's escaped for you */
+    children: TextChildren;
+  };
+
+type LabelProps = LabelOptions & {
+  /** The label's elements */
   children?: ZplNode;
+};
+type DefaultFontProps = DefaultFontOptions;
+type FieldOrientationProps = {
+  /** Orientation of the fields that follow */
+  orientation: Orientation;
+};
+type TextProps = Position &
+  Omit<FontOptions, "name"> & {
+    /**
+     * One of the printer's fonts, or a font name
+     * @defaultValue The label's default font
+     */
+    font?: ZebraFontFamily | string;
+    /** The text; characters ZPL would read as commands are escaped */
+    children: TextChildren;
+  };
+type BoxProps = PositionedProps<BoxOptions>;
+type GraphicProps = PositionedProps<GraphicOptions>;
+type StoredGraphicProps = PositionedProps<StoredGraphicOptions>;
+type Code11Props = BarcodeProps<Code11Options>;
+type Code39Props = BarcodeProps<Code39Options>;
+type Code128Props = BarcodeProps<Code128Options>;
+type Interleaved2of5Props = BarcodeProps<Interleaved2of5Options>;
+type EAN13Props = BarcodeProps<Ean13Options>;
+type PDF417Props = BarcodeProps<Pdf417Options>;
+type AztecProps = BarcodeProps<AztecOptions>;
+type MaxiCodeProps = BarcodeProps<MaxiCodeOptions>;
+type DataMatrixProps = BarcodeProps<DataMatrixOptions>;
+type QrCodeProps = BarcodeProps<QrCodeOptions>;
+type FieldProps = Position &
+  Omit<FieldOptions, "position" | "data"> & {
+    /** Field data, if the command needs any; it's escaped for you */
+    children?: TextChildren;
+  };
+type RawProps = {
+  /** ZPL added as written */
+  zpl: string;
 };
 
 const REACT_FRAGMENT = Symbol.for("react.fragment");
@@ -127,279 +200,119 @@ const build = (root: ZplElement): LabelBuilder => {
 };
 
 /** Set the default font (^CF) for the text that follows */
-const DefaultFont = primitive(
-  (
-    label,
-    props: {
-      font: ZebraFontFamily | string;
-      height?: Length;
-      width?: Length;
-    }
-  ) => label.setDefaultFont(props)
+const DefaultFont = primitive((label, props: DefaultFontProps) =>
+  label.setDefaultFont(props)
 );
 
 /** Set the orientation (^FW) of the fields that follow and don't give one */
-const FieldOrientation = primitive(
-  (label, props: { orientation: Orientation }) =>
-    label.setFieldOrientation(props.orientation)
+const FieldOrientation = primitive((label, props: FieldOrientationProps) =>
+  label.setFieldOrientation(props.orientation)
 );
 
 /** Text. Without font props it uses the label's default font. */
-const Text = primitive(
-  (
-    label,
-    props: Position & {
-      font?: ZebraFontFamily | string;
-      /** A font file on the printer, like "E:ARIAL.TTF", instead of a font */
-      file?: string;
-      height?: Length;
-      width?: Length;
-      orientation?: Orientation;
-      children: TextChildren;
-    }
-  ) => {
-    const { font, file, height, width, orientation } = props;
-    const hasFont =
-      font !== undefined ||
-      file !== undefined ||
-      height !== undefined ||
-      width !== undefined ||
-      orientation !== undefined;
+const Text = primitive((label, props: TextProps) => {
+  const { font, file, height, width, orientation } = props;
+  const hasFont =
+    font !== undefined ||
+    file !== undefined ||
+    height !== undefined ||
+    width !== undefined ||
+    orientation !== undefined;
 
-    label.text({
-      position: position(props),
-      text: text(props.children),
-      font: hasFont
-        ? { name: font, file, height, width, orientation }
-        : undefined,
-    });
-  }
-);
+  label.text({
+    position: position(props),
+    text: text(props.children),
+    font: hasFont
+      ? { name: font, file, height, width, orientation }
+      : undefined,
+  });
+});
 
 /** A box or line */
-const Box = primitive(
-  (
-    label,
-    props: Position & {
-      width: Length;
-      height: Length;
-      thickness: Length;
-      color?: Color;
-      rounding?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
-    }
-  ) => label.box({ ...props, position: position(props) })
+const Box = primitive((label, props: BoxProps) =>
+  label.box({ ...props, position: position(props) })
 );
 
-type BarcodeProps = Position & {
-  height?: Length;
-  orientation?: Orientation;
-  printHri?: boolean;
-  printHriAbove?: boolean;
-  children: TextChildren;
-};
+/** The builder's options for a barcode element's props */
+const barcode = <P extends Position & { children: TextChildren }>({
+  children,
+  ...props
+}: P) => ({ ...props, position: position(props), data: text(children) });
 
 /** Code 11 barcode, with the data as children */
-const Code11 = primitive(
-  (label, { children, ...props }: BarcodeProps & { checkDigits?: 1 | 2 }) =>
-    label.code11({
-      ...props,
-      position: position(props),
-      data: text(children),
-    })
+const Code11 = primitive((label, props: Code11Props) =>
+  label.code11(barcode(props))
 );
 
 /** Code 128 barcode, with the data as children */
-const Code128 = primitive(
-  (
-    label,
-    {
-      children,
-      ...props
-    }: BarcodeProps & { useUcc?: boolean; mode?: "N" | "U" | "A" | "D" }
-  ) =>
-    label.code128({
-      ...props,
-      position: position(props),
-      data: text(children),
-    })
+const Code128 = primitive((label, props: Code128Props) =>
+  label.code128(barcode(props))
 );
 
 /** Code 39 barcode, with the data as children */
-const Code39 = primitive(
-  (label, { children, ...props }: BarcodeProps & { checkDigit?: boolean }) =>
-    label.code39({
-      ...props,
-      position: position(props),
-      data: text(children),
-    })
+const Code39 = primitive((label, props: Code39Props) =>
+  label.code39(barcode(props))
 );
 
 /** Interleaved 2 of 5 barcode, with the digits as children */
-const Interleaved2of5 = primitive(
-  (label, { children, ...props }: BarcodeProps & { checkDigit?: boolean }) =>
-    label.interleaved2of5({
-      ...props,
-      position: position(props),
-      data: text(children),
-    })
+const Interleaved2of5 = primitive((label, props: Interleaved2of5Props) =>
+  label.interleaved2of5(barcode(props))
 );
 
 /** PDF417 barcode, with the data as children */
-const PDF417 = primitive(
-  (
-    label,
-    {
-      children,
-      ...props
-    }: Position & {
-      rowHeight?: Length;
-      securityLevel?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
-      columns?: number;
-      rows?: number;
-      truncate?: boolean;
-      orientation?: Orientation;
-      children: TextChildren;
-    }
-  ) =>
-    label.pdf417({
-      ...props,
-      position: position(props),
-      data: text(children),
-    })
+const PDF417 = primitive((label, props: PDF417Props) =>
+  label.pdf417(barcode(props))
 );
 
 /** Aztec code, with the data as children */
-const Aztec = primitive(
-  (
-    label,
-    {
-      children,
-      ...props
-    }: Position & {
-      moduleSize?: Length;
-      errorControl?: number;
-      orientation?: Orientation;
-      children: TextChildren;
-    }
-  ) =>
-    label.aztec({
-      ...props,
-      position: position(props),
-      data: text(children),
-    })
+const Aztec = primitive((label, props: AztecProps) =>
+  label.aztec(barcode(props))
 );
 
 /** MaxiCode, with the data as children */
-const MaxiCode = primitive(
-  (
-    label,
-    {
-      children,
-      ...props
-    }: Position & { mode?: 2 | 3 | 4 | 5 | 6; children: TextChildren }
-  ) =>
-    label.maxiCode({
-      ...props,
-      position: position(props),
-      data: text(children),
-    })
+const MaxiCode = primitive((label, props: MaxiCodeProps) =>
+  label.maxiCode(barcode(props))
 );
 
 /** EAN-13 barcode, with the 12 data digits as children */
-const EAN13 = primitive((label, { children, ...props }: BarcodeProps) =>
-  label.ean13({
-    ...props,
-    position: position(props),
-    data: text(children),
-  })
+const EAN13 = primitive((label, props: EAN13Props) =>
+  label.ean13(barcode(props))
 );
 
 /** Data Matrix code, with the data as children */
-const DataMatrix = primitive(
-  (
-    label,
-    {
-      children,
-      ...props
-    }: Position & {
-      moduleSize: Length;
-      orientation?: Orientation;
-      quality?: 0 | 50 | 80 | 100 | 140 | 200;
-      columns?: number;
-      rows?: number;
-      formatId?: 1 | 2 | 3 | 4 | 5 | 6;
-      escapeCharacter?: string;
-      children: TextChildren;
-    }
-  ) =>
-    label.dataMatrix({
-      ...props,
-      position: position(props),
-      data: text(children),
-    })
+const DataMatrix = primitive((label, props: DataMatrixProps) =>
+  label.dataMatrix(barcode(props))
 );
 
 /** QR code, with the data as children */
-const QrCode = primitive(
-  (
-    label,
-    {
-      children,
-      ...props
-    }: Position & {
-      moduleSize?: Length;
-      errorCorrection?: "H" | "Q" | "M" | "L";
-      children: TextChildren;
-    }
-  ) =>
-    label.qrCode({
-      ...props,
-      position: position(props),
-      data: text(children),
-    })
+const QrCode = primitive((label, props: QrCodeProps) =>
+  label.qrCode(barcode(props))
 );
 
 /**
  * A field with any command, for elements without their own component. The
  * command is added as written; children are the escaped field data.
  */
-const Field = primitive(
-  (
-    label,
-    {
-      children,
-      ...props
-    }: Position & {
-      command: `${"^" | "~"}${string}`;
-      children?: TextChildren;
-    }
-  ) =>
-    label.field({
-      command: props.command,
-      position: position(props),
-      data: children === undefined ? undefined : text(children),
-    })
+const Field = primitive((label, { children, ...props }: FieldProps) =>
+  label.field({
+    command: props.command,
+    position: position(props),
+    data: children === undefined ? undefined : text(children),
+  })
 );
 
 /** An image, e.g. from ImageConverter */
-const Graphic = primitive((label, props: Position & { graphic: Graphic }) =>
+const Graphic = primitive((label, props: GraphicProps) =>
   label.graphic({ position: position(props), graphic: props.graphic })
 );
 
 /** A graphic stored on the printer with PrinterSetup.storeGraphic() */
-const StoredGraphic = primitive(
-  (
-    label,
-    props: Position & {
-      name: string;
-      device?: StorageDevice;
-      magnification?: { x: number; y: number };
-    }
-  ) => label.storedGraphic({ ...props, position: position(props) })
+const StoredGraphic = primitive((label, props: StoredGraphicProps) =>
+  label.storedGraphic({ ...props, position: position(props) })
 );
 
 /** ZPL for commands without an element, added verbatim */
-const Raw = primitive((label, props: { zpl: string }) => label.raw(props.zpl));
+const Raw = primitive((label, props: RawProps) => label.raw(props.zpl));
 
 export {
   Label,
@@ -427,3 +340,24 @@ export { Fragment } from "./jsx-runtime.js";
 export { mm, dots } from "./units.js";
 export { Orientation, ZebraFontFamily } from "./types.js";
 export type { ZplElement, ZplNode } from "./jsx-runtime.js";
+export type {
+  LabelProps,
+  DefaultFontProps,
+  FieldOrientationProps,
+  TextProps,
+  BoxProps,
+  GraphicProps,
+  StoredGraphicProps,
+  Code11Props,
+  Code39Props,
+  Code128Props,
+  Interleaved2of5Props,
+  EAN13Props,
+  PDF417Props,
+  AztecProps,
+  MaxiCodeProps,
+  DataMatrixProps,
+  QrCodeProps,
+  FieldProps,
+  RawProps,
+};

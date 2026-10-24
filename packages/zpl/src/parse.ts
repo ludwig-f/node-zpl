@@ -1,16 +1,23 @@
 import { compact } from "./compact.js";
 import type { Command, Span } from "./ast.js";
 
+/** A problem parse() found while reading the ZPL */
 type Diagnostic = {
+  /** Parse problems are always warnings: the printer still prints */
   severity: "warning";
   /** A parameter that couldn't be read, or text the printer skips */
   rule: "invalid-parameter" | "ignored-text";
+  /** What's wrong, in a sentence */
   message: string;
+  /** Where in the text, as character offsets */
   span: Span;
 };
 
+/** What parse() returns */
 type ParseResult = {
+  /** Typed nodes for supported commands, Raw nodes for everything else */
   commands: Command[];
+  /** Parameters that couldn't be read, and text the printer skips */
   diagnostics: Diagnostic[];
 };
 
