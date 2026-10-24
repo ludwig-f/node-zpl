@@ -36,7 +36,7 @@ At this point, you're ready to make your changes!
 If you've gotten this far, you should make sure that your local main branch is up to date with `zplkit`s main branch:
 
 ```bash
-git remote add upstream git@github.com:ludwig-f/node-zpl
+git remote add upstream git@github.com:ludwig-f/zplkit
 git switch main
 git pull upstream main
 ```

@@ -8,7 +8,7 @@ export const docsContentRoute = "/llms.mdx/docs";
 
 export const gitConfig = {
   user: "ludwig-f",
-  repo: "node-zpl",
+  repo: "zplkit",
   branch: "main",
 };
 

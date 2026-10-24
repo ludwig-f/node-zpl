@@ -27,7 +27,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ludwig-f/node-zpl.git",
+    "url": "git+https://github.com/ludwig-f/zplkit.git",
     "directory": "packages/zpl"
   },
   "license": "MIT",

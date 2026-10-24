@@ -18,7 +18,7 @@ Importing the package registers the element:
 <zpl-preview zpl="^XA^PW400^LL200^FO20,20^A0,40^FDHello^FS^XZ"></zpl-preview>
 ```
 
-Set the `zpl` property instead of the attribute to pass a [zplkit](https://github.com/ludwig-f/node-zpl/tree/main/packages/zpl#readme) `Label`, or anything else with a `toZPL()` method:
+Set the `zpl` property instead of the attribute to pass a [zplkit](https://github.com/ludwig-f/zplkit/tree/main/packages/zpl#readme) `Label`, or anything else with a `toZPL()` method:
 
 ```ts
 import { Label, mm } from "zplkit";

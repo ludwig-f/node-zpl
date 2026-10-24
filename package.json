@@ -2,7 +2,7 @@
   "name": "zplkit-monorepo",
   "private": true,
   "type": "module",
-  "repository": "https://github.com/ludwig-f/node-zpl",
+  "repository": "https://github.com/ludwig-f/zplkit",
   "license": "MIT",
   "packageManager": "pnpm@11.1.2",
   "scripts": {
