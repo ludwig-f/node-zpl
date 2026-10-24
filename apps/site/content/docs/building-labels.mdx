@@ -79,6 +79,8 @@ new Label({ width: mm(57), height: mm(19), dpmm: 12 })
   .drawGraphic({ position: { x: dots(0), y: dots(0) }, graphic });
 ```
 
+It also takes pixels as `{ width, height, data }` with four bytes per pixel, like a canvas's `ImageData`. Pixels darker than half gray print, and transparent ones don't.
+
 ## Commands without a method
 
 For elements without their own method, `drawField` wraps any command in a field and escapes its data, so user input is still safe. For example, an EAN-8 barcode:

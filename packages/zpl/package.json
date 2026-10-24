@@ -53,6 +53,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.19.43",
+    "@types/pngjs": "^6.0.5",
     "@types/react": "^19.3.0",
     "react": "^19.3.1",
     "typescript": "~5.9.3",
@@ -66,6 +67,7 @@
     "README.md"
   ],
   "dependencies": {
-    "jimp": "^0.22.12"
+    "jpeg-js": "^0.4.4",
+    "pngjs": "^7.0.0"
   }
 }

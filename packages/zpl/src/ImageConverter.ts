@@ -1,5 +1,27 @@
-import Jimp from "jimp";
+import jpeg from "jpeg-js";
+import { PNG } from "pngjs";
 import ZplError from "./ZplError.js";
+
+/** Decoded pixels, four bytes (red, green, blue, alpha) each, like ImageData */
+type Pixels = {
+  width: number;
+  height: number;
+  data: ArrayLike<number>;
+};
+
+const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+
+/** Decode a PNG or JPEG file into pixels */
+const decode = (file: Uint8Array): Pixels => {
+  const buffer = Buffer.from(file.buffer, file.byteOffset, file.byteLength);
+  if (PNG_SIGNATURE.every((byte, i) => buffer[i] === byte)) {
+    return PNG.sync.read(buffer);
+  }
+  if (buffer[0] === 0xff && buffer[1] === 0xd8) {
+    return jpeg.decode(buffer, { useTArray: true });
+  }
+  throw new ZplError("Images must be PNG or JPEG files");
+};
 
 const zplMapCodes = {
   1: "G",
@@ -55,11 +77,13 @@ class ImageConverter {
     this.blackLimit = (blacknessLimitPercentage * 255) / 100;
   }
 
-  public async toZPL(image: Buffer): Promise<ZplImage> {
-    const img = await Jimp.read(image);
-
-    const width = img.bitmap.width;
-    const height = img.bitmap.height;
+  /**
+   * Convert an image to a ZPL graphic
+   * @param image A PNG or JPEG file, or decoded pixels such as a canvas's ImageData
+   */
+  public async toZPL(image: Uint8Array | Pixels): Promise<ZplImage> {
+    const pixels = image instanceof Uint8Array ? decode(image) : image;
+    const { width, height } = pixels;
     const bytesPerRow = Math.ceil(width / 8);
     const totalBytes = bytesPerRow * height;
 
@@ -71,10 +95,12 @@ class ImageConverter {
         let byte = 0;
         for (let bit = 0; bit < 8; bit++) {
           if (x + bit < width) {
-            const pixel = Jimp.intToRGBA(img.getPixelColor(x + bit, y));
-            const grayscale = 0.3 * pixel.r + 0.59 * pixel.g + 0.11 * pixel.b;
+            const i = (y * width + x + bit) * 4;
+            const { data } = pixels;
+            const grayscale =
+              0.3 * data[i] + 0.59 * data[i + 1] + 0.11 * data[i + 2];
             const isBlack = grayscale < this.blackLimit;
-            const isTransparent = pixel.a === 0;
+            const isTransparent = data[i + 3] === 0;
             if (isBlack && !isTransparent) {
               byte |= 1 << (7 - bit);
             }
@@ -168,4 +194,4 @@ type ZplImage = {
 
 export default ImageConverter;
 export { zplMapCodes };
-export type { ZplImage };
+export type { Pixels, ZplImage };
