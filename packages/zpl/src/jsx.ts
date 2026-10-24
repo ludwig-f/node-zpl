@@ -13,6 +13,12 @@ import type {
   DataMatrixOptions,
   DefaultFontOptions,
   Ean13Options,
+  Ean8Options,
+  UpcAOptions,
+  UpcEOptions,
+  UpcEanExtensionOptions,
+  Code93Options,
+  CodabarOptions,
   FieldOptions,
   FontOptions,
   GraphicOptions,
@@ -74,6 +80,12 @@ type Code39Props = BarcodeProps<Code39Options>;
 type Code128Props = BarcodeProps<Code128Options>;
 type Interleaved2of5Props = BarcodeProps<Interleaved2of5Options>;
 type EAN13Props = BarcodeProps<Ean13Options>;
+type EAN8Props = BarcodeProps<Ean8Options>;
+type UpcAProps = BarcodeProps<UpcAOptions>;
+type UpcEProps = BarcodeProps<UpcEOptions>;
+type UpcEanExtensionProps = BarcodeProps<UpcEanExtensionOptions>;
+type Code93Props = BarcodeProps<Code93Options>;
+type CodabarProps = BarcodeProps<CodabarOptions>;
 type PDF417Props = BarcodeProps<Pdf417Options>;
 type AztecProps = BarcodeProps<AztecOptions>;
 type MaxiCodeProps = BarcodeProps<MaxiCodeOptions>;
@@ -279,6 +291,30 @@ const EAN13 = primitive((label, props: EAN13Props) =>
   label.ean13(barcode(props))
 );
 
+/** EAN-8 barcode, with the 7 data digits as children */
+const EAN8 = primitive((label, props: EAN8Props) => label.ean8(barcode(props)));
+
+/** UPC-A barcode, with the 11 data digits as children */
+const UpcA = primitive((label, props: UpcAProps) => label.upcA(barcode(props)));
+
+/** UPC-E barcode, with the UPC-A number as children */
+const UpcE = primitive((label, props: UpcEProps) => label.upcE(barcode(props)));
+
+/** UPC/EAN add-on, with the 2 or 5 digits as children */
+const UpcEanExtension = primitive((label, props: UpcEanExtensionProps) =>
+  label.upcEanExtension(barcode(props))
+);
+
+/** Code 93 barcode, with the data as children */
+const Code93 = primitive((label, props: Code93Props) =>
+  label.code93(barcode(props))
+);
+
+/** ANSI Codabar barcode, with the data as children */
+const Codabar = primitive((label, props: CodabarProps) =>
+  label.codabar(barcode(props))
+);
+
 /** Data Matrix code, with the data as children */
 const DataMatrix = primitive((label, props: DataMatrixProps) =>
   label.dataMatrix(barcode(props))
@@ -329,6 +365,12 @@ export {
   Aztec,
   MaxiCode,
   EAN13,
+  EAN8,
+  UpcA,
+  UpcE,
+  UpcEanExtension,
+  Code93,
+  Codabar,
   DataMatrix,
   QrCode,
   Field,
@@ -353,6 +395,12 @@ export type {
   Code128Props,
   Interleaved2of5Props,
   EAN13Props,
+  EAN8Props,
+  UpcAProps,
+  UpcEProps,
+  UpcEanExtensionProps,
+  Code93Props,
+  CodabarProps,
   PDF417Props,
   AztecProps,
   MaxiCodeProps,

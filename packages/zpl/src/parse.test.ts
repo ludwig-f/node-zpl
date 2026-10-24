@@ -147,6 +147,12 @@ suite("parse", () => {
     });
   });
 
+  test("reads ^B0 as Aztec, like ^BO", () => {
+    expect(withoutSpans(parse("^B0N,5").commands)).toStrictEqual([
+      { type: "Aztec", orientation: "N", magnification: 5 },
+    ]);
+  });
+
   describe("ignored text", () => {
     test("reports text after a command without parameters", () => {
       const result = parse("^FDHi^FSG^XZ");

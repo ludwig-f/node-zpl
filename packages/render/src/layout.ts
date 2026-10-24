@@ -123,6 +123,12 @@ type BarcodeCommand = Extract<
       | "Interleaved2of5"
       | "Pdf417"
       | "Ean13"
+      | "Ean8"
+      | "UpcA"
+      | "UpcE"
+      | "UpcEanExtension"
+      | "Code93"
+      | "Codabar"
       | "DataMatrix"
       | "QrCode"
       | "Aztec"
@@ -214,6 +220,13 @@ const drawnCodes = new Set([
   "^B7",
   "^BC",
   "^BE",
+  "^B8",
+  "^BU",
+  "^B9",
+  "^BS",
+  "^BA",
+  "^BK",
+  "^B0",
   "^BQ",
   "^BX",
 ]);
@@ -643,6 +656,12 @@ const layout = (
       case "Interleaved2of5":
       case "Pdf417":
       case "Ean13":
+      case "Ean8":
+      case "UpcA":
+      case "UpcE":
+      case "UpcEanExtension":
+      case "Code93":
+      case "Codabar":
       case "DataMatrix":
       case "QrCode":
       case "Aztec":

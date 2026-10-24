@@ -83,6 +83,42 @@ EAN-13 (`^BE`). The data is 12 digits, and the printer adds the check digit.
 
 <auto-type-table cwd path="../../packages/zpl/src/options.ts" name="Ean13Options" />
 
+### ean8(options)
+
+EAN-8 (`^B8`). The data is 7 digits, and the printer adds the check digit.
+
+<auto-type-table cwd path="../../packages/zpl/src/options.ts" name="Ean8Options" />
+
+### upcA(options)
+
+UPC-A (`^BU`). The data is 11 digits, and the printer adds the check digit.
+
+<auto-type-table cwd path="../../packages/zpl/src/options.ts" name="UpcAOptions" />
+
+### upcE(options)
+
+UPC-E (`^B9`). The data is a UPC-A number without its check digit, which the printer compresses to 6 digits.
+
+<auto-type-table cwd path="../../packages/zpl/src/options.ts" name="UpcEOptions" />
+
+### upcEanExtension(options)
+
+The 2 or 5 digit add-on (`^BS`) printed to the right of a UPC or EAN code, for example for a magazine's issue number. Place it with its own position, and make it a little shorter than the main code.
+
+<auto-type-table cwd path="../../packages/zpl/src/options.ts" name="UpcEanExtensionOptions" />
+
+### code93(options)
+
+Code 93 (`^BA`), a denser alternative to Code 39 with two check characters.
+
+<auto-type-table cwd path="../../packages/zpl/src/options.ts" name="Code93Options" />
+
+### codabar(options)
+
+ANSI Codabar (`^BK`), used by libraries, blood banks and some parcel services.
+
+<auto-type-table cwd path="../../packages/zpl/src/options.ts" name="CodabarOptions" />
+
 ### pdf417(options)
 
 PDF417 (`^B7`).

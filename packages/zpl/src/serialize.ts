@@ -185,6 +185,54 @@ const serializeCommand = (command: Command): string => {
         yn(command.interpretationLine),
         yn(command.interpretationLineAbove)
       )}`;
+    case "Ean8":
+      return `^B8${params(
+        command.orientation,
+        command.height,
+        yn(command.interpretationLine),
+        yn(command.interpretationLineAbove)
+      )}`;
+    case "UpcA":
+      return `^BU${params(
+        command.orientation,
+        command.height,
+        yn(command.interpretationLine),
+        yn(command.interpretationLineAbove),
+        yn(command.printCheckDigit)
+      )}`;
+    case "UpcE":
+      return `^B9${params(
+        command.orientation,
+        command.height,
+        yn(command.interpretationLine),
+        yn(command.interpretationLineAbove),
+        yn(command.printCheckDigit)
+      )}`;
+    case "UpcEanExtension":
+      return `^BS${params(
+        command.orientation,
+        command.height,
+        yn(command.interpretationLine),
+        yn(command.interpretationLineAbove)
+      )}`;
+    case "Code93":
+      return `^BA${params(
+        command.orientation,
+        command.height,
+        yn(command.interpretationLine),
+        yn(command.interpretationLineAbove),
+        yn(command.printCheckDigit)
+      )}`;
+    case "Codabar":
+      return `^BK${params(
+        command.orientation,
+        undefined,
+        command.height,
+        yn(command.interpretationLine),
+        yn(command.interpretationLineAbove),
+        command.start,
+        command.stop
+      )}`;
     case "DataMatrix":
       return `^BX${params(
         command.orientation,

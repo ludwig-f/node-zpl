@@ -271,6 +271,75 @@ suite("Label", () => {
     });
   });
 
+  describe("retail and Code 93 barcodes", () => {
+    test("ean8", () => {
+      const label = wideLabel().ean8({
+        position: at20,
+        data: "1234567",
+        height: dots(100),
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^B8,100^FD1234567^FS^XZ"
+      );
+    });
+
+    test("upcA", () => {
+      const label = wideLabel().upcA({
+        position: at20,
+        data: "07000002198",
+        printCheckDigit: false,
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^BU,,,,N^FD07000002198^FS^XZ"
+      );
+    });
+
+    test("upcE", () => {
+      const label = wideLabel().upcE({
+        position: at20,
+        data: "1230000045",
+        orientation: Orientation.Normal,
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^B9N^FD1230000045^FS^XZ"
+      );
+    });
+
+    test("upcEanExtension", () => {
+      const label = wideLabel().upcEanExtension({
+        position: at20,
+        data: "04414",
+        height: dots(117),
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^BS,117^FD04414^FS^XZ"
+      );
+    });
+
+    test("code93", () => {
+      const label = wideLabel().code93({
+        position: at20,
+        data: "12345ABCDE",
+        printCheckDigit: true,
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^BA,,,,Y^FD12345ABCDE^FS^XZ"
+      );
+    });
+
+    test("codabar", () => {
+      const label = wideLabel().codabar({
+        position: at20,
+        data: "123456",
+        start: "B",
+        stop: "D",
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^BK,,,,,B,D^FD123456^FS^XZ"
+      );
+    });
+  });
+
   describe("code11", () => {
     test("should draw a Code 11 barcode on the label", () => {
       const label = wideLabel().code11({

@@ -203,6 +203,65 @@ type Interleaved2of5Options = LinearBarcodeOptions & {
 /** Options for `ean13()` (^BE); the data is 12 digits and the printer adds the check digit */
 type Ean13Options = LinearBarcodeOptions;
 
+/** Options for `ean8()` (^B8); the data is 7 digits and the printer adds the check digit */
+type Ean8Options = LinearBarcodeOptions;
+
+/** Options for `upcA()` (^BU); the data is 11 digits and the printer adds the check digit */
+type UpcAOptions = LinearBarcodeOptions & {
+  /**
+   * Print the check digit in the interpretation line
+   * @defaultValue true
+   */
+  printCheckDigit?: boolean;
+};
+
+/**
+ * Options for `upcE()` (^B9). The data is a UPC-A number without its check
+ * digit: 10 digits (the manufacturer and product number) with number system
+ * 0, or 11 starting with the number system, 0 or 1. The printer compresses it
+ * to 6 digits.
+ */
+type UpcEOptions = LinearBarcodeOptions & {
+  /**
+   * Print the check digit in the interpretation line
+   * @defaultValue true
+   */
+  printCheckDigit?: boolean;
+};
+
+/**
+ * Options for `upcEanExtension()` (^BS), the 2 or 5 digit add-on printed
+ * next to a UPC or EAN code. Its interpretation line is above the bars by
+ * default.
+ */
+type UpcEanExtensionOptions = LinearBarcodeOptions;
+
+/** Options for `code93()` (^BA) */
+type Code93Options = LinearBarcodeOptions & {
+  /**
+   * Print the two check characters in the interpretation line
+   * @defaultValue false
+   */
+  printCheckDigit?: boolean;
+};
+
+/**
+ * Options for `codabar()` (^BK). The data is digits and - $ : / . +, between
+ * a start and a stop character.
+ */
+type CodabarOptions = LinearBarcodeOptions & {
+  /**
+   * The start character
+   * @defaultValue "A"
+   */
+  start?: "A" | "B" | "C" | "D";
+  /**
+   * The stop character
+   * @defaultValue "A"
+   */
+  stop?: "A" | "B" | "C" | "D";
+};
+
 /** Options for `pdf417()` (^B7) */
 type Pdf417Options = BarcodeOptions & {
   /**
@@ -337,6 +396,12 @@ export type {
   Code128Options,
   Interleaved2of5Options,
   Ean13Options,
+  Ean8Options,
+  UpcAOptions,
+  UpcEOptions,
+  UpcEanExtensionOptions,
+  Code93Options,
+  CodabarOptions,
   Pdf417Options,
   AztecOptions,
   MaxiCodeOptions,

@@ -17,6 +17,12 @@ import type {
   DataMatrixOptions,
   DefaultFontOptions,
   Ean13Options,
+  Ean8Options,
+  UpcAOptions,
+  UpcEOptions,
+  UpcEanExtensionOptions,
+  Code93Options,
+  CodabarOptions,
   FieldOptions,
   GraphicOptions,
   Interleaved2of5Options,
@@ -358,6 +364,107 @@ class Label extends ZplContent {
         height: this.optionalDots(options.height),
         interpretationLine: options.printHri,
         interpretationLineAbove: options.printHriAbove,
+      },
+      ...this.fieldData(options.data),
+    ]);
+  }
+
+  /**
+   * Draw an EAN-8 barcode on the label
+   */
+  public ean8(options: Ean8Options): this {
+    return this.addField(options.position, [
+      {
+        type: "Ean8",
+        orientation: options.orientation,
+        height: this.optionalDots(options.height),
+        interpretationLine: options.printHri,
+        interpretationLineAbove: options.printHriAbove,
+      },
+      ...this.fieldData(options.data),
+    ]);
+  }
+
+  /**
+   * Draw a UPC-A barcode on the label
+   */
+  public upcA(options: UpcAOptions): this {
+    return this.addField(options.position, [
+      {
+        type: "UpcA",
+        orientation: options.orientation,
+        height: this.optionalDots(options.height),
+        interpretationLine: options.printHri,
+        interpretationLineAbove: options.printHriAbove,
+        printCheckDigit: options.printCheckDigit,
+      },
+      ...this.fieldData(options.data),
+    ]);
+  }
+
+  /**
+   * Draw a UPC-E barcode on the label
+   */
+  public upcE(options: UpcEOptions): this {
+    return this.addField(options.position, [
+      {
+        type: "UpcE",
+        orientation: options.orientation,
+        height: this.optionalDots(options.height),
+        interpretationLine: options.printHri,
+        interpretationLineAbove: options.printHriAbove,
+        printCheckDigit: options.printCheckDigit,
+      },
+      ...this.fieldData(options.data),
+    ]);
+  }
+
+  /**
+   * Draw a 2 or 5 digit UPC/EAN add-on on the label, next to a UPC or EAN code
+   */
+  public upcEanExtension(options: UpcEanExtensionOptions): this {
+    return this.addField(options.position, [
+      {
+        type: "UpcEanExtension",
+        orientation: options.orientation,
+        height: this.optionalDots(options.height),
+        interpretationLine: options.printHri,
+        interpretationLineAbove: options.printHriAbove,
+      },
+      ...this.fieldData(options.data),
+    ]);
+  }
+
+  /**
+   * Draw a Code 93 barcode on the label
+   */
+  public code93(options: Code93Options): this {
+    return this.addField(options.position, [
+      {
+        type: "Code93",
+        orientation: options.orientation,
+        height: this.optionalDots(options.height),
+        interpretationLine: options.printHri,
+        interpretationLineAbove: options.printHriAbove,
+        printCheckDigit: options.printCheckDigit,
+      },
+      ...this.fieldData(options.data),
+    ]);
+  }
+
+  /**
+   * Draw an ANSI Codabar barcode on the label
+   */
+  public codabar(options: CodabarOptions): this {
+    return this.addField(options.position, [
+      {
+        type: "Codabar",
+        orientation: options.orientation,
+        height: this.optionalDots(options.height),
+        interpretationLine: options.printHri,
+        interpretationLineAbove: options.printHriAbove,
+        start: options.start,
+        stop: options.stop,
       },
       ...this.fieldData(options.data),
     ]);
