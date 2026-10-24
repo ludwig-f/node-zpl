@@ -166,7 +166,7 @@ const Text = primitive(
       width !== undefined ||
       orientation !== undefined;
 
-    label.drawText({
+    label.text({
       position: position(props),
       text: text(props.children),
       font: hasFont
@@ -187,7 +187,7 @@ const Box = primitive(
       color?: Color;
       rounding?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
     }
-  ) => label.drawBox({ ...props, position: position(props) })
+  ) => label.box({ ...props, position: position(props) })
 );
 
 type BarcodeProps = Position & {
@@ -201,7 +201,7 @@ type BarcodeProps = Position & {
 /** Code 11 barcode, with the data as children */
 const Code11 = primitive(
   (label, { children, ...props }: BarcodeProps & { checkDigits?: 1 | 2 }) =>
-    label.drawCode11({
+    label.code11({
       ...props,
       position: position(props),
       data: text(children),
@@ -217,7 +217,7 @@ const Code128 = primitive(
       ...props
     }: BarcodeProps & { useUcc?: boolean; mode?: "N" | "U" | "A" | "D" }
   ) =>
-    label.drawCode128({
+    label.code128({
       ...props,
       position: position(props),
       data: text(children),
@@ -227,7 +227,7 @@ const Code128 = primitive(
 /** Code 39 barcode, with the data as children */
 const Code39 = primitive(
   (label, { children, ...props }: BarcodeProps & { checkDigit?: boolean }) =>
-    label.drawCode39({
+    label.code39({
       ...props,
       position: position(props),
       data: text(children),
@@ -237,7 +237,7 @@ const Code39 = primitive(
 /** Interleaved 2 of 5 barcode, with the digits as children */
 const Interleaved2of5 = primitive(
   (label, { children, ...props }: BarcodeProps & { checkDigit?: boolean }) =>
-    label.drawInterleaved2of5({
+    label.interleaved2of5({
       ...props,
       position: position(props),
       data: text(children),
@@ -261,7 +261,7 @@ const PDF417 = primitive(
       children: TextChildren;
     }
   ) =>
-    label.drawPDF417({
+    label.pdf417({
       ...props,
       position: position(props),
       data: text(children),
@@ -282,7 +282,7 @@ const Aztec = primitive(
       children: TextChildren;
     }
   ) =>
-    label.drawAztec({
+    label.aztec({
       ...props,
       position: position(props),
       data: text(children),
@@ -298,7 +298,7 @@ const MaxiCode = primitive(
       ...props
     }: Position & { mode?: 2 | 3 | 4 | 5 | 6; children: TextChildren }
   ) =>
-    label.drawMaxiCode({
+    label.maxiCode({
       ...props,
       position: position(props),
       data: text(children),
@@ -307,7 +307,7 @@ const MaxiCode = primitive(
 
 /** EAN-13 barcode, with the 12 data digits as children */
 const EAN13 = primitive((label, { children, ...props }: BarcodeProps) =>
-  label.drawEAN13({
+  label.ean13({
     ...props,
     position: position(props),
     data: text(children),
@@ -332,7 +332,7 @@ const DataMatrix = primitive(
       children: TextChildren;
     }
   ) =>
-    label.drawDataMatrix({
+    label.dataMatrix({
       ...props,
       position: position(props),
       data: text(children),
@@ -352,7 +352,7 @@ const QrCode = primitive(
       children: TextChildren;
     }
   ) =>
-    label.drawQrCode({
+    label.qrCode({
       ...props,
       position: position(props),
       data: text(children),
@@ -374,7 +374,7 @@ const Field = primitive(
       children?: TextChildren;
     }
   ) =>
-    label.drawField({
+    label.field({
       command: props.command,
       position: position(props),
       data: children === undefined ? undefined : text(children),
@@ -383,7 +383,7 @@ const Field = primitive(
 
 /** An image, e.g. from ImageConverter */
 const Graphic = primitive((label, props: Position & { graphic: Graphic }) =>
-  label.drawGraphic({ position: position(props), graphic: props.graphic })
+  label.graphic({ position: position(props), graphic: props.graphic })
 );
 
 /** A graphic stored on the printer with PrinterSetup.storeGraphic() */
@@ -395,7 +395,7 @@ const StoredGraphic = primitive(
       device?: StorageDevice;
       magnification?: { x: number; y: number };
     }
-  ) => label.drawStoredGraphic({ ...props, position: position(props) })
+  ) => label.storedGraphic({ ...props, position: position(props) })
 );
 
 /** ZPL for commands without an element, added verbatim */

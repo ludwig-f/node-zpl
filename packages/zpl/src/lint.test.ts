@@ -300,13 +300,13 @@ suite("lint", () => {
   describe("Label.lint", () => {
     test("lints the label as toZPL() would print it", () => {
       const label = new Label({ width: mm(50), height: mm(25), dpmm: 8 })
-        .drawBox({
+        .box({
           position: { x: dots(10), y: dots(10) },
           width: dots(1),
           height: mm(8),
           thickness: dots(2),
         })
-        .drawEAN13({ position: { x: dots(10), y: dots(100) }, data: "123" });
+        .ean13({ position: { x: dots(10), y: dots(100) }, data: "123" });
 
       expect(label.lint().map((d) => d.rule)).toStrictEqual([
         "box-smaller-than-line",

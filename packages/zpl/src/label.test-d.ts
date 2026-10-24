@@ -8,7 +8,7 @@ test("lengths require an explicit unit", () => {
 
   const label = new Label({ width: mm(57), height: mm(19), dpmm: 12 });
 
-  label.drawBox({
+  label.box({
     // @ts-expect-error - bare numbers are ambiguous
     position: { x: 10, y: dots(10) },
     width: mm(10),
@@ -16,7 +16,7 @@ test("lengths require an explicit unit", () => {
     thickness: dots(2),
   });
 
-  label.drawCode128({
+  label.code128({
     position: { x: dots(10), y: dots(10) },
     data: "ABC",
     // @ts-expect-error - bare numbers are ambiguous

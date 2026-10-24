@@ -30,7 +30,7 @@ document.querySelector("zpl-preview").zpl = new Label({
   width: mm(50),
   height: mm(25),
   dpmm: 8,
-}).drawText({
+}).text({
   position: { x: mm(3), y: mm(3) },
   text: "Hello",
   font: { height: mm(4) },

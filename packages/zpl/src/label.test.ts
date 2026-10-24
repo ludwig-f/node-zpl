@@ -160,9 +160,9 @@ suite("Label", () => {
     });
   });
 
-  describe("drawBox", () => {
+  describe("box", () => {
     test("should draw a black box on a normal label", () => {
-      const label = wideLabel().drawBox({
+      const label = wideLabel().box({
         position: at20,
         width: mm(10),
         height: mm(5),
@@ -174,7 +174,7 @@ suite("Label", () => {
     });
 
     test("should draw a white box when asked to", () => {
-      const label = wideLabel().drawBox({
+      const label = wideLabel().box({
         position: at20,
         width: dots(100),
         height: dots(50),
@@ -188,9 +188,9 @@ suite("Label", () => {
     });
   });
 
-  describe("drawText", () => {
+  describe("text", () => {
     test("should draw text with the given font", () => {
-      const label = wideLabel().drawText({
+      const label = wideLabel().text({
         position: at20,
         text: "Hello",
         font: {
@@ -206,14 +206,14 @@ suite("Label", () => {
     });
 
     test("should use the default font when no font is given", () => {
-      const label = wideLabel().drawText({ position: at20, text: "Hello" });
+      const label = wideLabel().text({ position: at20, text: "Hello" });
       expect(label.toZPL()).toStrictEqual(
         wideHeader + "^FO20,20^FDHello^FS^XZ"
       );
     });
 
     test("should use a font file by name", () => {
-      const label = wideLabel().drawText({
+      const label = wideLabel().text({
         position: at20,
         text: "Hello",
         font: { file: "E:ARIAL.TTF", height: dots(30) },
@@ -225,7 +225,7 @@ suite("Label", () => {
 
     test("should throw on a font file that isn't a name with an extension", () => {
       expect(() =>
-        wideLabel().drawText({
+        wideLabel().text({
           position: at20,
           text: "Hello",
           font: { file: "E:ARIAL" },
@@ -234,7 +234,7 @@ suite("Label", () => {
     });
 
     test("should default to font 0 when only a size is given", () => {
-      const label = wideLabel().drawText({
+      const label = wideLabel().text({
         position: at20,
         text: "Hello",
         font: { height: mm(3) },
@@ -245,7 +245,7 @@ suite("Label", () => {
     });
 
     test("should escape characters that would break the label", () => {
-      const label = wideLabel().drawText({
+      const label = wideLabel().text({
         position: at20,
         text: "50% off ^ 2~3_4",
       });
@@ -255,9 +255,9 @@ suite("Label", () => {
     });
   });
 
-  describe("drawEAN13", () => {
+  describe("ean13", () => {
     test("should draw an EAN13 barcode on the label", () => {
-      const label = wideLabel().drawEAN13({
+      const label = wideLabel().ean13({
         position: at20,
         height: mm(9),
         data: "123456789012",
@@ -271,9 +271,9 @@ suite("Label", () => {
     });
   });
 
-  describe("drawCode11", () => {
+  describe("code11", () => {
     test("should draw a Code 11 barcode on the label", () => {
-      const label = wideLabel().drawCode11({
+      const label = wideLabel().code11({
         position: at20,
         data: "1234567890",
         height: mm(9),
@@ -288,9 +288,9 @@ suite("Label", () => {
     });
   });
 
-  describe("drawCode39", () => {
+  describe("code39", () => {
     test("should draw a Code 39 barcode on the label", () => {
-      const label = wideLabel().drawCode39({
+      const label = wideLabel().code39({
         position: at20,
         data: "ABC-123",
         height: mm(9),
@@ -305,9 +305,9 @@ suite("Label", () => {
     });
   });
 
-  describe("drawInterleaved2of5", () => {
+  describe("interleaved2of5", () => {
     test("should draw an Interleaved 2 of 5 barcode on the label", () => {
-      const label = wideLabel().drawInterleaved2of5({
+      const label = wideLabel().interleaved2of5({
         position: at20,
         data: "123456",
         height: mm(9),
@@ -321,9 +321,9 @@ suite("Label", () => {
     });
   });
 
-  describe("drawPDF417", () => {
+  describe("pdf417", () => {
     test("should draw a PDF417 barcode on the label", () => {
-      const label = wideLabel().drawPDF417({
+      const label = wideLabel().pdf417({
         position: at20,
         data: "hello",
         rowHeight: dots(8),
@@ -336,9 +336,9 @@ suite("Label", () => {
     });
   });
 
-  describe("drawAztec", () => {
+  describe("aztec", () => {
     test("should draw an Aztec code on the label", () => {
-      const label = wideLabel().drawAztec({
+      const label = wideLabel().aztec({
         position: at20,
         data: "hello",
         moduleSize: dots(4),
@@ -350,9 +350,9 @@ suite("Label", () => {
     });
   });
 
-  describe("drawMaxiCode", () => {
+  describe("maxiCode", () => {
     test("should draw a MaxiCode on the label", () => {
-      const label = wideLabel().drawMaxiCode({
+      const label = wideLabel().maxiCode({
         position: at20,
         data: "hello",
         mode: 4,
@@ -363,9 +363,9 @@ suite("Label", () => {
     });
   });
 
-  describe("drawCode128", () => {
+  describe("code128", () => {
     test("should draw a Code 128 barcode on the label", () => {
-      const label = wideLabel().drawCode128({
+      const label = wideLabel().code128({
         position: at20,
         data: "1234567890",
         height: mm(9),
@@ -381,16 +381,16 @@ suite("Label", () => {
     });
 
     test("should leave unset parameters to the printer defaults", () => {
-      const label = wideLabel().drawCode128({ position: at20, data: "ABC" });
+      const label = wideLabel().code128({ position: at20, data: "ABC" });
       expect(label.toZPL()).toStrictEqual(
         wideHeader + "^FO20,20^BC^FDABC^FS^XZ"
       );
     });
   });
 
-  describe("drawDataMatrix", () => {
+  describe("dataMatrix", () => {
     test("should draw a DataMatrix code on the label", () => {
-      const label = wideLabel().drawDataMatrix({
+      const label = wideLabel().dataMatrix({
         position: at20,
         moduleSize: dots(9),
         data: "1234567890",
@@ -401,9 +401,9 @@ suite("Label", () => {
     });
   });
 
-  describe("drawQrCode", () => {
+  describe("qrCode", () => {
     test("should draw a QR code with standard error correction", () => {
-      const label = wideLabel().drawQrCode({
+      const label = wideLabel().qrCode({
         position: at20,
         data: "https://example.com",
       });
@@ -413,7 +413,7 @@ suite("Label", () => {
     });
 
     test("should set the module size and error correction", () => {
-      const label = wideLabel().drawQrCode({
+      const label = wideLabel().qrCode({
         position: at20,
         data: "ABC",
         moduleSize: mm(0.5),
@@ -425,16 +425,16 @@ suite("Label", () => {
     });
 
     test("should escape the data", () => {
-      const label = wideLabel().drawQrCode({ position: at20, data: "a^b" });
+      const label = wideLabel().qrCode({ position: at20, data: "a^b" });
       expect(label.toZPL()).toStrictEqual(
         wideHeader + "^FO20,20^BQN,2^FH^FDMA,a_5Eb^FS^XZ"
       );
     });
   });
 
-  describe("drawField", () => {
+  describe("field", () => {
     test("should wrap any command in a field with escaped data", () => {
-      const label = wideLabel().drawField({
+      const label = wideLabel().field({
         position: at20,
         command: "^B3N,N,100,Y,N",
         data: "ABC^1",
@@ -445,7 +445,7 @@ suite("Label", () => {
     });
 
     test("should work without data", () => {
-      const label = wideLabel().drawField({
+      const label = wideLabel().field({
         position: at20,
         command: "^GE100,50,3",
       });
@@ -456,7 +456,7 @@ suite("Label", () => {
 
     test("should reject a command that doesn't start with ^ or ~", () => {
       expect(() =>
-        wideLabel().drawField({
+        wideLabel().field({
           position: at20,
           // @ts-expect-error - commands start with ^ or ~
           command: "B3N",
@@ -465,9 +465,9 @@ suite("Label", () => {
     });
   });
 
-  describe("drawStoredGraphic", () => {
+  describe("storedGraphic", () => {
     test("should recall a stored graphic", () => {
-      const label = wideLabel().drawStoredGraphic({
+      const label = wideLabel().storedGraphic({
         position: at20,
         name: "LOGO",
       });
@@ -477,7 +477,7 @@ suite("Label", () => {
     });
   });
 
-  describe("drawGraphic", () => {
+  describe("graphic", () => {
     test("should draw a converted image on the label", async () => {
       const converter = new ImageConverter();
       const buffer = readFileSync(
@@ -485,7 +485,7 @@ suite("Label", () => {
       );
       const graphic = await converter.toZPL(buffer);
 
-      const zpl = wideLabel().drawGraphic({ position: at20, graphic }).toZPL();
+      const zpl = wideLabel().graphic({ position: at20, graphic }).toZPL();
 
       expect(zpl).toContain(
         `^FO20,20^GFA,${graphic.totalBytes},${graphic.totalBytes},${graphic.bytesPerRow},`

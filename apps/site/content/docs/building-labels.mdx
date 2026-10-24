@@ -9,12 +9,12 @@ description: Draw text, boxes, barcodes and images with typed method calls.
 import { Label, Orientation, mm, dots } from "@zplkit/core";
 
 const label = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
-  .drawText({
+  .text({
     position: { x: mm(2), y: mm(2) },
     text: "Organic Oat Drink",
     font: { height: mm(4) },
   })
-  .drawEAN13({
+  .ean13({
     position: { x: mm(2), y: mm(8) },
     data: "735000123456",
     height: mm(7),
@@ -30,22 +30,22 @@ Every length takes an explicit unit: `mm(10)` for millimeters or `dots(80)` for 
 
 | Method | Draws |
 | --- | --- |
-| `drawText` | Text in a built-in or downloaded font |
-| `drawBox` | Boxes and lines, optionally rounded or white |
-| `drawCode11`, `drawCode39`, `drawCode128`, `drawEAN13`, `drawInterleaved2of5` | Linear barcodes |
-| `drawPDF417` | PDF417 codes |
-| `drawDataMatrix` | Data Matrix codes |
-| `drawQrCode` | QR codes |
-| `drawAztec`, `drawMaxiCode` | Aztec codes and MaxiCodes |
-| `drawField` | A field with any command, for elements without a method |
-| `drawGraphic` | An image, converted with `ImageConverter` |
-| `drawStoredGraphic` | An image stored on the printer |
+| `text` | Text in a built-in or downloaded font |
+| `box` | Boxes and lines, optionally rounded or white |
+| `code11`, `code39`, `code128`, `ean13`, `interleaved2of5` | Linear barcodes |
+| `pdf417` | PDF417 codes |
+| `dataMatrix` | Data Matrix codes |
+| `qrCode` | QR codes |
+| `aztec`, `maxiCode` | Aztec codes and MaxiCodes |
+| `field` | A field with any command, for elements without a method |
+| `graphic` | An image, converted with `ImageConverter` |
+| `storedGraphic` | An image stored on the printer |
 | `setDefaultFont` | The font for text that doesn't set one |
 
 ## QR codes
 
 ```ts
-label.drawQrCode({
+label.qrCode({
   position: { x: mm(2), y: mm(2) },
   data: "https://example.com/orders/10442",
   moduleSize: dots(5),
@@ -60,7 +60,7 @@ label.drawQrCode({
 Text and barcode data are escaped for you. Characters that ZPL would read as commands, `^` and `~`, are hex-encoded with `^FH`, so user input can't break a label:
 
 ```ts
-label.drawText({ position: { x: dots(0), y: dots(0) }, text: "50% off ^ today" });
+label.text({ position: { x: dots(0), y: dots(0) }, text: "50% off ^ today" });
 // ^FO0,0^FH^FD50% off _5E today^FS
 ```
 
@@ -76,17 +76,17 @@ import { ImageConverter } from "@zplkit/core/image";
 const graphic = await new ImageConverter().toZPL(readFileSync("logo.png"));
 
 new Label({ width: mm(57), height: mm(19), dpmm: 12 })
-  .drawGraphic({ position: { x: dots(0), y: dots(0) }, graphic });
+  .graphic({ position: { x: dots(0), y: dots(0) }, graphic });
 ```
 
 It also takes pixels as `{ width, height, data }` with four bytes per pixel, like a canvas's `ImageData`. Pixels darker than half gray print, and transparent ones don't.
 
 ## Commands without a method
 
-For elements without their own method, `drawField` wraps any command in a field and escapes its data, so user input is still safe. For example, an EAN-8 barcode:
+For elements without their own method, `field` wraps any command in a field and escapes its data, so user input is still safe. For example, an EAN-8 barcode:
 
 ```ts
-label.drawField({
+label.field({
   position: { x: mm(2), y: mm(2) },
   command: "^B8N,100,Y,N",
   data: "1234567",

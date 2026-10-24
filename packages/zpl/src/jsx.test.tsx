@@ -92,56 +92,56 @@ suite("jsx", () => {
       const expected = builder()
         .setDefaultFont({ font: "0", height: dots(30) })
         .setFieldOrientation(Orientation.BottomUp270Degrees)
-        .drawText({
+        .text({
           position: at(20, 20),
           text: "Hello",
           font: { name: "0", height: mm(4) },
         })
-        .drawText({
+        .text({
           position: at(20, 60),
           text: "Arial",
           font: { file: "E:ARIAL.TTF", height: mm(3) },
         })
-        .drawBox({
+        .box({
           position: at(0, 0),
           width: mm(57),
           height: mm(19),
           thickness: dots(3),
           rounding: 2,
         })
-        .drawCode128({
+        .code128({
           position: at(20, 80),
           data: "ABC",
           height: mm(8),
           mode: "A",
         })
-        .drawCode11({ position: at(300, 80), data: "123", checkDigits: 1 })
-        .drawCode39({ position: at(20, 150), data: "ABC", checkDigit: true })
-        .drawInterleaved2of5({
+        .code11({ position: at(300, 80), data: "123", checkDigits: 1 })
+        .code39({ position: at(20, 150), data: "ABC", checkDigit: true })
+        .interleaved2of5({
           position: at(300, 150),
           data: "1234",
           printHri: false,
         })
-        .drawPDF417({
+        .pdf417({
           position: at(500, 150),
           data: "pdf",
           rowHeight: dots(6),
           columns: 3,
         })
-        .drawAztec({ position: at(20, 200), data: "az", moduleSize: dots(3) })
-        .drawMaxiCode({ position: at(300, 200), data: "mc", mode: 4 })
-        .drawEAN13({
+        .aztec({ position: at(20, 200), data: "az", moduleSize: dots(3) })
+        .maxiCode({ position: at(300, 200), data: "mc", mode: 4 })
+        .ean13({
           position: at(400, 80),
           data: "590123412345",
           height: mm(5),
         })
-        .drawDataMatrix({
+        .dataMatrix({
           position: at(600, 20),
           data: "data",
           moduleSize: dots(4),
         })
-        .drawStoredGraphic({ position: at(10, 10), name: "LOGO" })
-        .drawGraphic({
+        .storedGraphic({ position: at(10, 10), name: "LOGO" })
+        .graphic({
           position: at(10, 10),
           graphic: { totalBytes: 2, bytesPerRow: 1, data: "FF00" },
         })
@@ -226,13 +226,13 @@ suite("jsx", () => {
       );
 
       const expected = builder()
-        .drawQrCode({
+        .qrCode({
           position: at(20, 20),
           data: "https://example.com/42",
           moduleSize: dots(4),
           errorCorrection: "Q",
         })
-        .drawField({
+        .field({
           position: at(300, 20),
           command: "^B3N,N,100,Y,N",
           data: "ABC^1",

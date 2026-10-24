@@ -17,12 +17,12 @@ A label has a size and a resolution. Zebra printers come in 6, 8, 12 and 24 dots
 import { Label, mm } from "@zplkit/core";
 
 const label = new Label({ width: mm(101.6), height: mm(50.8), dpmm: 8 })
-  .drawText({
+  .text({
     position: { x: mm(5), y: mm(5) },
     text: "Harbor Parts Co.",
     font: { height: mm(7) },
   })
-  .drawCode128({
+  .code128({
     position: { x: mm(5), y: mm(20) },
     data: "10442-B3",
     height: mm(13),

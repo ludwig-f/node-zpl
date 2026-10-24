@@ -31,12 +31,12 @@ A label with some text and an EAN-13 barcode:
 import { Label, Orientation, mm, dots } from "@zplkit/core";
 
 const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
-  .drawText({
+  .text({
     position: { x: mm(2), y: mm(2) },
     text: "Hello ^ world",
     font: { height: mm(4) },
   })
-  .drawEAN13({
+  .ean13({
     position: { x: mm(2), y: mm(8) },
     data: "123456789012",
     height: mm(7),
@@ -112,10 +112,10 @@ Field data such as text and bar code contents is escaped automatically. Characte
 
 ### Fields with any command
 
-Elements without their own method can be drawn with `drawField`, which wraps any command in a field and escapes its data:
+Elements without their own method can be drawn with `field`, which wraps any command in a field and escapes its data:
 
 ```typescript
-label.drawField({ position: { x: mm(2), y: mm(2) }, command: "^B8N,100,Y,N", data: "1234567" });
+label.field({ position: { x: mm(2), y: mm(2) }, command: "^B8N,100,Y,N", data: "1234567" });
 ```
 
 ### Commands as data
@@ -191,7 +191,7 @@ const graphic = await new ImageConverter().toZPL(
 );
 
 const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
-  .drawGraphic({ position: { x: dots(0), y: dots(0) }, graphic })
+  .graphic({ position: { x: dots(0), y: dots(0) }, graphic })
   .toZPL();
 ```
 
