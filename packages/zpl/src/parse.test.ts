@@ -178,17 +178,17 @@ suite("parse", () => {
   describe("round trip", () => {
     test("parses labels built with Label back into the same commands", () => {
       const label = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
-        .drawText({
+        .text({
           position: { x: dots(20), y: dots(20) },
           text: "Price ^ 5_6",
           font: { height: mm(4) },
         })
-        .drawCode128({
+        .code128({
           position: { x: dots(20), y: dots(80) },
           data: "ABC",
           height: mm(8),
         })
-        .drawBox({
+        .box({
           position: { x: dots(0), y: dots(0) },
           width: mm(57),
           height: mm(19),

@@ -54,7 +54,7 @@ const setup = new PrinterSetup().storeGraphic({ name: "LOGO", graphic, device: "
 
 // In every label
 new Label({ width: mm(57), height: mm(19), dpmm: 12 })
-  .drawStoredGraphic({ position: { x: dots(0), y: dots(0) }, name: "LOGO", device: "E" });
+  .storedGraphic({ position: { x: dots(0), y: dots(0) }, name: "LOGO", device: "E" });
 ```
 
 Graphics in RAM are lost when the printer turns off; flash keeps them.
@@ -69,7 +69,7 @@ const setup = new PrinterSetup()
   .toZPL();
 
 new Label({ width: mm(57), height: mm(19), dpmm: 12 })
-  .drawText({
+  .text({
     position: { x: dots(0), y: dots(0) },
     text: "Hello",
     font: { file: "E:ARIAL.TTF", height: mm(4) },

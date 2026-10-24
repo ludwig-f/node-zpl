@@ -20,17 +20,17 @@ const zpl = new Label({
   height: mm(150),
   dpmm: 8,
 })
-  .drawText({
+  .text({
     position: { x: mm(5), y: mm(8) },
     text: "SHIP TO",
     font: { height: mm(3) },
   })
-  .drawText({
+  .text({
     position: { x: mm(5), y: mm(13) },
     text: order.name,
     font: { height: mm(6) },
   })
-  .drawCode128({
+  .code128({
     position: { x: mm(6), y: mm(112) },
     data: order.tracking,
     height: mm(22),
@@ -55,17 +55,17 @@ const zpl = build(
 
 /** The samples above, run for real, so the output shown can't drift from the code */
 const builderZpl = new Label({ width: mm(100), height: mm(150), dpmm: 8 })
-  .drawText({
+  .text({
     position: { x: mm(5), y: mm(8) },
     text: "SHIP TO",
     font: { height: mm(3) },
   })
-  .drawText({
+  .text({
     position: { x: mm(5), y: mm(13) },
     text: order.name,
     font: { height: mm(6) },
   })
-  .drawCode128({
+  .code128({
     position: { x: mm(6), y: mm(112) },
     data: order.tracking,
     height: mm(22),

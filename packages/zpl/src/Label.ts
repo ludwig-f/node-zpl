@@ -54,7 +54,7 @@ class Label extends ZplContent {
     if (reverse) {
       // With ^LR every field is XORed with what is below it, so a solid black
       // background makes everything drawn on top of it come out white.
-      this.field({ x: { dots: 0 }, y: { dots: 0 } }, [
+      this.addField({ x: { dots: 0 }, y: { dots: 0 } }, [
         {
           type: "GraphicBox",
           width,
@@ -74,7 +74,7 @@ class Label extends ZplContent {
   /**
    * Add a complete field: origin, the given commands and a field separator
    */
-  private field(position: Position, commands: Command[]): this {
+  private addField(position: Position, commands: Command[]): this {
     return this.add(
       {
         type: "FieldOrigin",
@@ -154,7 +154,7 @@ class Label extends ZplContent {
    * @param options.color Line color - defaults to black
    * @param options.rounding Degree of corner rounding from 0 (none) to 8 - defaults to 0
    */
-  public drawBox(options: {
+  public box(options: {
     position: Position;
     width: Length;
     height: Length;
@@ -164,7 +164,7 @@ class Label extends ZplContent {
   }): this {
     const { position, color = "B", rounding = 0 } = options;
 
-    return this.field(position, [
+    return this.addField(position, [
       {
         type: "GraphicBox",
         width: this.dots(options.width),
@@ -183,7 +183,7 @@ class Label extends ZplContent {
    * @param options.device Device where the graphic is stored - defaults to "R" (DRAM)
    * @param options.magnification Magnification of the graphic - defaults to 1
    */
-  public drawStoredGraphic(options: {
+  public storedGraphic(options: {
     position: Position;
     name: string;
     device?: StorageDevice;
@@ -196,7 +196,7 @@ class Label extends ZplContent {
       magnification = { x: 1, y: 1 },
     } = options;
 
-    return this.field(position, [
+    return this.addField(position, [
       {
         type: "RecallGraphic",
         device,
@@ -212,10 +212,10 @@ class Label extends ZplContent {
    * @param options.position Position (x, y) of the graphic
    * @param options.graphic Graphic to draw, e.g. from ImageConverter
    */
-  public drawGraphic(options: { position: Position; graphic: Graphic }): this {
+  public graphic(options: { position: Position; graphic: Graphic }): this {
     const { position, graphic } = options;
 
-    return this.field(position, [
+    return this.addField(position, [
       {
         type: "GraphicField",
         byteCount: graphic.totalBytes,
@@ -237,7 +237,7 @@ class Label extends ZplContent {
    * @param options.font.width Character width
    * @param options.font.orientation Orientation of the text
    */
-  public drawText(options: {
+  public text(options: {
     text: string;
     position: Position;
     font?: {
@@ -277,7 +277,7 @@ class Label extends ZplContent {
       });
     }
 
-    return this.field(position, [...commands, ...this.fieldData(text)]);
+    return this.addField(position, [...commands, ...this.fieldData(text)]);
   }
 
   /**
@@ -290,7 +290,7 @@ class Label extends ZplContent {
    * @param options.printHri Whether to print the human readable interpretation - defaults to true
    * @param options.printHriAbove Whether to print the human readable interpretation above the barcode - defaults to false
    */
-  public drawCode11(options: {
+  public code11(options: {
     position: Position;
     data: string;
     height?: Length;
@@ -299,7 +299,7 @@ class Label extends ZplContent {
     printHri?: boolean;
     printHriAbove?: boolean;
   }): this {
-    return this.field(options.position, [
+    return this.addField(options.position, [
       {
         type: "Code11",
         orientation: options.orientation,
@@ -323,7 +323,7 @@ class Label extends ZplContent {
    * @param options.useUcc Whether to add a UCC check digit - defaults to false
    * @param options.mode Mode of the barcode: N (none), U (UCC case), A (automatic) or D (UCC/EAN) - defaults to N
    */
-  public drawCode128(options: {
+  public code128(options: {
     position: Position;
     data: string;
     height?: Length;
@@ -333,7 +333,7 @@ class Label extends ZplContent {
     useUcc?: boolean;
     mode?: "N" | "U" | "A" | "D";
   }): this {
-    return this.field(options.position, [
+    return this.addField(options.position, [
       {
         type: "Code128",
         orientation: options.orientation,
@@ -357,7 +357,7 @@ class Label extends ZplContent {
    * @param options.printHri Whether to print the human readable interpretation - defaults to true
    * @param options.printHriAbove Whether to print the human readable interpretation above the barcode - defaults to false
    */
-  public drawCode39(options: {
+  public code39(options: {
     position: Position;
     data: string;
     height?: Length;
@@ -366,7 +366,7 @@ class Label extends ZplContent {
     printHri?: boolean;
     printHriAbove?: boolean;
   }): this {
-    return this.field(options.position, [
+    return this.addField(options.position, [
       {
         type: "Code39",
         orientation: options.orientation,
@@ -389,7 +389,7 @@ class Label extends ZplContent {
    * @param options.printHri Whether to print the human readable interpretation - defaults to true
    * @param options.printHriAbove Whether to print the human readable interpretation above the barcode - defaults to false
    */
-  public drawInterleaved2of5(options: {
+  public interleaved2of5(options: {
     position: Position;
     data: string;
     height?: Length;
@@ -398,7 +398,7 @@ class Label extends ZplContent {
     printHri?: boolean;
     printHriAbove?: boolean;
   }): this {
-    return this.field(options.position, [
+    return this.addField(options.position, [
       {
         type: "Interleaved2of5",
         orientation: options.orientation,
@@ -422,7 +422,7 @@ class Label extends ZplContent {
    * @param options.truncate Whether to leave out the right row indicators and stop pattern - defaults to false
    * @param options.orientation Orientation of the barcode
    */
-  public drawPDF417(options: {
+  public pdf417(options: {
     position: Position;
     data: string;
     rowHeight?: Length;
@@ -432,7 +432,7 @@ class Label extends ZplContent {
     truncate?: boolean;
     orientation?: Orientation;
   }): this {
-    return this.field(options.position, [
+    return this.addField(options.position, [
       {
         type: "Pdf417",
         orientation: options.orientation,
@@ -454,14 +454,14 @@ class Label extends ZplContent {
    * @param options.errorControl Error correction percentage (1 to 99), or 101 to 104 for a compact symbol and 201 to 232 for a full-range one with that many layers
    * @param options.orientation Orientation of the code
    */
-  public drawAztec(options: {
+  public aztec(options: {
     position: Position;
     data: string;
     moduleSize?: Length;
     errorControl?: number;
     orientation?: Orientation;
   }): this {
-    return this.field(options.position, [
+    return this.addField(options.position, [
       {
         type: "Aztec",
         orientation: options.orientation,
@@ -478,12 +478,12 @@ class Label extends ZplContent {
    * @param options.data Data to encode; in modes 2 and 3 it starts with the class of service, country code and postal code
    * @param options.mode 2 or 3 for carrier messages with a numeric or alphanumeric postal code, 4 to 6 for other data - defaults to 2
    */
-  public drawMaxiCode(options: {
+  public maxiCode(options: {
     position: Position;
     data: string;
     mode?: 2 | 3 | 4 | 5 | 6;
   }): this {
-    return this.field(options.position, [
+    return this.addField(options.position, [
       { type: "MaxiCode", mode: options.mode },
       ...this.fieldData(options.data),
     ]);
@@ -498,7 +498,7 @@ class Label extends ZplContent {
    * @param options.printHriAbove Whether to print the human readable interpretation above the barcode - defaults to false
    * @param options.orientation Orientation of the barcode
    */
-  public drawEAN13(options: {
+  public ean13(options: {
     position: Position;
     data: string;
     height?: Length;
@@ -506,7 +506,7 @@ class Label extends ZplContent {
     printHriAbove?: boolean;
     orientation?: Orientation;
   }): this {
-    return this.field(options.position, [
+    return this.addField(options.position, [
       {
         type: "Ean13",
         orientation: options.orientation,
@@ -530,7 +530,7 @@ class Label extends ZplContent {
    * @param options.formatId Format ID, not used with quality 200
    * @param options.escapeCharacter Escape sequence control character
    */
-  public drawDataMatrix(options: {
+  public dataMatrix(options: {
     position: Position;
     data: string;
     moduleSize: Length;
@@ -541,7 +541,7 @@ class Label extends ZplContent {
     formatId?: 1 | 2 | 3 | 4 | 5 | 6;
     escapeCharacter?: string;
   }): this {
-    return this.field(options.position, [
+    return this.addField(options.position, [
       {
         type: "DataMatrix",
         orientation: options.orientation ?? Orientation.Normal,
@@ -564,7 +564,7 @@ class Label extends ZplContent {
    * @param options.moduleSize Size of each square module - defaults to the printer's default for its resolution
    * @param options.errorCorrection H (highest), Q, M (standard) or L (densest) - defaults to M
    */
-  public drawQrCode(options: {
+  public qrCode(options: {
     position: Position;
     data: string;
     moduleSize?: Length;
@@ -572,7 +572,7 @@ class Label extends ZplContent {
   }): this {
     const { errorCorrection = "M" } = options;
 
-    return this.field(options.position, [
+    return this.addField(options.position, [
       {
         type: "QrCode",
         orientation: "N",
@@ -591,7 +591,7 @@ class Label extends ZplContent {
    * @param options.command ZPL command(s) for the field, e.g. "^B3N,N,100,Y,N"
    * @param options.data Field data, if the command needs any
    */
-  public drawField(options: {
+  public field(options: {
     position: Position;
     command: `${"^" | "~"}${string}`;
     data?: string;
@@ -602,7 +602,7 @@ class Label extends ZplContent {
       throw new ZplError(`Commands start with ^ or ~, got: ${command}`);
     }
 
-    return this.field(position, [
+    return this.addField(position, [
       { type: "Raw", zpl: command },
       ...(data === undefined ? [] : this.fieldData(data)),
     ]);

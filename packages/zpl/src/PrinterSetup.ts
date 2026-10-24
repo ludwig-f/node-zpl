@@ -17,7 +17,7 @@ class PrinterSetup extends ZplContent {
   }
 
   /**
-   * Store a graphic on the printer, to be drawn with Label.drawStoredGraphic
+   * Store a graphic on the printer, to be drawn with Label.storedGraphic
    * @param options.name Name of the graphic, 1 to 8 characters
    * @param options.graphic Graphic to store, e.g. from ImageConverter
    * @param options.device Device to store the graphic on - defaults to "R" (DRAM)
@@ -45,7 +45,7 @@ class PrinterSetup extends ZplContent {
 
   /**
    * Store a TrueType font on the printer, to be used with
-   * `drawText({ font: { file: "R:NAME.TTF" } })`
+   * `text({ font: { file: "R:NAME.TTF" } })`
    * @param options.name Name of the font, 1 to 8 characters; it's stored as NAME.TTF
    * @param options.data The .ttf file
    * @param options.device Device to store the font on - defaults to "R" (DRAM)
