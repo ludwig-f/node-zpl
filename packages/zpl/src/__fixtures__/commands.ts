@@ -102,6 +102,43 @@ const commandCases: [Command, string][] = [
   [{ type: "Ean13", orientation: "R", height: 50 }, "^BER,50"],
   [
     {
+      type: "PostalCode",
+      orientation: "N",
+      height: 40,
+      interpretationLine: true,
+      interpretationLineAbove: false,
+    },
+    "^BZN,40,Y,N",
+  ],
+  [{ type: "PostalCode", height: 40, postalType: 3 }, "^BZ,40,,,3"],
+  [
+    {
+      type: "Planet",
+      orientation: "N",
+      height: 100,
+      interpretationLine: true,
+      interpretationLineAbove: false,
+    },
+    "^B5N,100,Y,N",
+  ],
+  [
+    {
+      type: "Gs1DataBar",
+      orientation: "N",
+      symbology: 1,
+      magnification: 5,
+      separatorHeight: 2,
+      height: 100,
+    },
+    "^BRN,1,5,2,100",
+  ],
+  [{ type: "Gs1DataBar", symbology: 6, segments: 4 }, "^BR,6,,,,4"],
+  [
+    { type: "MicroPdf417", orientation: "N", rowHeight: 8, mode: 3 },
+    "^BFN,8,3",
+  ],
+  [
+    {
       type: "Ean8",
       orientation: "N",
       height: 100,

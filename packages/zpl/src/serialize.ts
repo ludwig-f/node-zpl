@@ -233,6 +233,36 @@ const serializeCommand = (command: Command): string => {
         command.start,
         command.stop
       )}`;
+    case "PostalCode":
+      return `^BZ${params(
+        command.orientation,
+        command.height,
+        yn(command.interpretationLine),
+        yn(command.interpretationLineAbove),
+        command.postalType
+      )}`;
+    case "Planet":
+      return `^B5${params(
+        command.orientation,
+        command.height,
+        yn(command.interpretationLine),
+        yn(command.interpretationLineAbove)
+      )}`;
+    case "Gs1DataBar":
+      return `^BR${params(
+        command.orientation,
+        command.symbology,
+        command.magnification,
+        command.separatorHeight,
+        command.height,
+        command.segments
+      )}`;
+    case "MicroPdf417":
+      return `^BF${params(
+        command.orientation,
+        command.rowHeight,
+        command.mode
+      )}`;
     case "DataMatrix":
       return `^BX${params(
         command.orientation,

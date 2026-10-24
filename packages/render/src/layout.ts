@@ -76,8 +76,11 @@ type Element = Common &
         kind: "placeholder";
         /** The barcode command, like ^B7 */
         code: string;
-        /** Not drawn yet, or a drawn barcode whose parameters didn't parse */
-        reason: "unsupported" | "invalid";
+        /**
+         * Not drawn yet, a drawn barcode whose parameters didn't parse, or
+         * data the barcode can't encode
+         */
+        reason: "unsupported" | "invalid" | "data";
         /** ^BY's height; it's drawn taller if its text needs room */
         height: number;
         orientation: Orientation;
@@ -129,6 +132,10 @@ type BarcodeCommand = Extract<
       | "UpcEanExtension"
       | "Code93"
       | "Codabar"
+      | "PostalCode"
+      | "Planet"
+      | "Gs1DataBar"
+      | "MicroPdf417"
       | "DataMatrix"
       | "QrCode"
       | "Aztec"
@@ -167,6 +174,8 @@ type Field = {
   symbol?: { height?: number; width?: number; orientation?: Orientation };
   /** The barcode the field data goes into, or the code of one we can't draw */
   barcode?: BarcodeCommand | NonNullable<ReturnType<typeof rawBarcode>>;
+  /** Where the barcode command is in the list */
+  barcodeIndex?: number;
   commands: number[];
 };
 
@@ -227,6 +236,10 @@ const drawnCodes = new Set([
   "^BA",
   "^BK",
   "^B0",
+  "^BZ",
+  "^B5",
+  "^BR",
+  "^BF",
   "^BQ",
   "^BX",
 ]);
@@ -511,6 +524,23 @@ const layout = (
         }
         const { barcode } = field;
         if (barcode) {
+          // GS1 DataBar's composite symbols aren't drawn yet
+          if (
+            barcode.type === "Gs1DataBar" &&
+            ((barcode.symbology ?? 1) > 6 || data.includes("|"))
+          ) {
+            label.unsupported.push(field.barcodeIndex ?? index, index);
+            label.elements.push({
+              ...common(),
+              kind: "placeholder",
+              code: "^BR",
+              reason: "unsupported",
+              height: barcodeDefaults.height,
+              orientation: barcode.orientation ?? orientation,
+              fromBottom: field.fromBottom,
+            });
+            break;
+          }
           if (barcode.type === "Unsupported") {
             label.unsupported.push(index);
             label.elements.push({
@@ -662,11 +692,16 @@ const layout = (
       case "UpcEanExtension":
       case "Code93":
       case "Codabar":
+      case "PostalCode":
+      case "Planet":
+      case "Gs1DataBar":
+      case "MicroPdf417":
       case "DataMatrix":
       case "QrCode":
       case "Aztec":
       case "MaxiCode":
         field.barcode = command;
+        field.barcodeIndex = index;
         break;
       case "Raw": {
         const barcode = rawBarcode(command);

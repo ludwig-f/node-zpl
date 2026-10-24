@@ -46,6 +46,8 @@ const notes = {
   "^B7": "Same size as a printer's symbol; error correction codewords can differ",
   "^BD": "Modes 2 to 6",
   "^BX": "Same size as a printer's symbol; data can be encoded differently",
+  "^BF": "Same size as a printer's symbol; data can be encoded differently",
+  "^BR": "Types 1 to 6; composite symbols show a placeholder",
   "^CI": "UTF-8 (28 to 30) and Latin-1",
   "^GS": "The UL and CSA marks are drawn as stand-ins",
   "~DT": "Bounded fonts use Zebra's own format, which isn't drawn",
@@ -53,7 +55,7 @@ const notes = {
 };
 
 /** Supported, with differences the notes explain */
-const partial = new Set(["^CI", "^GS"]);
+const partial = new Set(["^CI", "^GS", "^BR"]);
 
 /** Commands with nothing to draw, besides printer setup */
 const nothingToDraw = new Set(["^FX", "^ID", "~DN", "~EG", "^HG", "^HY"]);

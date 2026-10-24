@@ -17,6 +17,11 @@ import {
   UpcEanExtension,
   Code93,
   Codabar,
+  Postnet,
+  Planet,
+  IntelligentMail,
+  GS1DataBar,
+  MicroPDF417,
   DataMatrix,
   Graphic,
   StoredGraphic,
@@ -394,6 +399,37 @@ test("retail and Code 93 elements match the builder", () => {
     .upcEanExtension({ position: at, data: "04414" })
     .code93({ position: at, data: "ABC", printHri: false })
     .codabar({ position: at, data: "123", start: "B", stop: "C" });
+
+  expect(label.toZPL()).toStrictEqual(expected.toZPL());
+});
+
+test("postal, GS1 DataBar and MicroPDF417 elements match the builder", () => {
+  const label = build(
+    <Label width={mm(57)} height={mm(19)} dpmm={12}>
+      <Postnet x={dots(10)} y={dots(10)}>
+        12345
+      </Postnet>
+      <Planet x={dots(10)} y={dots(10)}>
+        12345678901
+      </Planet>
+      <IntelligentMail x={dots(10)} y={dots(10)}>
+        00123123456123456789
+      </IntelligentMail>
+      <GS1DataBar x={dots(10)} y={dots(10)} type="limited">
+        12345678901
+      </GS1DataBar>
+      <MicroPDF417 x={dots(10)} y={dots(10)} mode={5}>
+        ABC
+      </MicroPDF417>
+    </Label>
+  );
+  const at = { x: dots(10), y: dots(10) };
+  const expected = new LabelBuilder({ width: mm(57), height: mm(19), dpmm: 12 })
+    .postnet({ position: at, data: "12345" })
+    .planet({ position: at, data: "12345678901" })
+    .intelligentMail({ position: at, data: "00123123456123456789" })
+    .gs1DataBar({ position: at, data: "12345678901", type: "limited" })
+    .microPdf417({ position: at, data: "ABC", mode: 5 });
 
   expect(label.toZPL()).toStrictEqual(expected.toZPL());
 });

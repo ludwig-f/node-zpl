@@ -307,6 +307,60 @@ type Codabar = Node<
     stop?: "A" | "B" | "C" | "D";
   }
 >;
+/** `^BZo,h,f,g,t`: USPS POSTNET, PLANET or Intelligent Mail */
+type PostalCode = Node<
+  "PostalCode",
+  {
+    orientation?: Orientation;
+    height?: number;
+    interpretationLine?: boolean;
+    interpretationLineAbove?: boolean;
+    /** 0 for POSTNET (the default), 1 for PLANET, 3 for Intelligent Mail */
+    postalType?: 0 | 1 | 3;
+  }
+>;
+/** `^B5o,h,f,g`: USPS PLANET */
+type Planet = Node<
+  "Planet",
+  {
+    orientation?: Orientation;
+    height?: number;
+    interpretationLine?: boolean;
+    interpretationLineAbove?: boolean;
+  }
+>;
+/** `^BRa,b,c,d,e,f`: GS1 DataBar, alone or in a composite symbol */
+type Gs1DataBar = Node<
+  "Gs1DataBar",
+  {
+    orientation?: Orientation;
+    /**
+     * 1 Omnidirectional, 2 Truncated, 3 Stacked, 4 Stacked Omnidirectional,
+     * 5 Limited, 6 Expanded, 7 UPC-A, 8 UPC-E, 9 EAN-13, 10 EAN-8, 11 and 12
+     * GS1-128 with a CC-A/B or CC-C composite component
+     */
+    symbology?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+    /** Module width in dots, 1 to 10 */
+    magnification?: number;
+    /** Height of separator rows in modules, 1 or 2 */
+    separatorHeight?: 1 | 2;
+    /** Height of the linear part of UPC, EAN and GS1-128 composites, in dots */
+    height?: number;
+    /** Segments per row of DataBar Expanded, 2 to 22 and even */
+    segments?: number;
+  }
+>;
+/** `^BFo,h,m`: MicroPDF417 */
+type MicroPdf417 = Node<
+  "MicroPdf417",
+  {
+    orientation?: Orientation;
+    /** Height of each row in dots */
+    rowHeight?: number;
+    /** 0 to 33, which sets the columns, rows and error correction */
+    mode?: number;
+  }
+>;
 /** `^BXo,h,s,c,r,f,g,a` */
 type DataMatrix = Node<
   "DataMatrix",
@@ -487,6 +541,10 @@ type Command =
   | UpcEanExtension
   | Code93
   | Codabar
+  | PostalCode
+  | Planet
+  | Gs1DataBar
+  | MicroPdf417
   | DataMatrix
   | QrCode
   | Aztec
@@ -549,6 +607,10 @@ export type {
   UpcEanExtension,
   Code93,
   Codabar,
+  PostalCode,
+  Planet,
+  Gs1DataBar,
+  MicroPdf417,
   DataMatrix,
   QrCode,
   Aztec,

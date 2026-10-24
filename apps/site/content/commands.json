@@ -68,8 +68,8 @@
       "code": "^B5",
       "name": "Planet Code bar code",
       "category": "Barcodes",
-      "support": "no",
-      "drawn": false,
+      "support": "yes",
+      "drawn": true,
       "note": ""
     },
     {
@@ -140,9 +140,9 @@
       "code": "^BF",
       "name": "MicroPDF417 bar code",
       "category": "Barcodes",
-      "support": "no",
-      "drawn": false,
-      "note": ""
+      "support": "yes",
+      "drawn": true,
+      "note": "Same size as a printer's symbol; data can be encoded differently"
     },
     {
       "code": "^BI",
@@ -212,9 +212,9 @@
       "code": "^BR",
       "name": "RSS (Reduced Space Symbology) bar code",
       "category": "Barcodes",
-      "support": "no",
-      "drawn": false,
-      "note": ""
+      "support": "partial",
+      "drawn": true,
+      "note": "Types 1 to 6; composite symbols show a placeholder"
     },
     {
       "code": "^BS",
@@ -260,8 +260,8 @@
       "code": "^BZ",
       "name": "POSTNET bar code",
       "category": "Barcodes",
-      "support": "no",
-      "drawn": false,
+      "support": "yes",
+      "drawn": true,
       "note": ""
     },
     {

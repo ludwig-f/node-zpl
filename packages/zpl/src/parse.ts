@@ -456,6 +456,38 @@ const parsers: Record<string, CommandParser> = {
       stop: p.oneOf(6, "stop", ["A", "B", "C", "D"] as const),
     };
   }),
+  "^BZ": withParams("^BZ", (p) => ({
+    type: "PostalCode",
+    orientation: p.oneOf(0, "orientation", orientations),
+    height: p.number(1, "height"),
+    interpretationLine: p.yesNo(2, "interpretationLine"),
+    interpretationLineAbove: p.yesNo(3, "interpretationLineAbove"),
+    postalType: p.oneOf(4, "postalType", [0, 1, 3] as const),
+  })),
+  "^B5": withParams("^B5", (p) => ({
+    type: "Planet",
+    orientation: p.oneOf(0, "orientation", orientations),
+    height: p.number(1, "height"),
+    interpretationLine: p.yesNo(2, "interpretationLine"),
+    interpretationLineAbove: p.yesNo(3, "interpretationLineAbove"),
+  })),
+  "^BR": withParams("^BR", (p) => ({
+    type: "Gs1DataBar",
+    orientation: p.oneOf(0, "orientation", orientations),
+    symbology: p.oneOf(1, "symbology", [
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+    ] as const),
+    magnification: p.number(2, "magnification"),
+    separatorHeight: p.oneOf(3, "separatorHeight", [1, 2] as const),
+    height: p.number(4, "height"),
+    segments: p.number(5, "segments"),
+  })),
+  "^BF": withParams("^BF", (p) => ({
+    type: "MicroPdf417",
+    orientation: p.oneOf(0, "orientation", orientations),
+    rowHeight: p.number(1, "rowHeight"),
+    mode: p.number(2, "mode"),
+  })),
   "^BX": withParams("^BX", (p) =>
     // The aspect ratio parameter has no typed node
     p.string(7) !== undefined

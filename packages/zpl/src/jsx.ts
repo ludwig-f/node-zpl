@@ -19,6 +19,11 @@ import type {
   UpcEanExtensionOptions,
   Code93Options,
   CodabarOptions,
+  PostnetOptions,
+  PlanetOptions,
+  IntelligentMailOptions,
+  Gs1DataBarOptions,
+  MicroPdf417Options,
   FieldOptions,
   FontOptions,
   GraphicOptions,
@@ -86,6 +91,11 @@ type UpcEProps = BarcodeProps<UpcEOptions>;
 type UpcEanExtensionProps = BarcodeProps<UpcEanExtensionOptions>;
 type Code93Props = BarcodeProps<Code93Options>;
 type CodabarProps = BarcodeProps<CodabarOptions>;
+type PostnetProps = BarcodeProps<PostnetOptions>;
+type PlanetProps = BarcodeProps<PlanetOptions>;
+type IntelligentMailProps = BarcodeProps<IntelligentMailOptions>;
+type GS1DataBarProps = BarcodeProps<Gs1DataBarOptions>;
+type MicroPDF417Props = BarcodeProps<MicroPdf417Options>;
 type PDF417Props = BarcodeProps<Pdf417Options>;
 type AztecProps = BarcodeProps<AztecOptions>;
 type MaxiCodeProps = BarcodeProps<MaxiCodeOptions>;
@@ -315,6 +325,31 @@ const Codabar = primitive((label, props: CodabarProps) =>
   label.codabar(barcode(props))
 );
 
+/** USPS POSTNET barcode, with the ZIP code as children */
+const Postnet = primitive((label, props: PostnetProps) =>
+  label.postnet(barcode(props))
+);
+
+/** USPS PLANET barcode, with the digits as children */
+const Planet = primitive((label, props: PlanetProps) =>
+  label.planet(barcode(props))
+);
+
+/** USPS Intelligent Mail barcode, with the tracking and routing codes as children */
+const IntelligentMail = primitive((label, props: IntelligentMailProps) =>
+  label.intelligentMail(barcode(props))
+);
+
+/** GS1 DataBar, with the GTIN or GS1 element strings as children */
+const GS1DataBar = primitive((label, props: GS1DataBarProps) =>
+  label.gs1DataBar(barcode(props))
+);
+
+/** MicroPDF417 code, with the data as children */
+const MicroPDF417 = primitive((label, props: MicroPDF417Props) =>
+  label.microPdf417(barcode(props))
+);
+
 /** Data Matrix code, with the data as children */
 const DataMatrix = primitive((label, props: DataMatrixProps) =>
   label.dataMatrix(barcode(props))
@@ -371,6 +406,11 @@ export {
   UpcEanExtension,
   Code93,
   Codabar,
+  Postnet,
+  Planet,
+  IntelligentMail,
+  GS1DataBar,
+  MicroPDF417,
   DataMatrix,
   QrCode,
   Field,
@@ -401,6 +441,11 @@ export type {
   UpcEanExtensionProps,
   Code93Props,
   CodabarProps,
+  PostnetProps,
+  PlanetProps,
+  IntelligentMailProps,
+  GS1DataBarProps,
+  MicroPDF417Props,
   PDF417Props,
   AztecProps,
   MaxiCodeProps,

@@ -75,6 +75,11 @@ describe("Code 93", () => {
     );
   });
 
+  test("prints shift check characters as a to d", () => {
+    // The C check character is 45, the third shift character
+    expect(encodeCode93("12345ABCDE", true).text).toBe("12345ABCDEcO");
+  });
+
   test("prints the check characters only when asked", () => {
     expect(encodeCode93("12345ABCDE", false).text).toBe("12345ABCDE");
     expect(encodeCode93("TEST93", true).text).toMatch(/^TEST93..$/);
