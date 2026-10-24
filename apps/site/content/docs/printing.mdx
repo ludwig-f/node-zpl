@@ -33,7 +33,7 @@ Positions in ZPL are in dots, and dot size depends on the printhead. The same ZP
 Format commands start with `^`. The printer collects them between `^XA` and `^XZ` and prints them as one label. Control commands start with `~` and act as soon as they arrive, like `~SD` for print darkness. That's why printer settings live in `PrinterSetup` rather than `Label`:
 
 ```ts
-import { PrinterSetup } from "zplkit";
+import { PrinterSetup } from "@zplkit/core";
 
 const setup = new PrinterSetup().setDarkness(20).toZPL();
 ```
@@ -44,8 +44,8 @@ Send an image once and recall it by name in every label, instead of including it
 
 ```ts
 import { readFileSync } from "node:fs";
-import { Label, PrinterSetup, mm, dots } from "zplkit";
-import { ImageConverter } from "zplkit/image";
+import { Label, PrinterSetup, mm, dots } from "@zplkit/core";
+import { ImageConverter } from "@zplkit/core/image";
 
 const graphic = await new ImageConverter().toZPL(readFileSync("logo.png"));
 

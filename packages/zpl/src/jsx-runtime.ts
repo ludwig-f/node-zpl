@@ -1,6 +1,6 @@
 /**
  * JSX runtime for zplkit. TypeScript and bundlers load this module when a
- * project sets `"jsx": "react-jsx"` and `"jsxImportSource": "zplkit"`.
+ * project sets `"jsx": "react-jsx"` and `"jsxImportSource": "@zplkit/core"`.
  *
  * Elements have the same shape as React's, `{ type, props, key }`, and
  * components are not called until build() walks the tree. That means labels

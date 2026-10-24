@@ -21,7 +21,7 @@ Importing the package registers the element:
 Set the `zpl` property instead of the attribute to pass a [zplkit](https://github.com/ludwig-f/zplkit/tree/main/packages/zpl#readme) `Label`, or anything else with a `toZPL()` method:
 
 ```ts
-import { Label, mm } from "zplkit";
+import { Label, mm } from "@zplkit/core";
 import "@zplkit/preview";
 
 document.querySelector("zpl-preview").zpl = new Label({

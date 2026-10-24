@@ -6,7 +6,7 @@ Docs and playground: [zpl.fingal.dev](https://zpl.fingal.dev)
 
 | Package | What it does |
 | --- | --- |
-| [`zplkit`](./packages/zpl) | Build labels with typed method calls or JSX, parse and lint existing ZPL |
+| [`@zplkit/core`](./packages/zpl) | Build labels with typed method calls or JSX, parse and lint existing ZPL |
 | [`@zplkit/render`](./packages/render) | Renders ZPL to images in pure TypeScript, in Node and the browser |
 | [`@zplkit/preview`](./packages/preview) | `<zpl-preview>`, a web component that shows ZPL as images in any framework |
 

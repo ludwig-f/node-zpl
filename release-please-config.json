@@ -3,7 +3,7 @@
   "packages": {
     "packages/zpl": {
       "release-type": "node",
-      "package-name": "zplkit",
+      "package-name": "@zplkit/core",
       "include-component-in-tag": false
     },
     "packages/render": {

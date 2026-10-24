@@ -6,7 +6,7 @@ description: Install zplkit and build your first label.
 ## Install
 
 ```bash
-npm install zplkit
+npm install @zplkit/core
 ```
 
 ## Build a label
@@ -14,7 +14,7 @@ npm install zplkit
 A label has a size and a resolution. Zebra printers come in 6, 8, 12 and 24 dots per millimeter (152, 203, 300 and 600 dpi); use the one your printer has.
 
 ```ts
-import { Label, mm } from "zplkit";
+import { Label, mm } from "@zplkit/core";
 
 const label = new Label({ width: mm(101.6), height: mm(50.8), dpmm: 8 })
   .drawText({

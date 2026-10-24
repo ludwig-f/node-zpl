@@ -6,7 +6,7 @@ description: Write labels as JSX, in React projects or on their own.
 Labels can also be written as JSX. It produces the same commands as the method calls, and `build()` returns the same `Label` object, with `toZPL()`, `lint()` and `commands`.
 
 ```tsx
-import { Label, Text, Box, Code128, build, mm, dots } from "zplkit/jsx";
+import { Label, Text, Box, Code128, build, mm, dots } from "@zplkit/core/jsx";
 
 const order = { id: 10442, express: true };
 
@@ -64,7 +64,7 @@ Tell TypeScript or your bundler to use zplkit's JSX runtime:
 {
   "compilerOptions": {
     "jsx": "react-jsx",
-    "jsxImportSource": "zplkit"
+    "jsxImportSource": "@zplkit/core"
   }
 }
 ```

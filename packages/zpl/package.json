@@ -1,5 +1,5 @@
 {
-  "name": "zplkit",
+  "name": "@zplkit/core",
   "type": "module",
   "version": "1.0.5",
   "description": "Build, parse and lint ZPL for Zebra label printers, with typed method calls or JSX",

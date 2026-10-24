@@ -69,7 +69,7 @@ export default async function HomePage() {
             </Link>
           </div>
           <code className="w-fit rounded-md border border-fd-border bg-fd-card px-3 py-2 font-mono text-sm">
-            npm install zplkit
+            npm install @zplkit/core
           </code>
         </div>
 

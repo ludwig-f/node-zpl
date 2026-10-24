@@ -7,7 +7,7 @@ import {
   build,
   mm,
   dots,
-} from "zplkit/jsx";
+} from "@zplkit/core/jsx";
 
 const order = { id: 10442, shelf: "B_3", express: true };
 
