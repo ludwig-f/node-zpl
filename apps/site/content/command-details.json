@@ -171,7 +171,7 @@
       ],
       [
         "h",
-        "Height multiplier of each row, in dots"
+        "Row height multiplier: this number times the module width gives each row height in dots"
       ],
       [
         "f",
@@ -429,7 +429,7 @@
       ],
       [
         "h",
-        "Height of each row, in dots"
+        "Bar code height, in dots"
       ],
       [
         "m",
@@ -632,7 +632,7 @@
     "example": "^XA\n^BY2\n^FO50,50^BPN,N,100,Y,N^FD12345^FS\n^XZ"
   },
   "^BQ": {
-    "summary": "Creates a QR Code. The field data starts with the error correction level and input mode, e.g. QA, for automatic mode at the default level.",
+    "summary": "Creates a QR Code. The field data starts with the error correction level and input mode, e.g. QA, for error correction level Q with automatic input.",
     "syntax": "^BQa,b,c,d,e",
     "params": [
       [
@@ -645,7 +645,7 @@
       ],
       [
         "c",
-        "Magnification factor: 1 to 10"
+        "Magnification factor: 1 to 100"
       ],
       [
         "d",
@@ -800,7 +800,7 @@
       ],
       [
         "g",
-        "Escape sequence control character, default ~"
+        "Escape sequence control character (quality 200 only): default _ on firmware V60.13.0.12 and later, ~ on older firmware"
       ],
       [
         "a",
@@ -829,8 +829,8 @@
     "example": "^XA\n^BY3,2,100\n^FO50,50^BCN^FD12345^FS\n^XZ"
   },
   "^BZ": {
-    "summary": "Creates a USPS POSTNET bar code, which encodes ZIP Code data on mail.",
-    "syntax": "^BZo,h,f,g",
+    "summary": "Creates a USPS postal bar code: POSTNET by default, or PLANET or Intelligent Mail with the t parameter. Used to encode ZIP Code and tracking data on mail.",
+    "syntax": "^BZo,h,f,g,t",
     "params": [
       [
         "o",
@@ -847,6 +847,10 @@
       [
         "g",
         "Interpretation line above the code: Y or N"
+      ],
+      [
+        "t",
+        "Postal code type: 0 POSTNET (default), 1 PLANET, 3 USPS Intelligent Mail"
       ]
     ],
     "example": "^XA\n^FO50,50^BZN,40,Y,N^FD12345^FS\n^XZ"
@@ -877,7 +881,7 @@
     "params": [
       [
         "a",
-        "New delimiter character, default comma"
+        "New delimiter character, any ASCII character. The parameter is required."
       ]
     ]
   },
@@ -887,7 +891,7 @@
     "params": [
       [
         "a",
-        "New delimiter character, default comma"
+        "New delimiter character, any ASCII character. The parameter is required."
       ]
     ]
   },
@@ -927,23 +931,27 @@
   },
   "^CM": {
     "summary": "Reassigns the letters used to refer to the printer's memory devices (B:, E:, R: and A:).",
-    "syntax": "^CMa,b,c,d",
+    "syntax": "^CMa,b,c,d,e",
     "params": [
       [
         "a",
-        "New letter for B: memory"
+        "Letter to use for B: memory: B, E, R, A or NONE"
       ],
       [
         "b",
-        "New letter for E: memory"
+        "Letter to use for E: memory: B, E, R, A or NONE"
       ],
       [
         "c",
-        "New letter for R: memory"
+        "Letter to use for R: memory: B, E, R, A or NONE"
       ],
       [
         "d",
-        "New letter for A: memory"
+        "Letter to use for A: memory: B, E, R, A or NONE"
+      ],
+      [
+        "e",
+        "Multiple alias: M lets two letters point to the same device (newer firmware only)"
       ]
     ]
   },
@@ -1175,7 +1183,7 @@
       ],
       [
         "b",
-        "Data format: A ASCII hex, B binary, C compressed"
+        "Data format: A ASCII hex or ZB64, B binary, C AR-compressed, P PNG (ZB64 encoded)"
       ],
       [
         "x",
@@ -1187,7 +1195,7 @@
       ],
       [
         "w",
-        "Bytes per row (graphics only)"
+        "Bytes per row for .GRF images; ignored for PNG and fonts"
       ],
       [
         "data",
@@ -1575,7 +1583,7 @@
     "syntax": "~HM"
   },
   "~HS": {
-    "summary": "Asks the printer for its status. It returns three strings that report things like paper out, pause, head open, ribbon out and labels remaining in the buffer.",
+    "summary": "Asks the printer for its status. It returns three strings that report things like paper out, pause, head open, ribbon out and labels remaining in the batch.",
     "syntax": "~HS"
   },
   "~HU": {
@@ -1583,20 +1591,28 @@
     "syntax": "~HU"
   },
   "^HV": {
-    "summary": "Sends the data of a specified field back to the host after the label prints. Used with RFID and other fields to verify what was written or read.",
+    "summary": "Sends the data of a numbered field (set with ^FN or ^RF) back to the host, with an optional header. Often used with RFID to check what was read or written.",
     "syntax": "^HV#,n,h,t,a",
     "params": [
       [
         "#",
-        "Field number to return"
+        "Field number to return, 0 to 9999, default 0"
       ],
       [
         "n",
-        "Number of bytes to return: 1 to 256"
+        "Number of bytes to return: 1 to 256, default 64"
       ],
       [
         "h",
         "Header text to send before the data"
+      ],
+      [
+        "t",
+        "Termination text to send after the data"
+      ],
+      [
+        "a",
+        "When to respond: F once per format (default), L once per label printed"
       ]
     ]
   },
@@ -1621,12 +1637,12 @@
     ]
   },
   "^HZ": {
-    "summary": "Asks the printer to return description information, such as settings, fonts or the object directory, as XML.",
+    "summary": "Asks the printer to return description information as XML, such as format settings, the object directory, object data or printer status.",
     "syntax": "^HZb",
     "params": [
       [
         "b",
-        "What to return: a all, f font links, l object directory, o object data, r printer status"
+        "What to return: a all, f format settings, l object directory, o object data, r printer status"
       ]
     ]
   },
@@ -1652,7 +1668,7 @@
     "example": "^XA\n^ILR:FORM.GRF\n^FO50,50^A0N,40,40^FDOn top of the form^FS\n^XZ"
   },
   "^IM": {
-    "summary": "Places a stored graphic at the field origin, like ^XG but without magnification. It prints faster than ^XG.",
+    "summary": "Places a stored graphic at the field origin, like ^XG but without magnification. Because it skips scaling, it can take less formatting time than ^XG.",
     "syntax": "^IMd:o.x",
     "params": [
       [
@@ -1678,7 +1694,7 @@
     "example": "^XA\n^FO50,50^GB400,200,4^FS\n^ISR:FORM.GRF,N\n^XZ"
   },
   "~JA": {
-    "summary": "Cancels all formats waiting in the printer's buffer, including the one printing now.",
+    "summary": "Cancels all formats waiting in the printer's buffer and any batch that is printing. The printer stops after the current label finishes.",
     "syntax": "~JA"
   },
   "^JB": {
@@ -1700,7 +1716,7 @@
     "syntax": "~JC"
   },
   "~JD": {
-    "summary": "Turns on communications diagnostics mode. The printer prints the data it receives as hex instead of interpreting it, which helps debug what the host is sending.",
+    "summary": "Turns on communications diagnostics mode. The printer prints every character it receives, with its hex value and any communication errors, which helps debug what the host is sending.",
     "syntax": "~JD"
   },
   "~JE": {
@@ -1713,7 +1729,7 @@
     "params": [
       [
         "p",
-        "Pause on low voltage: Y or N"
+        "Pause on low voltage: Y (default) or N. N is suggested when running from a car battery adapter"
       ]
     ]
   },
@@ -1730,7 +1746,7 @@
     "syntax": "~JL"
   },
   "^JM": {
-    "summary": "Changes the printer's resolution for the formats that follow. B halves the dots per millimeter, which makes everything print larger and coarser.",
+    "summary": "Sets the print density. ^JMB halves it (for example 8 dots/mm becomes 4), which doubles the size of everything on the label, including ^FO positions. ^JMA (default) is full density. Put it before the first ^FS in the format. The setting stays in effect.",
     "syntax": "^JMn",
     "params": [
       [
@@ -1744,11 +1760,11 @@
     "syntax": "~JN"
   },
   "~JO": {
-    "summary": "Makes the printhead test non-fatal, which is the default: the printer reports a bad head element but keeps printing.",
+    "summary": "Makes the printhead test non-fatal, which is the default. If the head test fails, the printer shows an error and stops printing, but you can press PAUSE to continue without a power cycle (unlike ~JN).",
     "syntax": "~JO"
   },
   "~JP": {
-    "summary": "Pauses the printer and cancels the format that is printing. If more formats are in the buffer, the printer stays paused.",
+    "summary": "Cancels the format being processed and puts the printer in Pause Mode. Each further ~JP clears the next format in the buffer. It works like pressing CANCEL on the printer.",
     "syntax": "~JP"
   },
   "~JR": {
@@ -1771,7 +1787,7 @@
     "params": [
       [
         "b",
-        "A 100% after, B 100% before, N normal, O off, or 10 to 90"
+        "A 100% after printing, B 100% before the next label, N normal (90% after, default), O off, or 10 to 90 in steps of 10 (percent done after printing)"
       ]
     ]
   },
@@ -1781,7 +1797,19 @@
     "params": [
       [
         "####",
-        "Number of labels between head tests: 0 to 9999"
+        "Number of labels between head tests: 0000 to 9999. 0000 (default) turns the test off"
+      ],
+      [
+        "a",
+        "Choose the range of elements to test yourself: Y or N (default)"
+      ],
+      [
+        "b",
+        "First element to test when a is Y: 0 to 9999, default 0"
+      ],
+      [
+        "c",
+        "Last element to test when a is Y: 0 to 9999, default 9999"
       ]
     ]
   },
@@ -1791,7 +1819,7 @@
     "params": [
       [
         "a",
-        "F factory defaults, N factory network defaults, R recall last saved, S save current"
+        "A factory and factory network defaults, F factory defaults, N factory network defaults, R recall last saved, S save current. Reloaded defaults are lost at power off unless saved with ^JUS"
       ]
     ]
   },
@@ -1834,17 +1862,17 @@
     ]
   },
   "^KL": {
-    "summary": "Sets the language used on the printer's display and configuration label.",
+    "summary": "Sets the language shown on the printer's control panel.",
     "syntax": "^KLa",
     "params": [
       [
         "a",
-        "Language number, e.g. 1 English"
+        "Language number, e.g. 1 English (default), 2 Spanish, 3 French, 4 German"
       ]
     ]
   },
   "^KN": {
-    "summary": "Sets the printer's name and description, which show up on its web page and network tools.",
+    "summary": "Sets the printer's network name and description, which show up on its configuration label and web page. Send ^JUS to save them.",
     "syntax": "^KNa,b",
     "params": [
       [
@@ -1864,6 +1892,10 @@
       [
         "a",
         "Four-digit password: 0000 to 9999"
+      ],
+      [
+        "b",
+        "Password level, S4M printers only: 1 to 4, default 3"
       ]
     ]
   },
@@ -1883,12 +1915,12 @@
     "example": "^XA\n^LH30,30\n^FO20,20^A0N,30,30^FDShifted^FS\n^XZ"
   },
   "^LL": {
-    "summary": "Sets the label length (height). Use it for continuous media, or when the printer has not detected the label size.",
+    "summary": "Sets the label length (height). It is required for continuous media. Put it before the first ^FS so it affects the current label.",
     "syntax": "^LLy",
     "params": [
       [
         "y",
-        "Label length, in dots"
+        "Label length, in dots: 1 to 32000"
       ]
     ],
     "example": "^XA\n^PW812\n^LL1218\n^FO50,50^A0N,40,40^FD4x6 label at 203 dpi^FS\n^XZ"
@@ -1920,7 +1952,7 @@
     "params": [
       [
         "x",
-        "Offset in dot rows: -120 to 120"
+        "Offset in dot rows: -120 to 120 on most printers. Negative moves the format toward the top"
       ]
     ]
   },
@@ -1988,11 +2020,11 @@
     "params": [
       [
         "a",
-        "N continuous, Y or W gap/notch, M black mark, A auto-detect"
+        "N continuous, Y or W gap/notch (web sensing), M black mark, A auto-detect (G-series only), V continuous with variable length (KR403 only)"
       ],
       [
         "b",
-        "Black mark offset, in dots"
+        "Black mark offset, in dots, default 0. Used only when a is M"
       ]
     ]
   },
@@ -2070,11 +2102,11 @@
   },
   "^NS": {
     "summary": "Changes the printer's wired network settings, such as how it gets an IP address, the IP address, subnet mask and gateway.",
-    "syntax": "^NSa,b,c,d",
+    "syntax": "^NSa,b,c,d,e,f,g,h,i",
     "params": [
       [
         "a",
-        "IP resolution: e.g. A all, D DHCP, P permanent"
+        "IP resolution: A all (default), B BOOTP, C DHCP and BOOTP, D DHCP, G gleaning only, R RARP, P permanent"
       ],
       [
         "b",
@@ -2087,6 +2119,26 @@
       [
         "d",
         "Default gateway"
+      ],
+      [
+        "e",
+        "WINS server address"
+      ],
+      [
+        "f",
+        "Connection timeout checking: Y (default) or N"
+      ],
+      [
+        "g",
+        "Timeout in seconds: 0 to 9999, default 300"
+      ],
+      [
+        "h",
+        "ARP broadcast interval in minutes: 0 to 30, default 0 (no ARP sent)"
+      ],
+      [
+        "i",
+        "Base raw port number: 1 to 65535, default 9100"
       ]
     ]
   },
@@ -2135,7 +2187,7 @@
     "example": "^XA\n^POI\n^FO50,50^A0N,40,40^FDUpside down^FS\n^XZ"
   },
   "^PP": {
-    "summary": "Pauses the printer when it reaches this command in a format. The printer resumes when the PAUSE button is pressed or ~PS is sent.",
+    "summary": "Pauses the printer after the current format prints. It is not immediate, so several labels may print before the pause. The printer resumes when the PAUSE button is pressed or ~PS is sent.",
     "syntax": "^PP"
   },
   "~PP": {
@@ -2213,7 +2265,7 @@
     "params": [
       [
         "c",
-        "Counter: 1 or 2 user counters, 3 valid RFID, 4 voided RFID"
+        "Counter: 1 or 2 user counters, 3 valid RFID, 4 voided RFID, C head cleaned, R head replaced and head cleaned (C and R on some models only)"
       ]
     ]
   },
@@ -2239,7 +2291,11 @@
       ],
       [
         "e",
-        "Handshake: X XON/XOFF, D DTR/DSR, R RTS"
+        "Handshake (protocol mode): X XON/XOFF, D DTR/DSR, R RTS, M DTR/DSR XON/XOFF (G-Series only)"
+      ],
+      [
+        "f",
+        "Zebra protocol: A ACK/NAK, N none, Z Zebra"
       ]
     ]
   },
@@ -2254,12 +2310,20 @@
     ]
   },
   "^SE": {
-    "summary": "Selects a stored encoding table (.DAT) used to map characters for TrueType fonts.",
+    "summary": "Selects which stored encoding table (a .DAT file) the printer uses to map characters.",
     "syntax": "^SEd:o.x",
     "params": [
       [
-        "d:o.x",
-        "Drive, name and extension of the encoding table"
+        "d",
+        "Drive: R:, E:, B: or A:, default R:"
+      ],
+      [
+        "o",
+        "Name of the encoding table, 1 to 8 characters"
+      ],
+      [
+        "x",
+        "Extension, always .DAT"
       ]
     ]
   },
@@ -2279,12 +2343,16 @@
     "example": "^XA\n^FO50,50^A0N,40,40^FDBL0000^SF%%DDDD,1^FS\n^PQ3\n^XZ"
   },
   "^SL": {
-    "summary": "Sets how the real time clock is printed: the time when the format was received or the time each label prints.",
+    "summary": "Sets the real time clock mode (print the time when the format was received or the time each label prints) and the language used for printed date and time text.",
     "syntax": "^SLa,b",
     "params": [
       [
         "a",
-        "S start time, T time now, or 1 to 999 seconds of tolerance"
+        "Mode: S start time (default), T time now, or 1 to 999 seconds of tolerance"
+      ],
+      [
+        "b",
+        "Language: 1 English, 2 Spanish, 3 French, 4 German, 5 Italian, up to 18 Polish. Default is the language set with ^KL or on the control panel."
       ]
     ]
   },
@@ -2356,12 +2424,12 @@
     "syntax": "^SQa,b,c"
   },
   "^SR": {
-    "summary": "Sets the printhead resistance value, which the printer uses to adjust heat. Needed after installing a new printhead on some printers.",
+    "summary": "Sets the printhead resistance value. Newer printer models set this automatically.",
     "syntax": "^SR####",
     "params": [
       [
         "####",
-        "Resistance value, from the printhead label"
+        "Resistance, four digits: 0488 to 1175. Use a value no higher than the one shown on the printhead, or you may damage it."
       ]
     ]
   },
@@ -2449,7 +2517,7 @@
     "params": [
       [
         "###",
-        "Offset in dot rows: -120 to 120"
+        "Offset in dot rows: -120 to 120. Always use three digits (e.g. 020), or the command is ignored."
       ]
     ]
   },
@@ -2526,16 +2594,16 @@
     "example": "^XA\n^FO50,50^A0N,40,40^FDHello^FS\n^XZ"
   },
   "^ZZ": {
-    "summary": "Puts a battery-powered printer to sleep after it has been idle for the given time.",
+    "summary": "Puts a battery-powered printer (PA400 or PT400) into sleep mode after it has been idle for the given time.",
     "syntax": "^ZZt,b",
     "params": [
       [
         "t",
-        "Idle seconds before sleeping"
+        "Idle seconds before shutdown: 0 to 999999, 0 disables automatic shutdown"
       ],
       [
         "b",
-        "Print a label at shutdown: Y or N"
+        "Y shuts down even if labels are still queued, N (default) waits until all labels are printed"
       ]
     ]
   }

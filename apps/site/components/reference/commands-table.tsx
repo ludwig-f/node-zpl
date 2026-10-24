@@ -17,7 +17,7 @@ type Details = {
 };
 
 const detailsOf = (code: string) =>
-  (details as Record<string, Details | undefined>)[code];
+  (details as unknown as Record<string, Details | undefined>)[code];
 
 /** The anchor for a command: #BC for ^BC, #tilde-CC for ~CC */
 const anchorOf = (code: string) =>
