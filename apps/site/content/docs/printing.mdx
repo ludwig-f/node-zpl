@@ -7,15 +7,28 @@ zplkit produces ZPL text; sending it to a printer is up to you. The printer's fi
 
 ## Sending ZPL
 
-Networked Zebra printers accept raw ZPL on TCP port 9100:
+[`@zplkit/print`](/docs/api/print) sends labels and reads the printer's status, over the network from Node, or over USB and Bluetooth from the browser:
 
 ```ts
-import { connect } from "node:net";
+import { connectNetworkPrinter } from "@zplkit/print/network";
 
-const socket = connect(9100, "192.168.1.50", () => socket.end(label.toZPL()));
+const printer = await connectNetworkPrinter("192.168.1.50");
+await printer.send(label);
+console.log(await printer.status()); // { ready: true, paperOut: false, … }
+await printer.close();
 ```
 
-Printers connected over USB, serial or Bluetooth take the same text through their connection, and print servers usually pass it through untouched. Browsers can't open TCP connections, so web apps send labels through a server, Zebra's Browser Print app, or WebUSB.
+<Callout type="warn" title="Experimental">
+  `@zplkit/print` is built from Zebra's documentation and tested against stand-ins, not yet against real printers. Please [open an issue](https://github.com/ludwig-f/zplkit/issues) with your printer's model and what happened.
+</Callout>
+
+| Connection | Import | Where |
+| --- | --- | --- |
+| Network, TCP port 9100 | `@zplkit/print/network` | Node, Bun and Deno |
+| USB, with WebUSB | `@zplkit/print/usb` | Chrome and Edge; on Windows the printer driver usually gets in the way |
+| Bluetooth LE | `@zplkit/print/bluetooth` | Chrome and Edge, for printers with Zebra's Bluetooth LE service; slow, so best for text |
+
+Without it, ZPL is plain text: networked printers take it on TCP port 9100, and print servers usually pass it through untouched. Browsers can't open TCP connections, so web apps send labels to network printers through a server or Zebra's Browser Print app.
 
 ## Resolution
 

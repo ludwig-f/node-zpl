@@ -26,6 +26,7 @@ const zpl = build(
 | [`@zplkit/core`](./packages/zpl) | Build labels with method calls or JSX, and parse and lint existing ZPL |
 | [`@zplkit/render`](./packages/render) | Render ZPL to images the way a printer draws it, in Node or the browser, in plain TypeScript |
 | [`@zplkit/preview`](./packages/preview) | `<zpl-preview>`, a web component that shows ZPL as images in any framework |
+| [`@zplkit/print`](./packages/print) | Send labels to printers and read their status, over the network, USB or Bluetooth (experimental) |
 
 ## Contributing
 
