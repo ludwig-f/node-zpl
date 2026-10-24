@@ -1,4 +1,4 @@
-import { lint, parse } from "zplkit";
+import { lint, parse } from "@zplkit/core";
 
 type Problem = {
   from: number;

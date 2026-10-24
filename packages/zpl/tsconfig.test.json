@@ -5,10 +5,10 @@
     "incremental": false,
     "skipLibCheck": true,
     "jsx": "react-jsx",
-    "jsxImportSource": "zplkit",
+    "jsxImportSource": "@zplkit/core",
     "paths": {
-      "zplkit/jsx-runtime": ["./src/jsx-runtime.ts"],
-      "zplkit/jsx-dev-runtime": ["./src/jsx-dev-runtime.ts"]
+      "@zplkit/core/jsx-runtime": ["./src/jsx-runtime.ts"],
+      "@zplkit/core/jsx-dev-runtime": ["./src/jsx-dev-runtime.ts"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],

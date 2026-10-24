@@ -8,7 +8,7 @@ import { decodeObjectData } from "./data.js";
 import { FontFiles } from "./font-files.js";
 import { expandFormats } from "./formats.js";
 import { decodeGraphicData } from "./graphics.js";
-import type { Command } from "zplkit";
+import type { Command } from "@zplkit/core";
 import type { Font } from "./font.js";
 import type { FontPath } from "./font-files.js";
 import type { Orientation, TextBlockOptions } from "./text.js";

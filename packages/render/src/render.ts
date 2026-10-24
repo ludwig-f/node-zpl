@@ -1,11 +1,11 @@
-import { parse } from "zplkit";
+import { parse } from "@zplkit/core";
 import { Raster, fillPath } from "./raster.js";
 import { boxPath, circlePath, diagonalPath } from "./shapes.js";
 import { layout } from "./layout.js";
 import { drawText } from "./text.js";
 import { drawBarcode, drawPlaceholder } from "./barcode.js";
 import { drawSymbol } from "./symbols.js";
-import type { Command } from "zplkit";
+import type { Command } from "@zplkit/core";
 import type { Element } from "./layout.js";
 import type { Color } from "./raster.js";
 

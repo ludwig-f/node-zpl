@@ -1,7 +1,7 @@
 // Print orientation, ^FV, ^IL and stored formats, as measured on Labelary
 // at 8 dpmm
 import { describe, test, expect } from "vitest";
-import { parse } from "zplkit";
+import { parse } from "@zplkit/core";
 import { layout } from "./layout.js";
 import { renderLabels } from "./render.js";
 

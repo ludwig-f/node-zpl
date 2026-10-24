@@ -6,7 +6,7 @@ description: Draw text, boxes, barcodes and images with typed method calls.
 `Label` builds a label one element at a time. Each method returns the label, so calls can be chained, and `toZPL()` returns the finished ZPL.
 
 ```ts
-import { Label, Orientation, mm, dots } from "zplkit";
+import { Label, Orientation, mm, dots } from "@zplkit/core";
 
 const label = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
   .drawText({
@@ -70,8 +70,8 @@ label.drawText({ position: { x: dots(0), y: dots(0) }, text: "50% off ^ today" }
 
 ```ts
 import { readFileSync } from "node:fs";
-import { Label, mm, dots } from "zplkit";
-import { ImageConverter } from "zplkit/image";
+import { Label, mm, dots } from "@zplkit/core";
+import { ImageConverter } from "@zplkit/core/image";
 
 const graphic = await new ImageConverter().toZPL(readFileSync("logo.png"));
 

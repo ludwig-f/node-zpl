@@ -3,7 +3,7 @@
 import { describe, test, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { deflateSync } from "node:zlib";
-import { parse } from "zplkit";
+import { parse } from "@zplkit/core";
 import { layout } from "./layout.js";
 import { renderLabels } from "./render.js";
 import type { RenderOptions } from "./render.js";
