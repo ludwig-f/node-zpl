@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useState } from "react";
+import type { ImgHTMLAttributes } from "react";
 import { ChevronRight } from "lucide-react";
 import data from "@/content/commands.json";
 import details from "@/content/command-details.json";
@@ -59,6 +60,26 @@ function Mark({ value }: { value: Support }) {
   );
 }
 
+/** An image that fades in once it has loaded, instead of popping in */
+function FadeInImage(props: ImgHTMLAttributes<HTMLImageElement>) {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <img
+      {...props}
+      // Cached images can finish loading before React listens for it
+      ref={(image) => {
+        if (image?.complete) setLoaded(true);
+      }}
+      onLoad={() => setLoaded(true)}
+      className={`${
+        props.className ?? ""
+      } transition-opacity duration-200 motion-reduce:transition-none ${
+        loaded ? "opacity-100" : "opacity-0"
+      }`}
+    />
+  );
+}
+
 function CommandDetails({
   command,
   image,
@@ -95,7 +116,7 @@ function CommandDetails({
         <figure className="flex flex-col gap-1.5">
           {/* The paper only dims in dark mode, so what's shown is what prints */}
           <div className="w-fit max-w-full overflow-hidden rounded-[6px] bg-paper shadow-label">
-            <img
+            <FadeInImage
               src={`/reference/examples/${image.file}`}
               alt={`What the ${command.code} example prints`}
               width={image.width}
