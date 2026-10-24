@@ -4,23 +4,22 @@
  * Everything is scoped to .playground so it doesn't affect the docs.
  */
 .playground {
-  --panel: #f7f8f9;
-  --ink: #15171a;
-  --muted: #5b626c;
-  --line: #d3d8de;
-  --accent: #2f45c9;
-  --selection: #d6dcfa;
-  --active-line: #eef0f3;
-  --warn: #a15800;
-  --error: #b3261e;
-  --syntax-command: #2f45c9;
-  --syntax-data: #15171a;
-  --syntax-comment: #6f7681;
-  --syntax-number: #8a3a9e;
+  --panel: var(--zk-surface);
+  --ink: var(--zk-ink);
+  --muted: var(--zk-muted);
+  --line: var(--zk-rule);
+  --accent: var(--zk-accent);
+  --selection: var(--zk-accent-soft);
+  --active-line: var(--zk-surface);
+  --warn: var(--zk-warn);
+  --error: var(--zk-err);
+  --syntax-command: var(--zk-syn-zpl);
+  --syntax-data: var(--zk-syn-str);
+  --syntax-comment: var(--zk-syn-com);
+  --syntax-number: var(--zk-syn-num);
 
   --font-ui: var(--font-archivo), system-ui, sans-serif;
-  --font-code: var(--font-spline-mono), ui-monospace, "SF Mono", Menlo,
-    monospace;
+  --font-code: var(--font-plex-mono), ui-monospace, "SF Mono", Menlo, monospace;
 
   display: grid;
   grid-template-rows: auto 1fr;
@@ -29,22 +28,6 @@
   background: var(--color-fd-background);
   color: var(--ink);
   font: 15px/1.45 var(--font-ui);
-}
-
-.dark .playground {
-  --panel: #1b1e22;
-  --ink: #e5e7ea;
-  --muted: #98a0aa;
-  --line: #2d3238;
-  --accent: #93a3ff;
-  --selection: #2c3566;
-  --active-line: #20242a;
-  --warn: #e6a245;
-  --error: #ff8a7e;
-  --syntax-command: #93a3ff;
-  --syntax-data: #e5e7ea;
-  --syntax-comment: #8a919b;
-  --syntax-number: #e0a0f0;
 }
 
 .playground :focus-visible {

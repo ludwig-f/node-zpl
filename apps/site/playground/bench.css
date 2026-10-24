@@ -3,20 +3,14 @@
  * Self-contained so it works in the playground and on other pages.
  */
 .bench {
-  --liner: #e8dfc1;
-  --liner-edge: #d6caa2;
-  --bench-muted: #5b626c;
+  --liner: var(--zk-liner);
+  --liner-edge: var(--zk-rule-strong);
+  --bench-muted: var(--zk-muted);
 
   display: grid;
   justify-items: center;
   align-content: start;
   gap: 10px;
-}
-
-.dark .bench {
-  --liner: #3b3627;
-  --liner-edge: #4a4430;
-  --bench-muted: #98a0aa;
 }
 
 .bench .liner {
@@ -77,8 +71,8 @@
   width: 100%;
   height: auto;
   border-radius: 6px;
-  background: #fff;
-  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.08), 0 1px 2px rgb(0 0 0 / 0.12);
+  background: var(--zk-paper);
+  box-shadow: var(--shadow-label);
 }
 
 .bench zpl-preview::part(error) {
@@ -91,4 +85,14 @@
   color: var(--bench-muted);
   font-size: 13px;
   font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Labels aren't inverted in dark mode, which would misrepresent what prints:
+ * the white paper dims to a warm tone near the paper token, and black stays black
+ */
+.dark .bench zpl-preview::part(label),
+.dark .bench .label-image,
+.dark .label-dim {
+  filter: brightness(0.91) sepia(0.12);
 }
