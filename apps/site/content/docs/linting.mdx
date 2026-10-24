@@ -6,7 +6,7 @@ description: Find problems in labels that printers don't report.
 Printers don't report mistakes. They quietly clamp values, ignore commands or never print a label. `lint()` finds these problems before you print.
 
 ```ts
-import { parse, lint } from "node-zpl";
+import { parse, lint } from "zplkit";
 
 lint(parse("^XA^FO10,10^GB1,64,2^FS^FO40,40^BE^FD123^FS").commands);
 // [

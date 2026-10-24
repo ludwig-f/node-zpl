@@ -1,5 +1,5 @@
 import "server-only";
-import { renderZpl } from "@node-zpl/render";
+import { renderZpl } from "@zplkit/render";
 
 /**
  * Render ZPL to a PNG data URL on the server, with the same renderer the

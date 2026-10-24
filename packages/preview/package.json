@@ -1,5 +1,5 @@
 {
-  "name": "@node-zpl/preview",
+  "name": "@zplkit/preview",
   "version": "0.0.0",
   "description": "<zpl-preview>, a web component that shows ZPL labels as images in any framework",
   "type": "module",
@@ -42,7 +42,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@node-zpl/render": "workspace:*"
+    "@zplkit/render": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.19.43",

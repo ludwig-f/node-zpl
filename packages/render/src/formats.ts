@@ -5,7 +5,7 @@
  * replacing data of its own. Commands keep their index in the original
  * list, so drawn elements can still be traced back to their source.
  */
-import type { Command } from "node-zpl";
+import type { Command } from "zplkit";
 
 type Indexed = { command: Command; index: number };
 

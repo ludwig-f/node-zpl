@@ -1,5 +1,5 @@
 {
-  "name": "node-zpl-monorepo",
+  "name": "zplkit-monorepo",
   "private": true,
   "type": "module",
   "repository": "https://github.com/ludwig-f/node-zpl",

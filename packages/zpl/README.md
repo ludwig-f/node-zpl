@@ -1,6 +1,9 @@
-# node-zpl
+# zplkit
 
-`node-zpl` is a ZPL (Zebra Programming Language) generator for TypeScript.
+`zplkit` is a ZPL (Zebra Programming Language) generator for TypeScript.
+
+> [!NOTE]
+> zplkit was called `node-zpl` before version 2. To upgrade, install `zplkit` and change imports from `node-zpl` to `zplkit`.
 
 This library provides a thin (but typed!) wrapper around the ZPL commands as described by Zebra.
 
@@ -9,20 +12,20 @@ This library provides a thin (but typed!) wrapper around the ZPL commands as des
 
 ## Installation
 
-Install `node-zpl` using the package manager of your choice. Using `npm`:
+Install `zplkit` using the package manager of your choice. Using `npm`:
 
 ```bash
-npm install node-zpl
+npm install zplkit
 ```
 
-`node-zpl` is an ES module and needs Node 22 or newer. CommonJS projects can still load it with `require()`, which Node supports for ES modules since 22.12.
+`zplkit` is an ES module and needs Node 22 or newer. CommonJS projects can still load it with `require()`, which Node supports for ES modules since 22.12.
 
 ## Usage
 
-Here's a basic example of how to use `node-zpl` to generate a label with some text and an EAN-13 bar code:
+Here's a basic example of how to use `zplkit` to generate a label with some text and an EAN-13 bar code:
 
 ```typescript
-import { Label, Orientation, mm, dots } from "node-zpl";
+import { Label, Orientation, mm, dots } from "zplkit";
 
 const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
   .drawText({
@@ -44,20 +47,20 @@ const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 
 ### JSX
 
-Labels can also be written as JSX. It compiles to the same commands as the builder, so everything else in this README applies. Set up TypeScript (or your bundler) to use `node-zpl` as the JSX runtime:
+Labels can also be written as JSX. It compiles to the same commands as the builder, so everything else in this README applies. Set up TypeScript (or your bundler) to use `zplkit` as the JSX runtime:
 
 ```json
 {
   "compilerOptions": {
     "jsx": "react-jsx",
-    "jsxImportSource": "node-zpl"
+    "jsxImportSource": "zplkit"
   }
 }
 ```
 
 ```tsx
-import { Label, Text, Box, Code128, build, mm, dots } from "node-zpl/jsx";
-import type { Length } from "node-zpl";
+import { Label, Text, Box, Code128, build, mm, dots } from "zplkit/jsx";
+import type { Length } from "zplkit";
 
 const order = { id: 10442, barcode: "10442-B3", express: true };
 
@@ -123,10 +126,10 @@ label.raw("^PQ2"); // print two copies
 
 ### Parsing ZPL
 
-`parse` reads existing ZPL into the same command nodes, so you can inspect, check or modify labels you didn't build with `node-zpl`:
+`parse` reads existing ZPL into the same command nodes, so you can inspect, check or modify labels you didn't build with `zplkit`:
 
 ```typescript
-import { parse, serialize } from "node-zpl";
+import { parse, serialize } from "zplkit";
 
 const { commands, diagnostics } = parse("^XA^FO50,50^A0N,30^FDHello^FS^XZ");
 // commands: [{ type: "StartFormat", span: { start: 0, end: 3 } }, { type: "FieldOrigin", x: 50, y: 50, ... }, ...]
@@ -144,7 +147,7 @@ serialize(commands); // "^XA^FO50,50^A0N,30^FDHello^FS^XZ"
 Printers don't report mistakes. They quietly clamp values, ignore commands or never print a label. `lint` finds these problems before you print:
 
 ```typescript
-import { parse, lint } from "node-zpl";
+import { parse, lint } from "zplkit";
 
 lint(parse("^XA^FO10,10^GB1,64,2^FS^FO40,40^BE^FD123^FS").commands);
 // [
@@ -176,8 +179,8 @@ Labels built with `Label` or JSX can be checked with `label.lint()`. Pass the me
 You can convert an image to a ZPL graphic using `ImageConverter`. It depends on [jimp](https://github.com/jimp-dev/jimp) and only runs in Node, so it has its own entry point:
 
 ```typescript
-import { Label, mm, dots } from "node-zpl";
-import { ImageConverter } from "node-zpl/image";
+import { Label, mm, dots } from "zplkit";
+import { ImageConverter } from "zplkit/image";
 import { readFileSync } from "fs";
 
 const graphic = await new ImageConverter().toZPL(
@@ -371,7 +374,7 @@ const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 > If you need an unsupported ZPL command, use the `raw` method available on both `Label` and `PrinterSetup`.
 >
 > ```typescript
-> import { PrinterSetup } from "node-zpl";
+> import { PrinterSetup } from "zplkit";
 >
 > // Put a battery powered printer to sleep after 10s
 > const zpl = new PrinterSetup().raw("^ZZ10").toZPL();
@@ -379,9 +382,9 @@ const zpl = new Label({ width: mm(57), height: mm(19), dpmm: 12 })
 
 ## Contributing
 
-Contributions to `node-zpl` are always welcome!
+Contributions to `zplkit` are always welcome!
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for details on how to get started.
 
 ## License
 
-`node-zpl` is licensed under the [MIT License](./LICENSE)
+`zplkit` is licensed under the [MIT License](./LICENSE)

@@ -13,7 +13,7 @@ const Header = (props: { x: Length; title: string }) => (
 );
 
 suite("jsx with React's runtime", () => {
-  test("builds the same ZPL as node-zpl's own runtime", () => {
+  test("builds the same ZPL as zplkit's own runtime", () => {
     const lines = ["One", "Two"];
     const express = false;
 

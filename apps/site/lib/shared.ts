@@ -1,6 +1,6 @@
 import { createGetUrl } from "fumadocs-core/source";
 
-export const appName = "node-zpl";
+export const appName = "zplkit";
 export const siteUrl = "https://zpl.fingal.dev";
 export const docsRoute = "/docs";
 export const docsImageRoute = "/og/docs";

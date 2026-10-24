@@ -12,7 +12,7 @@ const toBase64 = (bytes: Uint8Array): string => {
 
 /**
  * Render ZPL to one base64-encoded PNG per label. The signature matches what
- * @node-zpl/preview expects from a renderer, so it can be passed to
+ * @zplkit/preview expects from a renderer, so it can be passed to
  * `configure({ render: renderZpl })`.
  * @param options.grayscale Anti-aliased edges instead of the printer's whole dots
  * @param options.fonts Fonts already on the printer, by path like "E:ARIAL.TTF"

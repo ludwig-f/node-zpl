@@ -3,10 +3,10 @@ title: Parsing ZPL
 description: Read existing ZPL into typed commands.
 ---
 
-`parse()` reads ZPL into the same command nodes that labels are built from, so you can inspect, check or change labels you didn't build with node-zpl.
+`parse()` reads ZPL into the same command nodes that labels are built from, so you can inspect, check or change labels you didn't build with zplkit.
 
 ```ts
-import { parse, serialize } from "node-zpl";
+import { parse, serialize } from "zplkit";
 
 const { commands, diagnostics } = parse("^XA^FO50,50^A0N,30^FDHello^FS^XZ");
 // [{ type: "StartFormat", span: { start: 0, end: 3 } },

@@ -2,7 +2,7 @@
 import { describe, test, expect } from "vitest";
 import { renderLabels } from "./render.js";
 import { layout } from "./layout.js";
-import { parse } from "node-zpl";
+import { parse } from "zplkit";
 
 const size = { widthMm: 101.6, heightMm: 101.6, dpmm: 8 };
 const render = (body: string) =>

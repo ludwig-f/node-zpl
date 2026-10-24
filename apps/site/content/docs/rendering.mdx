@@ -1,16 +1,16 @@
 ---
 title: Rendering
-description: Render ZPL to images in Node or the browser with @node-zpl/render.
+description: Render ZPL to images in Node or the browser with @zplkit/render.
 ---
 
-`@node-zpl/render` draws ZPL the way a Zebra printer does, dot for dot, in plain TypeScript. It runs in Node and in browsers without WebAssembly or native modules, and powers [`<zpl-preview>`](/docs/preview) and the [playground](/playground).
+`@zplkit/render` draws ZPL the way a Zebra printer does, dot for dot, in plain TypeScript. It runs in Node and in browsers without WebAssembly or native modules, and powers [`<zpl-preview>`](/docs/preview) and the [playground](/playground).
 
 ```bash
-npm install @node-zpl/render
+npm install @zplkit/render
 ```
 
 ```ts
-import { renderZpl } from "@node-zpl/render";
+import { renderZpl } from "@zplkit/render";
 
 // One base64-encoded PNG per label
 const [png] = await renderZpl("^XA^FO50,50^A0,40^FDHello^FS^XZ", {
@@ -26,7 +26,7 @@ const [png] = await renderZpl("^XA^FO50,50^A0,40^FDHello^FS^XZ", {
 For the image data itself, `renderLabels` returns a raster per label, with ink coverage from 0 to 1 for each dot:
 
 ```ts
-import { renderLabels, encodePng } from "@node-zpl/render";
+import { renderLabels, encodePng } from "@zplkit/render";
 
 const [raster] = renderLabels(zpl, { widthMm: 50, heightMm: 25, dpmm: 12 });
 raster.width; // 600
@@ -47,7 +47,7 @@ const png = await encodePng(raster);
 Fonts already stored on the printer can be passed in by path. A path without a device matches any device, and a font that isn't there prints in font 0:
 
 ```ts
-import { renderZpl } from "@node-zpl/render";
+import { renderZpl } from "@zplkit/render";
 
 const fonts = { "E:ARIAL.TTF": new Uint8Array(await (await fetch("/arial.ttf")).arrayBuffer()) };
 const pngs = await renderZpl(zpl, { widthMm: 101.6, heightMm: 152.4, dpmm: 8, grayscale: false, fonts });
@@ -56,8 +56,8 @@ const pngs = await renderZpl(zpl, { widthMm: 101.6, heightMm: 152.4, dpmm: 8, gr
 In `<zpl-preview>`, pass them through `configure`:
 
 ```ts
-import { configure } from "@node-zpl/preview";
-import { renderZpl } from "@node-zpl/render";
+import { configure } from "@zplkit/preview";
+import { renderZpl } from "@zplkit/render";
 
 configure({ render: (zpl, options) => renderZpl(zpl, { ...options, fonts }) });
 ```

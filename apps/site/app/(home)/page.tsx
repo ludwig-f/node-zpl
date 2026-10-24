@@ -50,8 +50,8 @@ export default async function HomePage() {
             Zebra labels, written in TypeScript
           </h1>
           <p className="max-w-[48ch] text-lg text-fd-muted-foreground">
-            node-zpl builds ZPL from typed code or JSX, checks it for mistakes
-            the printer won't report, and shows you the label before anything is
+            zplkit builds ZPL from typed code or JSX, checks it for mistakes the
+            printer won't report, and shows you the label before anything is
             printed.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -69,7 +69,7 @@ export default async function HomePage() {
             </Link>
           </div>
           <code className="w-fit rounded-md border border-fd-border bg-fd-card px-3 py-2 font-mono text-sm">
-            npm install node-zpl
+            npm install zplkit
           </code>
         </div>
 

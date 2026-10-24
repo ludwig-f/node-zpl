@@ -1,4 +1,4 @@
-# @node-zpl/render
+# @zplkit/render
 
 Renders ZPL labels to images in pure TypeScript, in Node and the browser. No WebAssembly, no native dependencies.
 
@@ -14,7 +14,7 @@ It draws:
 Other barcodes are drawn as a crossed-out box naming the command. Commands it understands but doesn't draw yet are listed in each label's `layout().unsupported`.
 
 ```ts
-import { renderZpl } from "@node-zpl/render";
+import { renderZpl } from "@zplkit/render";
 
 const [png] = await renderZpl("^XA^FO50,50^GB200,100,4^FS^XZ", {
   widthMm: 50.8,
@@ -47,7 +47,7 @@ A font that isn't there prints in font 0, like Labelary does, and its command is
 Geometry follows Zebra's ZPL II Programming Guide. `scripts/compare.mjs` compares our render of any ZPL file with two references, [Labelary](https://labelary.com) and [zebrash](https://github.com/ingridhq/zebrash): where both agree and we don't, it's likely our bug; where they disagree, Zebra's guide or a real printout decides.
 
 ```bash
-pnpm --filter @node-zpl/render build
+pnpm --filter @zplkit/render build
 node packages/render/scripts/compare.mjs --diff 4 6 8 label.zpl
 ```
 

@@ -7,11 +7,11 @@ import {
   build,
   mm,
   dots,
-} from "node-zpl/jsx";
+} from "zplkit/jsx";
 
 const order = { id: 10442, shelf: "B_3", express: true };
 
-/** The label shown on the home page, built with node-zpl's JSX */
+/** The label shown on the home page, built with zplkit's JSX */
 export const exampleLabel = build(
   <Label width={mm(101.6)} height={mm(50.8)} dpmm={8}>
     <Text x={mm(5)} y={mm(5)} height={mm(7)}>
