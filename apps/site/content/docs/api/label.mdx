@@ -653,26 +653,4 @@ Sets the orientation (`^FW`) of the fields that follow and don't give one.
 
 ## Types
 
-### Length
-
-```ts
-type Length = { mm: number } | { dots: number };
-```
-
-Every length has a unit, so millimeters and dots can't be mixed up. Make one with `mm(value)`, converted with the label's `dpmm`, or `dots(value)`, ZPL's own unit, whole numbers only. Both throw a `ZplError` for negative numbers.
-
-### Position
-
-```ts
-type Position = { x: Length; y: Length };
-```
-
-Where an element starts, measured from the label home (`^LH`), the top left corner unless set.
-
-### Orientation
-
-`Normal`, `Rotated90Degrees`, `Inverted180Degrees` or `BottomUp270Degrees`: which way text and barcodes run.
-
-### ZebraFontFamily
-
-The printer's fonts: `ZERO` for the scalable font 0, and `A` to `H` and `P` to `V` for the bitmap fonts.
+`Length`, `Position`, `Orientation` and the other shared types are described in [Types](/docs/api/types).

@@ -48,7 +48,8 @@ export function TypeTable({ type }: { type: Record<string, TypeNode> }) {
                 {node.typeDescriptionLink ? (
                   <a
                     href={node.typeDescriptionLink}
-                    className="text-accent hover:underline"
+                    // The type keeps its code colors, so an underline marks the link
+                    className="underline decoration-rule-strong underline-offset-[3px] hover:decoration-accent"
                   >
                     {node.type}
                   </a>

@@ -37,6 +37,32 @@ const shortUnion = ({ type, checker, location }: TypeSimplifierContext) => {
   return text.length <= 48 && !/[{&(]/.test(text) ? text : undefined;
 };
 
+/** Shared types and where they're described, so tables can link to them */
+const typeLinks: Record<string, string> = {
+  Length: "/docs/api/types#length",
+  Position: "/docs/api/types#position",
+  Orientation: "/docs/api/types#orientation",
+  ZebraFontFamily: "/docs/api/types#zebrafontfamily",
+  Color: "/docs/api/types#color",
+  StorageDevice: "/docs/api/types#storagedevice",
+  Graphic: "/docs/api/types#graphic",
+  TextChildren: "/docs/api/types#textchildren",
+  FontOptions: "/docs/api/label#text",
+  Render: "/docs/api/preview#configure",
+};
+
+/** Link a property's type to where it's described, if it's a shared one */
+const linkType = (entry: {
+  type: string;
+  simplifiedType: string;
+  typeHref?: string;
+}) => {
+  const name = Object.keys(typeLinks).find((type) =>
+    new RegExp(`\\b${type}\\b`).test(entry.simplifiedType || entry.type)
+  );
+  if (name) entry.typeHref = typeLinks[name];
+};
+
 // API reference tables, generated from the packages' TypeScript types
 const generator = createGenerator({
   cache: createFileSystemGeneratorCache(".next/fumadocs-typescript"),
@@ -57,7 +83,10 @@ const docs = defineDocs({
           {
             generator,
             remarkStringify: true,
-            options: { typeSimplifier: { override: shortUnion } },
+            options: {
+              typeSimplifier: { override: shortUnion },
+              transform: linkType,
+            },
           },
         ],
       ],

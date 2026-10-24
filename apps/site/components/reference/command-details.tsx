@@ -1,6 +1,5 @@
 import data from "@/content/commands.json";
 import details from "@/content/command-details.json";
-import { anchorOf } from "./anchor";
 import { apiFor } from "./api-links";
 import { FadeInImage } from "./fade-in-image";
 
@@ -34,12 +33,9 @@ type Examples = Record<string, { file: string; width: number; height: number }>;
 export function CommandDetails({
   command,
   image,
-  showPageLink = false,
 }: {
   command: Command;
   image?: Examples[string];
-  /** A link to the command's own page, for the table's panels */
-  showPageLink?: boolean;
 }) {
   const info = detailsOf(command.code);
   if (!info) return null;
@@ -48,22 +44,12 @@ export function CommandDetails({
   const api = command.support !== "no" ? apiFor[command.code] : undefined;
   const label =
     "font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-muted";
-  const page = `/reference/${anchorOf(command.code)}`;
   return (
     <div className="@container pb-5 pt-1">
       {/* Text on the left, what the example prints on the right */}
       <div className="grid gap-x-8 gap-y-5 text-[14px] leading-[1.55] @[720px]:grid-cols-[minmax(0,1fr)_auto]">
         <div className="flex min-w-0 max-w-[68ch] flex-col gap-4">
           <p className="text-ink-2">{info.summary}</p>
-
-          {showPageLink && (
-            <a
-              href={page}
-              className="w-fit text-[13.5px] font-semibold text-accent hover:underline"
-            >
-              Open the {command.code} page
-            </a>
-          )}
 
           <div className="flex flex-col gap-1.5">
             <span className={label}>Format</span>

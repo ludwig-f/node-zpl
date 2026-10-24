@@ -4,8 +4,9 @@ import { Fragment, useState } from "react";
 import { ChevronRight } from "lucide-react";
 import data from "@/content/commands.json";
 import { anchorOf, categoryAnchor } from "./anchor";
-import { CommandDetails, detailsOf } from "./command-details";
-import type { Command, Examples } from "./command-details";
+import { detailsOf } from "./command-details";
+import type { Command } from "./command-details";
+import { apiFor } from "./api-links";
 import { Mark } from "./mark";
 import type { Support } from "./mark";
 
@@ -13,7 +14,35 @@ type Mode = "All" | "Supported" | "Not yet";
 const isSupported = (command: Command) => command.support !== "no";
 
 /** The supported commands, generated from the code, with a filter */
-export function CommandsTable({ examples }: { examples: Examples }) {
+/** What a row's panel shows: the summary, and where to read more */
+function CommandSummary({ command }: { command: Command }) {
+  const info = detailsOf(command.code);
+  if (!info) return null;
+  const api = command.support !== "no" ? apiFor[command.code] : undefined;
+  return (
+    <div className="flex max-w-[68ch] flex-col gap-2 pb-4 pt-1 text-[14px] leading-[1.55]">
+      <p className="text-ink-2">{info.summary}</p>
+      <p className="flex flex-wrap gap-x-4 gap-y-1">
+        <a
+          href={`/reference/${anchorOf(command.code)}`}
+          className="font-semibold text-accent hover:underline"
+        >
+          Parameters and example
+        </a>
+        {api && (
+          <a
+            href={`/docs/api/label#${api.method.toLowerCase()}`}
+            className="font-mono text-[13px] text-accent hover:underline"
+          >
+            label.{api.method}()
+          </a>
+        )}
+      </p>
+    </div>
+  );
+}
+
+export function CommandsTable() {
   const [query, setQuery] = useState("");
   const [mode, setMode] = useState<Mode>("All");
   const [open, setOpen] = useState<Set<string>>(new Set());
@@ -252,11 +281,7 @@ export function CommandsTable({ examples }: { examples: Examples }) {
                                 }`}
                               >
                                 <div className="min-h-0 overflow-hidden px-3 @[640px]:ps-[42px]">
-                                  <CommandDetails
-                                    command={command}
-                                    image={examples[command.code]}
-                                    showPageLink
-                                  />
+                                  <CommandSummary command={command} />
                                 </div>
                               </div>
                             </td>
