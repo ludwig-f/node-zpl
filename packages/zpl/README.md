@@ -177,6 +177,18 @@ Labels built with `Label` or JSX can be checked with `label.lint()`. Pass the me
 | `unknown-command` | warning | Commands that don't exist in ZPL |
 | `printer-command-in-label` | warning | Tilde commands like `~SD` inside a label, which act on the printer as soon as they're read |
 
+### Printer setup and print jobs
+
+`PrinterSetup` holds commands that change the printer itself, like its darkness or stored graphics, and `PrintJob` sends setup and labels together, in order:
+
+```typescript
+import { PrinterSetup, PrintJob } from "@zplkit/core";
+
+const job = new PrintJob(new PrinterSetup().setDarkness(20), label);
+job.toZPL(); // send this to the printer
+job.lint(); // checks the whole job
+```
+
 ### Images
 
 `ImageConverter` turns a PNG or JPEG file into a ZPL graphic. It reads files with Node APIs, so it has its own entry point:

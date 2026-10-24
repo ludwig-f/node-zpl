@@ -10,6 +10,7 @@ suite("entry points", () => {
     expect(Object.keys(core).sort()).toStrictEqual([
       "Label",
       "Orientation",
+      "PrintJob",
       "PrinterSetup",
       "ZebraFontFamily",
       "ZplError",
