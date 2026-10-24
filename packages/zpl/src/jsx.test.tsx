@@ -22,6 +22,11 @@ import {
   IntelligentMail,
   GS1DataBar,
   MicroPDF417,
+  Industrial2of5,
+  Standard2of5,
+  LOGMARS,
+  MSI,
+  Plessey,
   DataMatrix,
   Graphic,
   StoredGraphic,
@@ -430,6 +435,37 @@ test("postal, GS1 DataBar and MicroPDF417 elements match the builder", () => {
     .intelligentMail({ position: at, data: "00123123456123456789" })
     .gs1DataBar({ position: at, data: "12345678901", type: "limited" })
     .microPdf417({ position: at, data: "ABC", mode: 5 });
+
+  expect(label.toZPL()).toStrictEqual(expected.toZPL());
+});
+
+test("2 of 5, LOGMARS, MSI and Plessey elements match the builder", () => {
+  const label = build(
+    <Label width={mm(57)} height={mm(19)} dpmm={12}>
+      <Industrial2of5 x={dots(10)} y={dots(10)}>
+        123456
+      </Industrial2of5>
+      <Standard2of5 x={dots(10)} y={dots(10)}>
+        123456
+      </Standard2of5>
+      <LOGMARS x={dots(10)} y={dots(10)}>
+        12AB
+      </LOGMARS>
+      <MSI x={dots(10)} y={dots(10)} checkDigits="C">
+        123456
+      </MSI>
+      <Plessey x={dots(10)} y={dots(10)}>
+        12345
+      </Plessey>
+    </Label>
+  );
+  const at = { x: dots(10), y: dots(10) };
+  const expected = new LabelBuilder({ width: mm(57), height: mm(19), dpmm: 12 })
+    .industrial2of5({ position: at, data: "123456" })
+    .standard2of5({ position: at, data: "123456" })
+    .logmars({ position: at, data: "12AB" })
+    .msi({ position: at, data: "123456", checkDigits: "C" })
+    .plessey({ position: at, data: "12345" });
 
   expect(label.toZPL()).toStrictEqual(expected.toZPL());
 });

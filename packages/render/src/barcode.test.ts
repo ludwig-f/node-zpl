@@ -527,6 +527,36 @@ describe("Data Matrix", () => {
   });
 });
 
+describe("2 of 5, LOGMARS, MSI and Plessey", () => {
+  test.each([
+    // Wide elements are the module width times ^BY's ratio, rounded down
+    ["^FO100,100^BY2,2^BIN,100,N,N^FD123456^FS", 273],
+    ["^FO100,100^BY3,2.5^BIN,100,N,N^FD123456^FS", 376],
+    ["^FO100,100^BY2,2^BJN,100,N,N^FD123456^FS", 259],
+    ["^FO100,100^BY2,2^BMN,A,100,N,N^FD123456^FS", 257],
+    ["^FO100,100^BY2^BMN,D,100,N,N,N^FD12345678901^FS", 533],
+    ["^FO100,100^BY2,2^BPN,N,100,N,N^FD12345^FS", 321],
+    ["^FO100,100^BY3^BPN,N,100,N,N^FD12345^FS", 543],
+    ["^FO100,100^BY3,2.5^B3N,N,100,N,N^FD12AB^FS", 348],
+    ["^FO100,100^BY3,2.5^B2N,100,N,N^FD123456^FS", 262],
+    ["^FO100,100^BY3,2.5^B1N,N,100,N,N^FD123456^FS", 356],
+  ])("%s", (body, right) => {
+    expect(bounds(body)).toStrictEqual({
+      left: 100,
+      right,
+      top: 100,
+      bottom: 199,
+    });
+  });
+
+  test("LOGMARS prints its text without Code 39's asterisks", () => {
+    // 12AB and the check digit 0, centered under bars 100 to 321
+    const { text } = parts("^FO100,100^BY2^BLN,100,N^FD12AB^FS");
+    expect(text!.left).toBeGreaterThan(170);
+    expect(text!.right).toBeLessThan(250);
+  });
+});
+
 describe("postal codes, GS1 DataBar and MicroPDF417", () => {
   test.each([
     // Bars a module wide, two and a half modules apart, short ones 0.4 high

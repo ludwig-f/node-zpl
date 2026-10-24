@@ -263,6 +263,43 @@ const serializeCommand = (command: Command): string => {
         command.rowHeight,
         command.mode
       )}`;
+    case "Industrial2of5":
+      return `^BI${params(
+        command.orientation,
+        command.height,
+        yn(command.interpretationLine),
+        yn(command.interpretationLineAbove)
+      )}`;
+    case "Standard2of5":
+      return `^BJ${params(
+        command.orientation,
+        command.height,
+        yn(command.interpretationLine),
+        yn(command.interpretationLineAbove)
+      )}`;
+    case "Logmars":
+      return `^BL${params(
+        command.orientation,
+        command.height,
+        yn(command.interpretationLineAbove)
+      )}`;
+    case "Msi":
+      return `^BM${params(
+        command.orientation,
+        command.checkDigits,
+        command.height,
+        yn(command.interpretationLine),
+        yn(command.interpretationLineAbove),
+        yn(command.printCheckDigit)
+      )}`;
+    case "Plessey":
+      return `^BP${params(
+        command.orientation,
+        yn(command.printCheckDigit),
+        command.height,
+        yn(command.interpretationLine),
+        yn(command.interpretationLineAbove)
+      )}`;
     case "DataMatrix":
       return `^BX${params(
         command.orientation,

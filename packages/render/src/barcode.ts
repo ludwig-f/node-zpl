@@ -10,6 +10,9 @@ import { encodeCode128 } from "./barcodes/code128.js";
 import { encodeCode39 } from "./barcodes/code39.js";
 import { encodeEan13 } from "./barcodes/ean13.js";
 import { encodeCodabar } from "./barcodes/codabar.js";
+import { encodeMsi } from "./barcodes/msi.js";
+import { encodePlessey } from "./barcodes/plessey.js";
+import { encodeTwoOf5 } from "./barcodes/two-of-five.js";
 import { encodeCode93 } from "./barcodes/code93.js";
 import {
   encodeEan8,
@@ -50,6 +53,11 @@ const codes: Record<Barcode["symbology"]["type"], string> = {
   Planet: "^B5",
   Gs1DataBar: "^BR",
   MicroPdf417: "^BF",
+  Industrial2of5: "^BI",
+  Standard2of5: "^BJ",
+  Logmars: "^BL",
+  Msi: "^BM",
+  Plessey: "^BP",
   DataMatrix: "^BX",
   QrCode: "^BQ",
   Aztec: "^BO",
@@ -317,6 +325,10 @@ const pdf417Columns = (count: number) => {
   return best;
 };
 
+/** Wide bars and spaces: the module width times ^BY's ratio, rounded down */
+const wideOf = (barcode: Barcode) =>
+  Math.floor(barcode.moduleWidth * barcode.ratio + 1e-9);
+
 const interpretation = (
   shown: boolean | undefined,
   above: boolean | undefined
@@ -339,7 +351,7 @@ const encode = (barcode: Barcode, dpmm: number): Linear | Matrix | Postal => {
       };
     }
     case "Code11": {
-      const wide = Math.round(moduleWidth * barcode.ratio);
+      const wide = wideOf(barcode);
       const { widths, text } = encodeCode11(
         data,
         symbology.checkDigits ?? 2,
@@ -367,7 +379,7 @@ const encode = (barcode: Barcode, dpmm: number): Linear | Matrix | Postal => {
         data,
         symbology.checkDigit ?? false,
         moduleWidth,
-        Math.round(moduleWidth * barcode.ratio)
+        wideOf(barcode)
       );
       return {
         kind: "linear",
@@ -508,7 +520,80 @@ const encode = (barcode: Barcode, dpmm: number): Linear | Matrix | Postal => {
         symbology.start ?? "A",
         symbology.stop ?? "A",
         moduleWidth,
-        Math.round(moduleWidth * barcode.ratio)
+        wideOf(barcode)
+      );
+      return {
+        kind: "linear",
+        widths,
+        height: symbology.height ?? barcode.height,
+        line: interpretation(
+          symbology.interpretationLine,
+          symbology.interpretationLineAbove
+        ),
+        text,
+      };
+    }
+    case "Industrial2of5":
+    case "Standard2of5": {
+      const { widths, text } = encodeTwoOf5(
+        symbology.type === "Industrial2of5" ? "industrial" : "standard",
+        data,
+        moduleWidth,
+        wideOf(barcode)
+      );
+      return {
+        kind: "linear",
+        widths,
+        height: symbology.height ?? barcode.height,
+        line: interpretation(
+          symbology.interpretationLine,
+          symbology.interpretationLineAbove
+        ),
+        text,
+      };
+    }
+    case "Logmars": {
+      // Code 39 with its check digit, always with the interpretation line
+      const { widths, text } = encodeCode39(
+        data,
+        true,
+        moduleWidth,
+        wideOf(barcode)
+      );
+      return {
+        kind: "linear",
+        widths,
+        height: symbology.height ?? barcode.height,
+        line: symbology.interpretationLineAbove ? "above" : "below",
+        // Without the asterisks Code 39 prints around its text
+        text: text.replace(/\*/g, ""),
+      };
+    }
+    case "Msi": {
+      const { widths, text } = encodeMsi(
+        data,
+        symbology.checkDigits ?? "B",
+        symbology.printCheckDigit ?? false,
+        moduleWidth,
+        wideOf(barcode)
+      );
+      return {
+        kind: "linear",
+        widths,
+        height: symbology.height ?? barcode.height,
+        line: interpretation(
+          symbology.interpretationLine,
+          symbology.interpretationLineAbove
+        ),
+        text,
+      };
+    }
+    case "Plessey": {
+      const { widths, text } = encodePlessey(
+        data,
+        symbology.printCheckDigit ?? false,
+        moduleWidth,
+        wideOf(barcode)
       );
       return {
         kind: "linear",

@@ -409,6 +409,64 @@ suite("Label", () => {
     });
   });
 
+  describe("2 of 5, LOGMARS, MSI and Plessey", () => {
+    test("industrial2of5", () => {
+      const label = wideLabel().industrial2of5({
+        position: at20,
+        data: "123456",
+        height: dots(100),
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^BI,100^FD123456^FS^XZ"
+      );
+    });
+
+    test("standard2of5", () => {
+      const label = wideLabel().standard2of5({
+        position: at20,
+        data: "123456",
+        printHri: false,
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^BJ,,N^FD123456^FS^XZ"
+      );
+    });
+
+    test("logmars", () => {
+      const label = wideLabel().logmars({
+        position: at20,
+        data: "12AB",
+        printHriAbove: true,
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^BL,,Y^FD12AB^FS^XZ"
+      );
+    });
+
+    test("msi", () => {
+      const label = wideLabel().msi({
+        position: at20,
+        data: "123456",
+        checkDigits: "D",
+        printCheckDigit: true,
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^BM,D,,,,Y^FD123456^FS^XZ"
+      );
+    });
+
+    test("plessey", () => {
+      const label = wideLabel().plessey({
+        position: at20,
+        data: "12345",
+        printCheckDigit: true,
+      });
+      expect(label.toZPL()).toStrictEqual(
+        wideHeader + "^FO20,20^BP,Y^FD12345^FS^XZ"
+      );
+    });
+  });
+
   describe("code11", () => {
     test("should draw a Code 11 barcode on the label", () => {
       const label = wideLabel().code11({

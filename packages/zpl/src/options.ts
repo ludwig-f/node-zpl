@@ -340,6 +340,41 @@ type MicroPdf417Options = BarcodeOptions & {
   mode?: number;
 };
 
+/** Options for `industrial2of5()` (^BI): digits */
+type Industrial2of5Options = LinearBarcodeOptions;
+
+/** Options for `standard2of5()` (^BJ): digits */
+type Standard2of5Options = LinearBarcodeOptions;
+
+/**
+ * Options for `logmars()` (^BL): Code 39 with a Mod-43 check digit, used by
+ * the U.S. Department of Defense. It always prints its text.
+ */
+type LogmarsOptions = Omit<LinearBarcodeOptions, "printHri">;
+
+/** Options for `msi()` (^BM): digits */
+type MsiOptions = LinearBarcodeOptions & {
+  /**
+   * A for none, B for one Mod 10, C for two Mod 10, D for Mod 11 then Mod 10
+   * @defaultValue "B"
+   */
+  checkDigits?: "A" | "B" | "C" | "D";
+  /**
+   * Print the check digits in the interpretation line
+   * @defaultValue false
+   */
+  printCheckDigit?: boolean;
+};
+
+/** Options for `plessey()` (^BP): digits and A to F */
+type PlesseyOptions = LinearBarcodeOptions & {
+  /**
+   * Print the two check characters in the interpretation line
+   * @defaultValue false
+   */
+  printCheckDigit?: boolean;
+};
+
 /** Options for `pdf417()` (^B7) */
 type Pdf417Options = BarcodeOptions & {
   /**
@@ -485,6 +520,11 @@ export type {
   IntelligentMailOptions,
   Gs1DataBarOptions,
   MicroPdf417Options,
+  Industrial2of5Options,
+  Standard2of5Options,
+  LogmarsOptions,
+  MsiOptions,
+  PlesseyOptions,
   Pdf417Options,
   AztecOptions,
   MaxiCodeOptions,

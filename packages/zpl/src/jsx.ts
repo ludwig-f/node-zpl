@@ -24,6 +24,11 @@ import type {
   IntelligentMailOptions,
   Gs1DataBarOptions,
   MicroPdf417Options,
+  Industrial2of5Options,
+  Standard2of5Options,
+  LogmarsOptions,
+  MsiOptions,
+  PlesseyOptions,
   FieldOptions,
   FontOptions,
   GraphicOptions,
@@ -96,6 +101,11 @@ type PlanetProps = BarcodeProps<PlanetOptions>;
 type IntelligentMailProps = BarcodeProps<IntelligentMailOptions>;
 type GS1DataBarProps = BarcodeProps<Gs1DataBarOptions>;
 type MicroPDF417Props = BarcodeProps<MicroPdf417Options>;
+type Industrial2of5Props = BarcodeProps<Industrial2of5Options>;
+type Standard2of5Props = BarcodeProps<Standard2of5Options>;
+type LOGMARSProps = BarcodeProps<LogmarsOptions>;
+type MSIProps = BarcodeProps<MsiOptions>;
+type PlesseyProps = BarcodeProps<PlesseyOptions>;
 type PDF417Props = BarcodeProps<Pdf417Options>;
 type AztecProps = BarcodeProps<AztecOptions>;
 type MaxiCodeProps = BarcodeProps<MaxiCodeOptions>;
@@ -350,6 +360,29 @@ const MicroPDF417 = primitive((label, props: MicroPDF417Props) =>
   label.microPdf417(barcode(props))
 );
 
+/** Industrial 2 of 5 barcode, with the digits as children */
+const Industrial2of5 = primitive((label, props: Industrial2of5Props) =>
+  label.industrial2of5(barcode(props))
+);
+
+/** Standard 2 of 5 barcode, with the digits as children */
+const Standard2of5 = primitive((label, props: Standard2of5Props) =>
+  label.standard2of5(barcode(props))
+);
+
+/** LOGMARS barcode, with the data as children */
+const LOGMARS = primitive((label, props: LOGMARSProps) =>
+  label.logmars(barcode(props))
+);
+
+/** MSI barcode, with the digits as children */
+const MSI = primitive((label, props: MSIProps) => label.msi(barcode(props)));
+
+/** Plessey barcode, with the data as children */
+const Plessey = primitive((label, props: PlesseyProps) =>
+  label.plessey(barcode(props))
+);
+
 /** Data Matrix code, with the data as children */
 const DataMatrix = primitive((label, props: DataMatrixProps) =>
   label.dataMatrix(barcode(props))
@@ -411,6 +444,11 @@ export {
   IntelligentMail,
   GS1DataBar,
   MicroPDF417,
+  Industrial2of5,
+  Standard2of5,
+  LOGMARS,
+  MSI,
+  Plessey,
   DataMatrix,
   QrCode,
   Field,
@@ -446,6 +484,11 @@ export type {
   IntelligentMailProps,
   GS1DataBarProps,
   MicroPDF417Props,
+  Industrial2of5Props,
+  Standard2of5Props,
+  LOGMARSProps,
+  MSIProps,
+  PlesseyProps,
   PDF417Props,
   AztecProps,
   MaxiCodeProps,

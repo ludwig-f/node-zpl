@@ -148,16 +148,16 @@
       "code": "^BI",
       "name": "Industrial 2 of 5 bar code",
       "category": "Barcodes",
-      "support": "no",
-      "drawn": false,
+      "support": "yes",
+      "drawn": true,
       "note": ""
     },
     {
       "code": "^BJ",
       "name": "Standard 2 of 5 bar code",
       "category": "Barcodes",
-      "support": "no",
-      "drawn": false,
+      "support": "yes",
+      "drawn": true,
       "note": ""
     },
     {
@@ -172,16 +172,16 @@
       "code": "^BL",
       "name": "LOGMARS bar code",
       "category": "Barcodes",
-      "support": "no",
-      "drawn": false,
+      "support": "yes",
+      "drawn": true,
       "note": ""
     },
     {
       "code": "^BM",
       "name": "MSI bar code",
       "category": "Barcodes",
-      "support": "no",
-      "drawn": false,
+      "support": "yes",
+      "drawn": true,
       "note": ""
     },
     {
@@ -196,8 +196,8 @@
       "code": "^BP",
       "name": "Plessey bar code",
       "category": "Barcodes",
-      "support": "no",
-      "drawn": false,
+      "support": "yes",
+      "drawn": true,
       "note": ""
     },
     {
