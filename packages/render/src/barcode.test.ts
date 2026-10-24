@@ -213,6 +213,128 @@ describe("Code 11", () => {
   });
 });
 
+describe("Code 39", () => {
+  test.each([
+    // Wide bars are ^BY's ratio wide, with a narrow gap between characters
+    ["^FO100,100^BY1^B3N,N,50,N,N^FDAB1^FS", 100, 178],
+    ["^FO100,100^BY2^B3N,N,50,N,N^FDAB1^FS", 100, 257],
+    ["^FO100,100^BY2,2.5^B3N,N,50,N,N^FDAB1^FS", 100, 242],
+    // The Mod-43 check digit adds a character
+    ["^FO100,100^BY2^B3N,Y,50,N,N^FDAB1^FS", 100, 289],
+    // Lowercase letters are encoded as capitals
+    ["^FO100,100^BY1^B3N,N,50,N,N^FDab-1^FS", 100, 194],
+  ])("%s", (body, left, right) => {
+    expect(bounds(body)).toStrictEqual({ left, right, top: 100, bottom: 149 });
+  });
+
+  test("draws the bars dot for dot", () => {
+    const raster = render("^FO100,100^BY1^B3N,N,50,N,N^FDAB1^FS");
+    const runs: number[] = [];
+    let previous = true;
+    for (let x = 100; x <= 178; x++) {
+      const dot = raster.ink[110 * raster.width + x] >= 0.5;
+      if (dot === previous && runs.length) runs[runs.length - 1]++;
+      else runs.push(1);
+      previous = dot;
+    }
+    expect(runs.join(",")).toBe(
+      "1,3,1,1,3,1,3,1,1,1,3,1,1,1,1,3,1,1,3,1,1,1,3,1,1,3,1,1,3,1,3,1,1,3,1,1,1,1,3,1,1,3,1,1,3,1,3,1,1"
+    );
+  });
+
+  test.each([
+    // The interpretation line shows the start and stop characters as *
+    ["^FO100,100^BY2^B3N,N,50,Y,N^FDAB1^FS", 149, 206, 156, 169],
+    ["^FO100,200^BY2^B3N,N,50,Y,Y^FDAB1^FS", 149, 206, 174, 187],
+    ["^FO100,100^BY2^B3N,N,50,Y,N^FDab-1^FS", 159, 228, 156, 169],
+    // ...and the check digit
+    ["^FO100,100^BY2^B3N,Y,50,Y,N^FDAB1^FS", 161, 227, 156, 169],
+  ])("interpretation line of %s", (body, left, right, top, bottom) => {
+    near(parts(body).text, { left, right, top, bottom });
+  });
+});
+
+describe("Interleaved 2 of 5", () => {
+  test.each([
+    ["^FO100,100^BY1^B2N,50,N,N,N^FD1234^FS", 100, 144],
+    ["^FO100,100^BY2^B2N,50,N,N,N^FD1234^FS", 100, 189],
+    // An odd number of digits gets a leading zero
+    ["^FO100,100^BY2,2^B2N,50,N,N,N^FD123^FS", 100, 171],
+    // The check digit comes before padding: 1234 becomes 012342
+    ["^FO100,100^BY2^B2N,50,N,N,Y^FD1234^FS", 100, 225],
+    // Anything but digits is left out
+    ["^FO100,100^BY2^B2N,50,N,N,N^FD12A34^FS", 100, 189],
+  ])("%s", (body, left, right) => {
+    expect(bounds(body)).toStrictEqual({ left, right, top: 100, bottom: 149 });
+  });
+
+  test("draws the bars dot for dot", () => {
+    const raster = render("^FO100,100^BY2^B2N,50,N,N,Y^FD1234^FS");
+    const runs: number[] = [];
+    let previous = true;
+    for (let x = 100; x <= 225; x++) {
+      const dot = raster.ink[110 * raster.width + x] >= 0.5;
+      if (dot === previous && runs.length) runs[runs.length - 1]++;
+      else runs.push(1);
+      previous = dot;
+    }
+    expect(runs.join(",")).toBe(
+      "2,2,2,2,2,6,2,2,6,2,6,2,2,6,2,6,6,6,2,2,2,2,6,2,2,2,2,6,6,2,2,2,6,6,6,2,2"
+    );
+  });
+
+  test.each([
+    ["^FO100,100^BY2^B2N,50,Y,N,N^FD123456^FS", 128, 195, 156, 169],
+    ["^FO100,200^BY2^B2N,50,Y,Y,N^FD123456^FS", 128, 195, 174, 187],
+  ])("interpretation line of %s", (body, left, right, top, bottom) => {
+    near(parts(body).text, { left, right, top, bottom });
+  });
+});
+
+describe("PDF417", () => {
+  test.each([
+    // Columns of 17 modules, between start, stop and row indicators
+    ["^FO100,100^BY2^B7N,10,0,3^FDhello^FS", 100, 339, 100, 129],
+    ["^FO100,100^BY3^B7N,10,0,3^FDhello^FS", 100, 459, 100, 129],
+    ["^FO100,100^BY2^B7N,10,0,3,10^FDhello^FS", 100, 339, 100, 199],
+    // Truncated: no right row indicators, and a one-module stop
+    ["^FO100,100^BY2^B7N,10,0,3,,Y^FDhello^FS", 100, 271, 100, 129],
+    // Without a row height, ^BY's height is shared between the rows
+    ["^FO100,100^BY2^B7N,,0,3^FDhello^FS", 100, 339, 100, 108],
+    ["^FO100,100^BY2,3,30^B7N,,0,3^FDhello^FS", 100, 339, 100, 129],
+    // ^FT places the bottom row
+    ["^FT100,300^BY2^B7N,10,0,3^FDhello^FS", 100, 339, 270, 299],
+    ["^FO100,100^BY2^B7R,10,0,3^FDhello^FS", 100, 129, 100, 339],
+    ["^FT300,300^BY2^B7R,10,0,3^FDhello^FS", 300, 329, 300, 539],
+  ])("%s", (body, left, right, top, bottom) => {
+    expect(bounds(body)).toStrictEqual({ left, right, top, bottom });
+  });
+
+  test.each([
+    // Without columns, the symbol is about twice as wide as it's tall,
+    // counting rows as 3 modules
+    ["^B7N,10,0^FDhello", 1, 6],
+    ["^B7N,10^FDhello", 1, 6],
+    ["^B7N,10,5^FDhello", 3, 23],
+    [
+      "^B7N,10,0^FDThe quick brown fox jumps over the lazy dog 1234567890",
+      2,
+      16,
+    ],
+    // Labelary packs some runs of digits into a few more codewords than
+    // bwip-js does (45 digits take 21 or 22, not 20), so those can differ
+    [`^B7N,10,0^FD${"1234567890".repeat(25).slice(0, 10)}`, 1, 8],
+    [`^B7N,10,0^FD${"1234567890".repeat(25).slice(0, 130)}`, 3, 17],
+  ])("%s has %i columns and %i rows", (field, columns, rows) => {
+    expect(bounds(`^FO10,10^BY1${field}^FS`)).toStrictEqual({
+      left: 10,
+      right: 10 + 69 + 17 * columns - 1,
+      top: 10,
+      bottom: 10 + 10 * rows - 1,
+    });
+  });
+});
+
 describe("QR code", () => {
   test.each([
     // ^FO places it 10 dots lower; version 1 is 21 modules

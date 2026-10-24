@@ -5,6 +5,7 @@
  * that produced it, so a drawn element can be traced back to its source.
  */
 import { decodeGraphicData } from "./graphics.js";
+import { serializeCommand } from "node-zpl";
 import type { Command } from "node-zpl";
 import type { Orientation, TextBlockOptions } from "./text.js";
 
@@ -94,7 +95,17 @@ type LabelLayout = {
 
 type BarcodeCommand = Extract<
   Command,
-  { type: "Code11" | "Code128" | "Ean13" | "DataMatrix" | "QrCode" }
+  {
+    type:
+      | "Code11"
+      | "Code128"
+      | "Code39"
+      | "Interleaved2of5"
+      | "Pdf417"
+      | "Ean13"
+      | "DataMatrix"
+      | "QrCode";
+  }
 >;
 
 type StoredGraphic = { bytes: Uint8Array; bytesPerRow: number; rows: number };
@@ -171,6 +182,9 @@ const decodeFieldData = (
 const drawn = new Set<Command["type"]>([
   "Code11",
   "Code128",
+  "Code39",
+  "Interleaved2of5",
+  "Pdf417",
   "Ean13",
   "DataMatrix",
   "QrCode",
@@ -324,7 +338,7 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
         const data = decodeFieldData(command.data, field.hexIndicator, utf8);
         const { barcode } = field;
         if (barcode) {
-          if (barcode.type === "Unsupported") {
+          if (barcode.type === "Unsupported" || !drawn.has(barcode.type)) {
             label.unsupported.push(index);
             const height = Math.max(
               barcodeDefaults.height,
@@ -333,16 +347,14 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
             label.elements.push({
               ...common(),
               kind: "placeholder",
-              code: barcode.code,
+              code:
+                barcode.type === "Unsupported"
+                  ? barcode.code
+                  : serializeCommand(barcode).slice(0, 3),
               height,
               orientation,
               fromBottom: field.fromBottom,
             });
-            break;
-          }
-          // Field data under a barcode we can't draw yet isn't drawn either
-          if (!drawn.has(barcode.type)) {
-            label.unsupported.push(index);
             break;
           }
           label.elements.push({
@@ -468,6 +480,9 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
         break;
       case "Code11":
       case "Code128":
+      case "Code39":
+      case "Interleaved2of5":
+      case "Pdf417":
       case "Ean13":
       case "DataMatrix":
       case "QrCode":

@@ -7,7 +7,9 @@
 import bwipjs from "bwip-js";
 import { encodeCode11 } from "./barcodes/code11.js";
 import { encodeCode128 } from "./barcodes/code128.js";
+import { encodeCode39 } from "./barcodes/code39.js";
 import { encodeEan13 } from "./barcodes/ean13.js";
+import { encodeInterleaved2of5 } from "./barcodes/interleaved2of5.js";
 import { fillPath } from "./raster.js";
 import {
   drawGlyphs,
@@ -52,6 +54,8 @@ type Matrix = {
   modules: number[];
   columns: number;
   moduleSize: number;
+  /** Height of each row of modules, if not moduleSize */
+  rowHeight?: number;
   /** Moves the symbol down from ^FO, or up from ^FT */
   shift?: { origin: number; typeset: number };
 };
@@ -80,6 +84,26 @@ const qrData = (data: string, level: string) => {
     text = text[0] === "B" ? text.slice(5) : text.slice(1);
   }
   return { eclevel: match[1], text };
+};
+
+/**
+ * PDF417 columns for a symbol of `count` codewords: the one closest to twice
+ * as wide as it's tall, counting each row as 3 modules high, which is how
+ * Labelary reads Zebra's default of a 1:2 aspect ratio
+ */
+const pdf417Columns = (count: number) => {
+  let best = 1;
+  let bestError = Infinity;
+  for (let columns = 1; columns <= 30; columns++) {
+    const rows = Math.max(3, Math.ceil(count / columns));
+    if (rows > 90) continue;
+    const error = Math.abs((3 * rows) / (17 * columns + 69) - 0.5);
+    if (error < bestError) {
+      best = columns;
+      bestError = error;
+    }
+  }
+  return best;
 };
 
 const interpretation = (
@@ -124,6 +148,27 @@ const encode = (barcode: Barcode, dpmm: number): Linear | Matrix => {
         text: ` ${text} `,
       };
     }
+    case "Code39":
+    case "Interleaved2of5": {
+      const encoder =
+        symbology.type === "Code39" ? encodeCode39 : encodeInterleaved2of5;
+      const { widths, text } = encoder(
+        data,
+        symbology.checkDigit ?? false,
+        moduleWidth,
+        Math.round(moduleWidth * barcode.ratio)
+      );
+      return {
+        kind: "linear",
+        widths,
+        height: symbology.height ?? barcode.height,
+        line: interpretation(
+          symbology.interpretationLine,
+          symbology.interpretationLineAbove
+        ),
+        text,
+      };
+    }
     case "Ean13": {
       const { widths, guards, text } = encodeEan13(data);
       const m = moduleWidth;
@@ -143,6 +188,27 @@ const encode = (barcode: Barcode, dpmm: number): Linear | Matrix => {
           { text: text.slice(1, 7), from: 3 * m, to: 45 * m },
           { text: text.slice(7), from: 50 * m, to: 92 * m },
         ],
+      };
+    }
+    case "Pdf417": {
+      const options = [`eclevel=${symbology.securityLevel ?? 0}`, "rowmult=1"];
+      if (symbology.truncate) options.push("compact");
+      if (symbology.rows) options.push(`rows=${symbology.rows}`);
+      let columns = symbology.columns;
+      if (!columns && !symbology.rows) {
+        // In one column, there's a row for each codeword
+        const single = matrix("pdf417", data, [...options, "columns=1"]);
+        columns = pdf417Columns(single.modules.length / single.columns);
+      }
+      if (columns) options.push(`columns=${columns}`);
+      const symbol = matrix("pdf417", data, options);
+      const rows = symbol.modules.length / symbol.columns;
+      return {
+        kind: "matrix",
+        ...symbol,
+        moduleSize: moduleWidth,
+        rowHeight:
+          symbology.rowHeight ?? Math.max(1, Math.floor(barcode.height / rows)),
       };
     }
     case "QrCode": {
@@ -259,9 +325,10 @@ const drawMatrix = (
   color: Color
 ) => {
   const { modules, columns, moduleSize } = symbol;
+  const rowHeight = symbol.rowHeight ?? moduleSize;
   const rows = modules.length / columns;
   const size = columns * moduleSize;
-  const height = rows * moduleSize;
+  const height = rows * rowHeight;
   const shift = symbol.shift;
   const y = barcode.fromBottom
     ? barcode.y - (shift?.typeset ?? 0)
@@ -275,8 +342,8 @@ const drawMatrix = (
     for (let column = 0; column < columns; column++) {
       if (!modules[row * columns + column]) continue;
       const u = column * moduleSize;
-      const v = row * moduleSize - height;
-      fillRect(raster, place, u, v, u + moduleSize, v + moduleSize, color);
+      const v = row * rowHeight - height;
+      fillRect(raster, place, u, v, u + moduleSize, v + rowHeight, color);
     }
   }
 };

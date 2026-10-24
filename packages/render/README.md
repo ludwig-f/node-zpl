@@ -6,10 +6,10 @@ It draws:
 
 - Boxes, circles and diagonal lines (`^GB`, `^GC`, `^GD`) and images (`^GF`, `~DG` with `^XG`)
 - Text in font 0 and the bitmap fonts A to H (`^A`, `^CF`), rotated (`^FW`) and wrapped in blocks (`^FB`)
-- Code 128, EAN-13, Code 11, QR codes and Data Matrix (`^BC`, `^BE`, `^B1`, `^BQ`, `^BX`, `^BY`)
+- Code 128, Code 39, Interleaved 2 of 5, EAN-13, Code 11, PDF417, QR codes and Data Matrix (`^BC`, `^B3`, `^B2`, `^BE`, `^B1`, `^B7`, `^BQ`, `^BX`, `^BY`)
 - Reverse printing (`^FR`, `^LR`), label home (`^LH`), print width (`^PW`) and UTF-8 text (`^CI28`)
 
-Commands it understands but doesn't draw yet are listed in each label's `layout().unsupported`.
+Other barcodes are drawn as a crossed-out box naming the command. Commands it understands but doesn't draw yet are listed in each label's `layout().unsupported`.
 
 ```ts
 import { renderZpl } from "@node-zpl/render";
@@ -36,7 +36,7 @@ pnpm --filter @node-zpl/render build
 node packages/render/scripts/compare.mjs --diff 4 6 8 label.zpl
 ```
 
-Boxes, circles, diagonals, images and barcode bars match Labelary dot for dot, except large rounded corners, where we match zebrash instead. Data Matrix symbols have the same size but can encode data differently, which scanners read the same.
+Boxes, circles, diagonals, images and barcode bars match Labelary dot for dot, except large rounded corners, where we match zebrash instead. Data Matrix and PDF417 symbols have the same size but can encode data differently, which scanners read the same; long runs of digits can make a PDF417 symbol a row shorter.
 
 Zebra's fonts can't be redistributed, so open-licensed fonts stand in for them (see [fonts/README.md](fonts/README.md)): text takes the same space as on a printer, but letters look slightly different.
 
