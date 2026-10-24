@@ -6,6 +6,7 @@ It draws:
 
 - Boxes, circles and diagonal lines (`^GB`, `^GC`, `^GD`) and images (`^GF`, `~DG` with `^XG`)
 - Text in font 0 and the bitmap fonts A to H (`^A`, `^CF`), rotated (`^FW`) and wrapped in blocks (`^FB`)
+- Text in TrueType fonts, downloaded (`~DU`, `~DY`) or passed in, and called by name (`^A@`) or letter (`^CW`)
 - Code 128, Code 39, Interleaved 2 of 5, EAN-13, Code 11, PDF417, QR codes and Data Matrix (`^BC`, `^B3`, `^B2`, `^BE`, `^B1`, `^B7`, `^BQ`, `^BX`, `^BY`)
 - Reverse printing (`^FR`, `^LR`), label home (`^LH`), print width (`^PW`) and UTF-8 text (`^CI28`)
 
@@ -24,6 +25,19 @@ const [png] = await renderZpl("^XA^FO50,50^GB200,100,4^FS^XZ", {
 ```
 
 By default it prints whole dots the way a printer does: a dot is printed when its center falls inside a shape. `grayscale: true` anti-aliases edges instead, for smoother images on screen.
+
+### Fonts on the printer
+
+Labels can call fonts that are already stored on the printer, like `^A@N,30,30,E:ARIAL.TTF`. Pass them in by path, and a path without a device matches any device:
+
+```ts
+const [png] = await renderZpl(zpl, {
+  ...size,
+  fonts: { "E:ARIAL.TTF": readFileSync("arial.ttf") },
+});
+```
+
+A font that isn't there prints in font 0, like Labelary does, and its command is listed in `layout().unsupported`.
 
 `renderLabels()` returns the rasters instead of PNGs, and `layout()` the elements that will be drawn, each with the indices of the commands that produced it.
 

@@ -19,6 +19,11 @@ type RenderOptions = {
    * Defaults to false.
    */
   antialias?: boolean;
+  /**
+   * Fonts already on the printer, by path like "E:ARIAL.TTF". Without a
+   * device ("ARIAL.TTF"), a font matches references to any device.
+   */
+  fonts?: Record<string, Uint8Array>;
 };
 
 /** Draw an element in the given color, ignoring reverse printing */
@@ -77,6 +82,7 @@ const draw = (
           font: element.font,
           height: element.height,
           width: element.width,
+          typeface: element.typeface,
           orientation: element.orientation,
           block: element.block,
           dpmm,
@@ -143,7 +149,7 @@ const renderLabels = (
   const height = Math.ceil(options.heightMm * options.dpmm - 1e-9);
   const sampling = options.antialias ? "coverage" : "center";
 
-  return layout(commands).map((label) => {
+  return layout(commands, { fonts: options.fonts }).map((label) => {
     const printWidth = Math.min(width, label.printWidth ?? width);
     const printed = new Raster(printWidth, height, sampling);
 

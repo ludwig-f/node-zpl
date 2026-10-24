@@ -187,6 +187,8 @@ type TextOptions = {
   /** Height and width as given in ^A or ^CF; either may be missing */
   height?: number;
   width?: number;
+  /** A downloaded font to use instead of `font` */
+  typeface?: Font;
   orientation: Orientation;
   block?: TextBlockOptions;
   dpmm: number;
@@ -469,9 +471,39 @@ const placement = (
 };
 
 /** A built-in font at the size given in ^A or ^CF */
-const faceFor = (
-  options: Pick<TextOptions, "font" | "height" | "width" | "dpmm">
+/**
+ * A downloaded TrueType font: the em is the character height, stretched to
+ * the width, with the baseline three quarters down as for font 0
+ */
+const trueTypeFace = (
+  font: Font,
+  options: Pick<TextOptions, "height" | "width">
 ): Face => {
+  const height = options.height ?? options.width ?? 9;
+  const width = options.width ?? height;
+  const scaleX = width / font.unitsPerEm;
+  const scaleY = height / font.unitsPerEm;
+  const glyphOf = (char: string) => font.glyphIndex(char.codePointAt(0)!);
+
+  return {
+    height,
+    ascent: CAP_HEIGHT * height,
+    advance: (char) => font.advance(glyphOf(char)) * scaleX,
+    // Characters the font lacks print its missing glyph
+    glyph: (char) => ({
+      font,
+      glyph: glyphOf(char),
+      offset: 0,
+      scaleX,
+      scaleY,
+    }),
+  };
+};
+
+const faceFor = (
+  options: Pick<TextOptions, "font" | "height" | "width" | "typeface" | "dpmm">
+): Face => {
+  if (options.typeface) return trueTypeFace(options.typeface, options);
   const cell = cellFor(options.font, options.dpmm);
   // Font 0 stands in for fonts we don't have yet
   if (!cell) return font0Face(options);

@@ -43,6 +43,7 @@
   },
   "dependencies": {
     "bwip-js": "^4.11.4",
+    "fflate": "^0.8.2",
     "node-zpl": "workspace:*"
   },
   "devDependencies": {

@@ -39,8 +39,27 @@ const png = await encodePng(raster);
 - Boxes, circles and diagonal lines (`^GB`, `^GC`, `^GD`), with rounded corners and white lines
 - Images (`^GF`, `~DG` with `^XG`), including Zebra's compressed hex
 - Text in font 0 and the bitmap fonts A to H (`^A`, `^CF`), rotated (`^FW`) and wrapped in blocks (`^FB`)
+- Text in TrueType fonts downloaded with `~DU` or `~DY` (hex, `:B64:` or `:Z64:`), called with `^A@` or `^CW`
 - Code 128, Code 39, Interleaved 2 of 5, EAN-13, Code 11, PDF417, QR codes and Data Matrix, with interpretation lines (`^BY`, `^BC`, `^B3`, `^B2`, `^BE`, `^B1`, `^B7`, `^BQ`, `^BX`)
 - Reverse printing (`^FR`, `^LR`), label home (`^LH`), print width (`^PW`) and UTF-8 text (`^CI28`)
+
+Fonts already stored on the printer can be passed in by path. A path without a device matches any device, and a font that isn't there prints in font 0:
+
+```ts
+import { renderZpl } from "@node-zpl/render";
+
+const fonts = { "E:ARIAL.TTF": new Uint8Array(await (await fetch("/arial.ttf")).arrayBuffer()) };
+const pngs = await renderZpl(zpl, { widthMm: 101.6, heightMm: 152.4, dpmm: 8, grayscale: false, fonts });
+```
+
+In `<zpl-preview>`, pass them through `configure`:
+
+```ts
+import { configure } from "@node-zpl/preview";
+import { renderZpl } from "@node-zpl/render";
+
+configure({ render: (zpl, options) => renderZpl(zpl, { ...options, fonts }) });
+```
 
 Other barcodes show as a crossed-out box naming the command, so they don't go missing silently. Commands it doesn't draw yet are listed per label by `layout()`, so you can warn about them.
 

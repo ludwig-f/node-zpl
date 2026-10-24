@@ -4,8 +4,12 @@
  * graphics carry over between commands. Each element records the commands
  * that produced it, so a drawn element can be traced back to its source.
  */
+import { decodeObjectData } from "./data.js";
+import { FontFiles } from "./font-files.js";
 import { decodeGraphicData } from "./graphics.js";
 import type { Command } from "node-zpl";
+import type { Font } from "./font.js";
+import type { FontPath } from "./font-files.js";
 import type { Orientation, TextBlockOptions } from "./text.js";
 
 type Common = {
@@ -44,6 +48,8 @@ type Element = Common &
         /** Character height and width in dots, as given (see FontSetting) */
         height?: number;
         width?: number;
+        /** A font file, from ^A@ or a font letter named with ^CW */
+        typeface?: Font;
         orientation: Orientation;
         /** ^FT positions the baseline instead of the top */
         fromBottom: boolean;
@@ -119,6 +125,8 @@ type FontSetting = {
    */
   height?: number;
   width?: number;
+  /** A font file to use instead of the font letter */
+  typeface?: Font;
   /** Missing when ^A doesn't give one: the field then uses ^FW's */
   orientation?: Orientation;
 };
@@ -212,9 +220,23 @@ const rawBarcode = (command: Command) => {
 /** ^BY settings at power-up */
 const initialBarcodeDefaults = { moduleWidth: 2, ratio: 3, height: 10 };
 
-const layout = (commands: readonly Command[]): LabelLayout[] => {
+type LayoutOptions = {
+  /**
+   * Fonts already on the printer, by path like "E:ARIAL.TTF". Without a
+   * device ("ARIAL.TTF"), a font matches references to any device.
+   */
+  fonts?: Record<string, Uint8Array>;
+};
+
+const layout = (
+  commands: readonly Command[],
+  options: LayoutOptions = {}
+): LabelLayout[] => {
   const labels: LabelLayout[] = [];
   const stored = new Map<string, StoredGraphic>();
+  const fontFiles = new FontFiles(options.fonts);
+  /** ^CW: font letters that call font files, kept between labels */
+  const identifiers = new Map<string, FontPath>();
   let label: LabelLayout | undefined;
   let home = { x: 0, y: 0 };
   let labelReverse = false;
@@ -230,7 +252,49 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
     label?.elements.push(element);
   };
 
+  /**
+   * A font setting in a font file, or in font 0 if the file isn't there,
+   * which counts the command as unsupported
+   */
+  const fontFile = (
+    path: FontPath,
+    setting: FontSetting,
+    index: number
+  ): FontSetting => {
+    const typeface = fontFiles.find(path);
+    if (!typeface) label?.unsupported.push(index);
+    return typeface ? { ...setting, typeface } : { ...setting, font: "0" };
+  };
+
   commands.forEach((command, index) => {
+    if (command.type === "DownloadFont") {
+      // Bounded fonts are converted to Zebra's own format, which we can't read
+      if (!command.bounded) fontFiles.download(command, command.data);
+      return;
+    }
+    if (command.type === "DownloadObject") {
+      const { device, name, extension, data } = command;
+      if (command.format !== "A") return;
+      if (extension === "T") {
+        fontFiles.download({ device, name, extension: "TTF" }, data);
+      } else if (extension === "G" && command.bytesPerRow) {
+        const bytes = data.startsWith(":")
+          ? decodeObjectData(data)
+          : decodeGraphicData(data, command.bytesPerRow, command.totalBytes);
+        if (bytes) {
+          stored.set(`${device}:${name}`, {
+            bytes,
+            bytesPerRow: command.bytesPerRow,
+            rows: Math.ceil(command.totalBytes / command.bytesPerRow),
+          });
+        }
+      }
+      return;
+    }
+    if (command.type === "FontIdentifier") {
+      identifiers.set(command.font, command);
+      return;
+    }
     if (command.type === "DownloadGraphic") {
       stored.set(`${command.device}:${command.name}`, {
         bytes: decodeGraphicData(
@@ -310,11 +374,12 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
         const sized =
           command.height !== undefined || command.width !== undefined;
         defaultFont = {
-          ...defaultFont,
           font: command.font,
           height: sized ? command.height : defaultFont.height,
           width: sized ? command.width : defaultFont.width,
         };
+        const path = identifiers.get(command.font);
+        if (path) defaultFont = fontFile(path, defaultFont, index);
         break;
       }
       case "Font": {
@@ -327,6 +392,23 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
           width: sized ? command.width : defaultFont.width,
           orientation: command.orientation,
         };
+        const path = identifiers.get(command.font);
+        if (path) field.font = fontFile(path, field.font, index);
+        break;
+      }
+      case "FontByName": {
+        const sized =
+          command.height !== undefined || command.width !== undefined;
+        field.font = fontFile(
+          command,
+          {
+            font: "@",
+            height: sized ? command.height : defaultFont.height,
+            width: sized ? command.width : defaultFont.width,
+            orientation: command.orientation,
+          },
+          index
+        );
         break;
       }
       case "FieldOrientation":
@@ -383,6 +465,7 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
           font: font.font,
           height: font.height,
           width: font.width,
+          typeface: font.typeface,
           orientation: font.orientation ?? orientation,
           fromBottom: field.fromBottom,
           block: field.block,
@@ -506,5 +589,11 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
   return labels;
 };
 
-export type { BarcodeCommand, Element, FontSetting, LabelLayout };
+export type {
+  BarcodeCommand,
+  Element,
+  FontSetting,
+  LabelLayout,
+  LayoutOptions,
+};
 export { layout };

@@ -15,6 +15,7 @@ const toBase64 = (bytes: Uint8Array): string => {
  * @node-zpl/preview expects from a renderer, so it can be passed to
  * `configure({ render: renderZpl })`.
  * @param options.grayscale Anti-aliased edges instead of the printer's whole dots
+ * @param options.fonts Fonts already on the printer, by path like "E:ARIAL.TTF"
  */
 const renderZpl = async (
   zpl: string,
@@ -23,6 +24,7 @@ const renderZpl = async (
     heightMm: number;
     dpmm: number;
     grayscale: boolean;
+    fonts?: Record<string, Uint8Array>;
   }
 ): Promise<string[]> => {
   const rasters = renderLabels(zpl, {
@@ -36,7 +38,7 @@ const renderZpl = async (
 
 export type { RenderOptions };
 export type { Path, Point, Color, Sampling } from "./raster.js";
-export type { Element, LabelLayout } from "./layout.js";
+export type { Element, LabelLayout, LayoutOptions } from "./layout.js";
 export { renderZpl, renderLabels, encodePng };
 export { Raster, fillPath } from "./raster.js";
 export { layout } from "./layout.js";
