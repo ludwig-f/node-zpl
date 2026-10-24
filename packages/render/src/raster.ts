@@ -3,7 +3,7 @@
  *
  * A raster samples shapes one of two ways:
  * - "center": a dot is printed when its center is inside the shape, which is
- *   how printers (and Labelary) decide. Ink is 0 or 1.
+ *   how printers decide. Ink is 0 or 1.
  * - "coverage": each dot stores how much of it is covered, from 0 to 1, for
  *   smooth anti-aliased images.
  *

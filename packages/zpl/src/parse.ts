@@ -3,6 +3,8 @@ import type { Command, Span } from "./ast.js";
 
 type Diagnostic = {
   severity: "warning";
+  /** A parameter that couldn't be read, or text the printer skips */
+  rule: "invalid-parameter" | "ignored-text";
   message: string;
   span: Span;
 };
@@ -163,6 +165,9 @@ const downloadFont = (
 };
 
 type CommandParser = (body: string, delimiter: string) => Command | null;
+
+/** Commands without parameters, where any text after them is ignored */
+const withoutParams = new Set(["^XA", "^XZ", "^FR", "^FS"]);
 
 /** Builds a parser for a command whose body is a plain parameter list */
 const withParams =
@@ -599,9 +604,29 @@ const parse = (zpl: string): ParseResult => {
         commands.push(command ? { ...compact(command), span } : raw);
       } catch (error) {
         if (!(error instanceof ParamError)) throw error;
-        diagnostics.push({ severity: "warning", message: error.message, span });
+        diagnostics.push({
+          severity: "warning",
+          rule: "invalid-parameter",
+          message: error.message,
+          span,
+        });
         commands.push(raw);
       }
+    }
+
+    // Spaces and line breaks between commands are fine, anything else isn't
+    const text = body.trim();
+    if (withoutParams.has(key) && text) {
+      let from = cursor;
+      while (/\s/.test(zpl.charAt(from))) from++;
+      let to = end;
+      while (/\s/.test(zpl.charAt(to - 1))) to--;
+      diagnostics.push({
+        severity: "warning",
+        rule: "ignored-text",
+        message: `${key} takes no parameters, so the printer ignores '${text}'`,
+        span: { start: from, end: to },
+      });
     }
 
     i = end;

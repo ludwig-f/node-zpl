@@ -165,6 +165,8 @@ export default function Playground() {
     [zpl, dpmm, widthMm, heightMm]
   );
   const blocked = blockingReason(problems);
+  // The example shown, until it's edited
+  const example = examples.findIndex((option) => option.zpl === zpl);
 
   // The size the preview uses: settings, then ^PW/^LL, then 4 × 6 in
   const labelSize = {
@@ -293,7 +295,7 @@ export default function Playground() {
         <div className="spacer" />
         <select
           aria-label="Open an example"
-          value=""
+          value={example === -1 ? "" : example}
           onChange={(event) => {
             const index = Number(event.target.value);
             setState(fromExample(index));
@@ -345,12 +347,16 @@ export default function Playground() {
             problems={problems}
             onChange={(value) => update({ zpl: value })}
           />
-          <div className="problems">
+          <div className="problems" data-open={problems.length > 0}>
             <div className="problems-header">
               <span>Problems · {problems.length}</span>
-              <span className="hint">lint updates as you type</span>
             </div>
-            <ProblemList problems={problems} onSelect={selectProblem} />
+            {/* Collapsed while there's nothing to show, slides open after */}
+            <div className="problems-body">
+              <div>
+                <ProblemList problems={problems} onSelect={selectProblem} />
+              </div>
+            </div>
           </div>
         </section>
 

@@ -1,12 +1,12 @@
-// Print orientation, ^FV, ^IL and stored formats, as measured on Labelary
-// at 8 dpmm
+// Print orientation, ^FV, ^IL and stored formats, as measured from
+// reference renders at 8 dpmm
 import { describe, test, expect } from "vitest";
 import { parse } from "@zplkit/core";
 import { layout } from "./layout.js";
 import { renderLabels } from "./render.js";
 
-// 812 by 406 dots, the size of Labelary's 4 by 2 inch image, so labels
-// turned upside down line up with it
+// 812 by 406 dots, a 4 by 2 inch label, so labels turned upside down line
+// up with the reference renders
 const size = { widthMm: 101.5, heightMm: 50.75, dpmm: 8 };
 
 type Box = { left: number; right: number; top: number; bottom: number };

@@ -1,80 +1,86 @@
 /**
- * Decoding of ASCII graphic data (^GF A and ~DG): hex, including Zebra's
- * compression scheme, or base64 as :B64: and :Z64:. Based on zebrash (MIT,
- * https://github.com/ingridhq/zebrash).
+ * Decoding of ASCII graphic data (^GF A and ~DG): hex, with the compression
+ * scheme from Zebra's ZPL II Programming Guide, or base64 as :B64: and :Z64:.
  */
 import { decodeObjectData } from "./data.js";
 
-/** Repeat counts: G to Y are 1 to 19, g to z are 20 to 400 in steps of 20 */
-const repeatCount = (char: string): number | undefined => {
-  const code = char.charCodeAt(0);
-  if (code >= 71 && code <= 89) return code - 70; // G-Y
-  if (code >= 103 && code <= 122) return (code - 102) * 20; // g-z
-  return undefined;
+/**
+ * How many times the next hex digit repeats, for a repeat character: G to Y
+ * mean 1 to 19, g to z mean 20 to 400 in steps of 20, and 0 for anything else
+ */
+const repeatsOf = (char: string): number => {
+  if (char >= "G" && char <= "Y") return char.charCodeAt(0) - 70;
+  if (char >= "g" && char <= "z") return (char.charCodeAt(0) - 102) * 20;
+  return 0;
 };
 
 /**
- * Decode ASCII hex graphic data to bytes, one row of `bytesPerRow` after the
- * other. Supports Zebra's compression: repeat counts before a hex digit, `,`
- * to fill the rest of a row with 0, `!` to fill it with 1 and `:` to repeat
- * the previous row.
+ * Decode ASCII graphic data to `totalBytes` bytes, in rows of `bytesPerRow`.
+ * Compressed data can put a repeat count before a hex digit, end a row early
+ * with `,` (the rest is 0) or `!` (the rest is 1), and repeat the previous
+ * row with `:`. Data that runs out leaves the rest of the graphic blank.
  */
 const decodeGraphicData = (
   data: string,
   bytesPerRow: number,
   totalBytes: number
 ): Uint8Array => {
+  const bytes = new Uint8Array(totalBytes);
+
   if (/^:[BZ]64:/.test(data)) {
-    // Short data leaves the rest of the graphic blank
-    const bytes = new Uint8Array(totalBytes);
-    bytes.set(
-      (decodeObjectData(data) ?? new Uint8Array()).subarray(0, totalBytes)
-    );
+    const decoded = decodeObjectData(data) ?? new Uint8Array();
+    bytes.set(decoded.subarray(0, totalBytes));
     return bytes;
   }
 
-  const rowHex = bytesPerRow * 2;
-  let hex = "";
-  let row = "";
-  let previousRow = "";
-  let count = 0;
+  const digitsPerRow = bytesPerRow * 2;
+  // Digits are written straight into the bytes, a row at a time
+  let rowStart = 0;
+  let digit = 0;
+  let repeats = 0;
 
-  const endRow = () => {
-    hex += row;
-    previousRow = row;
-    row = "";
+  const write = (value: number) => {
+    const index = rowStart + Math.floor(digit / 2);
+    if (index < totalBytes) bytes[index] |= digit % 2 ? value : value << 4;
+    digit++;
   };
 
-  for (const char of data.replace(/\s/g, "")) {
-    if (row.length >= rowHex) endRow();
+  for (const char of data) {
+    if (/\s/.test(char)) continue;
 
-    const repeat = repeatCount(char);
-    if (repeat !== undefined) {
-      count += repeat;
+    // A full row moves on to the next; a long run spills over into it
+    if (digit >= digitsPerRow) {
+      rowStart += Math.max(bytesPerRow, Math.ceil(digit / 2));
+      digit = 0;
+    }
+    if (rowStart >= totalBytes) break;
+
+    const count = repeatsOf(char);
+    if (count) {
+      repeats += count;
       continue;
     }
 
-    if (char === "," || char === "!") {
-      row = row.padEnd(rowHex, char === "," ? "0" : "F");
-      count = 0;
-      continue;
+    if (char === ",") {
+      digit = digitsPerRow;
+    } else if (char === "!") {
+      while (digit < digitsPerRow) write(0xf);
+    } else if (char === ":") {
+      const row = bytes.subarray(rowStart, rowStart + bytesPerRow);
+      row.fill(0);
+      if (rowStart >= bytesPerRow) {
+        row.set(bytes.subarray(rowStart - bytesPerRow, rowStart));
+      }
+      digit = digitsPerRow;
+    } else {
+      const value = parseInt(char, 16);
+      for (let i = 0; i < Math.max(repeats, 1); i++) {
+        write(Number.isNaN(value) ? 0 : value);
+      }
     }
-    if (char === ":") {
-      row = previousRow || "0".repeat(rowHex);
-      count = 0;
-      continue;
-    }
-
-    row += char.repeat(Math.max(count, 1));
-    count = 0;
+    repeats = 0;
   }
-  if (row.length) endRow();
 
-  const bytes = new Uint8Array(totalBytes);
-  for (let i = 0; i < totalBytes && i * 2 + 1 < hex.length; i++) {
-    const value = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
-    bytes[i] = Number.isNaN(value) ? 0 : value;
-  }
   return bytes;
 };
 

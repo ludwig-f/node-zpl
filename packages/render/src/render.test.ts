@@ -1,4 +1,4 @@
-// Expected dots were measured from Labelary renders at 8 dpmm, which match
+// Expected dots were measured from reference renders at 8 dpmm, which match
 // Zebra printers closely
 import { describe, test, expect } from "vitest";
 import { deflateSync } from "node:zlib";

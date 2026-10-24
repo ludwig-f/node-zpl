@@ -175,15 +175,40 @@
 }
 
 .playground .problems {
+  display: flex;
+  flex-direction: column;
   max-height: 260px;
-  overflow: auto;
   border-top: 1px solid var(--zk-rule-strong);
   background: var(--zk-surface);
 }
 
+/* Rows animate from 0fr to 1fr, so the list slides open to its own height */
+.playground .problems-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  min-height: 0;
+}
+
+.playground .problems[data-open="true"] .problems-body {
+  grid-template-rows: 1fr;
+}
+
+.playground .problems[data-open="false"] .problems-header {
+  border-bottom-color: transparent;
+}
+
+.playground .problems-body > div {
+  min-height: 0;
+  overflow: auto;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .playground .problems-body {
+    transition: grid-template-rows 200ms ease-out;
+  }
+}
+
 .playground .problems-header {
-  position: sticky;
-  top: 0;
   display: flex;
   justify-content: space-between;
   padding: 8px 16px;
@@ -193,11 +218,6 @@
   font: 600 11.5px var(--font-code);
   letter-spacing: 0.06em;
   text-transform: uppercase;
-}
-
-.playground .problems-header .hint {
-  letter-spacing: 0;
-  text-transform: none;
 }
 
 .playground ul {

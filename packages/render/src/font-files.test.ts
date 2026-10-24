@@ -1,5 +1,5 @@
 // Fonts downloaded with ~DU or ~DY, or passed in, and called with ^A@ or
-// ^CW, as measured on Labelary at 8 dpmm
+// ^CW, as measured from reference renders at 8 dpmm
 import { describe, test, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { deflateSync } from "node:zlib";
@@ -45,7 +45,7 @@ const near = (actual: Box, [left, right, top, bottom]: number[], slack = 1) => {
   }
 };
 
-/** The same text in Labelary's fallback for a font it can't find */
+/** The same text in font 0, the fallback for a font that isn't found */
 const font0 = (body: string) =>
   bounds(
     `^XA${body.replace(/\^A@(\w?),?(\d*),?(\d*),[^^]*/, "^A0$1,$2,$3")}^XZ`

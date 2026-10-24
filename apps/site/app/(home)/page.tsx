@@ -315,15 +315,15 @@ export default async function HomePage() {
         <Feature
           n="01"
           packages="@zplkit/core"
-          title="Build labels with typed calls or JSX."
+          title="Build labels with JSX or typed calls."
           text="Place fields in millimeters or dots. zplkit converts them to the printer's resolution and escapes your data, and your editor catches a missing unit before a test print does."
-          href="/docs/building-labels"
+          href="/docs/jsx"
           link="Building labels"
         >
           <CodePanel
             tabs={[
-              { id: "Methods", code: builderSource, html: builderHtml },
               { id: "JSX", code: jsxSource, html: jsxHtml },
+              { id: "Methods", code: builderSource, html: builderHtml },
             ]}
           />
           <Output title="Output · ZPL">

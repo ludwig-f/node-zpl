@@ -86,7 +86,7 @@ const qrData = (data: string, level: string) => {
 /**
  * PDF417 columns for a symbol of `count` codewords: the one closest to twice
  * as wide as it's tall, counting each row as 3 modules high, which is how
- * Labelary reads Zebra's default of a 1:2 aspect ratio
+ * reference renders read Zebra's default of a 1:2 aspect ratio
  */
 const pdf417Columns = (count: number) => {
   let best = 1;
@@ -140,8 +140,8 @@ const encode = (barcode: Barcode, dpmm: number): Linear | Matrix => {
           symbology.interpretationLine,
           symbology.interpretationLineAbove
         ),
-        // Labelary marks the start and stop characters with triangles; we
-        // leave their places blank
+        // Reference renders mark the start and stop characters with
+        // triangles; we leave their places blank
         text: ` ${text} `,
       };
     }

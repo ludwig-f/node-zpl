@@ -1,4 +1,4 @@
-// Checked against bwip-js, whose bars match Labelary's
+// Checked against bwip-js, whose bars match reference renders
 import { test, expect } from "vitest";
 import bwipjs from "bwip-js";
 import { encodeCode39 } from "./code39.js";
