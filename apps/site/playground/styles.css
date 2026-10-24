@@ -79,6 +79,11 @@
   background: var(--zk-surface);
 }
 
+/* The toolbar scrolls sideways on phones instead of squeezing its controls */
+.playground .toolbar > * {
+  flex: none;
+}
+
 .playground .filename {
   padding-right: 8px;
   font: 600 13px var(--font-code);
@@ -420,6 +425,7 @@
   }
 
   .playground[data-tab="Editor"] .code,
+  .playground[data-tab="Code"] .code,
   .playground[data-tab="Problems"] .problems-tab {
     display: grid;
   }

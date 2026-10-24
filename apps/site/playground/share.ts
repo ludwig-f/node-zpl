@@ -75,5 +75,44 @@ const decodeShare = async (text: string): Promise<ShareState | undefined> => {
   }
 };
 
-export type { ShareState };
-export { encodeShare, decodeShare };
+/** Everything a shared playground link restores */
+type CodeShareState = {
+  code: string;
+  smoothing: number;
+};
+
+/** Encode playground code like encodeShare(), as an object so the two differ */
+const encodeCodeShare = async (state: CodeShareState): Promise<string> =>
+  toBase64Url(
+    await transform(
+      new TextEncoder().encode(
+        JSON.stringify({ code: state.code, smoothing: state.smoothing })
+      ),
+      new CompressionStream("deflate-raw")
+    )
+  );
+
+/** Read a string from encodeCodeShare(), or undefined if it isn't one */
+const decodeCodeShare = async (
+  text: string
+): Promise<CodeShareState | undefined> => {
+  try {
+    const bytes = await transform(
+      fromBase64Url(text),
+      new DecompressionStream("deflate-raw")
+    );
+    const value = JSON.parse(new TextDecoder().decode(bytes));
+    if (Array.isArray(value) || typeof value?.code !== "string") {
+      return undefined;
+    }
+    return {
+      code: value.code,
+      smoothing: typeof value.smoothing === "number" ? value.smoothing : 0.4,
+    };
+  } catch {
+    return undefined;
+  }
+};
+
+export type { ShareState, CodeShareState };
+export { encodeShare, decodeShare, encodeCodeShare, decodeCodeShare };

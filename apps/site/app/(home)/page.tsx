@@ -278,10 +278,10 @@ export default async function HomePage() {
               Read the docs
             </Link>
             <Link
-              href="/viewer"
+              href="/playground"
               className="inline-flex h-12 items-center rounded-md border-[1.5px] border-ink px-[22px] font-bold transition-colors hover:bg-surface"
             >
-              Open the ZPL viewer →
+              Open the playground →
             </Link>
           </div>
         </div>
