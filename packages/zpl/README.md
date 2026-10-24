@@ -176,7 +176,7 @@ Labels built with `Label` or JSX can be checked with `label.lint()`. Pass the me
 
 ### Images
 
-You can convert an image to a ZPL graphic using `ImageConverter`. It depends on [jimp](https://github.com/jimp-dev/jimp) and only runs in Node, so it has its own entry point:
+`ImageConverter` turns a PNG or JPEG file into a ZPL graphic. It reads files with Node APIs, so it has its own entry point:
 
 ```typescript
 import { Label, mm, dots } from "@zplkit/core";
