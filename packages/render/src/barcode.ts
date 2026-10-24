@@ -372,7 +372,10 @@ const drawPlaceholder = (
   dpmm: number,
   color: Color
 ): void => {
-  const text = `${placeholder.code} not supported`;
+  const text =
+    placeholder.reason === "invalid"
+      ? `${placeholder.code} has invalid parameters`
+      : `${placeholder.code} not supported`;
   // Font D, magnified so it stays legible at higher resolutions
   const face = faceFor({
     font: "D",
@@ -382,13 +385,13 @@ const drawPlaceholder = (
   const advance = advanceOf(face, text);
   const padding = face.height;
   const width = Math.ceil(advance + 2 * padding);
-  const { height } = placeholder;
+  const line = Math.max(1, Math.round(dpmm / 4));
+  // Room for the text and the diagonals around it, whatever ^BY's height
+  const height = Math.max(placeholder.height, 2 * face.height + 2 * line);
   const place = placement(
     { width, height, ascent: height, lastBaseline: 0 },
     placeholder
   );
-  const line = Math.max(1, Math.round(dpmm / 4));
-
   // Outline and diagonals, with the bottom edge at v = 0
   fillRect(raster, place, 0, -height, width, -height + line, color);
   fillRect(raster, place, 0, -line, width, 0, color);

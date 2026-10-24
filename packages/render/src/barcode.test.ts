@@ -402,6 +402,34 @@ describe("barcodes we can't draw yet", () => {
     });
   });
 
+  test("placeholders fit their text at higher resolutions", () => {
+    // Font D at 24 dpmm is 54 dots tall, between 6-dot lines
+    const [raster] = renderLabels("^XA^FO100,100^BZ^FDx^FS^XZ", {
+      widthMm: 101.6,
+      heightMm: 101.6,
+      dpmm: 24,
+    });
+    let top = Infinity;
+    let bottom = -1;
+    for (let y = 0; y < raster.height; y++) {
+      if (raster.ink[y * raster.width + 101] < 0.5) continue;
+      top = Math.min(top, y);
+      bottom = Math.max(bottom, y);
+    }
+    expect(bottom - top + 1).toBeGreaterThanOrEqual(54 + 2 * 6 + 4);
+  });
+
+  test("a barcode we draw, with parameters we can't read, says so", () => {
+    const [label] = layout(parse("^XA^FO10,10^BCQ,100^FD12^FS^XZ").commands);
+    expect(label.elements).toMatchObject([
+      { kind: "placeholder", code: "^BC", reason: "invalid" },
+    ]);
+    const [other] = layout(parse("^XA^FO10,10^BZ^FD12^FS^XZ").commands);
+    expect(other.elements).toMatchObject([
+      { kind: "placeholder", code: "^BZ", reason: "unsupported" },
+    ]);
+  });
+
   test("^BY isn't a barcode", () => {
     const [label] = layout(parse("^XA^BY3^FO10,10^FDHI^FS^XZ").commands);
     expect(label.elements[0].kind).toBe("text");

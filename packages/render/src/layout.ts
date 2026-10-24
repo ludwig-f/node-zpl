@@ -5,7 +5,6 @@
  * that produced it, so a drawn element can be traced back to its source.
  */
 import { decodeGraphicData } from "./graphics.js";
-import { serializeCommand } from "node-zpl";
 import type { Command } from "node-zpl";
 import type { Orientation, TextBlockOptions } from "./text.js";
 
@@ -70,7 +69,9 @@ type Element = Common &
         kind: "placeholder";
         /** The barcode command, like ^B7 */
         code: string;
-        /** ^BY's height, at least MIN_PLACEHOLDER_HEIGHT */
+        /** Not drawn yet, or a drawn barcode whose parameters didn't parse */
+        reason: "unsupported" | "invalid";
+        /** ^BY's height; it's drawn taller if its text needs room */
         height: number;
         orientation: Orientation;
         fromBottom: boolean;
@@ -134,7 +135,7 @@ type Field = {
   hexIndicator?: string;
   block?: TextBlockOptions;
   /** The barcode the field data goes into, or the code of one we can't draw */
-  barcode?: BarcodeCommand | { type: "Unsupported"; code: string };
+  barcode?: BarcodeCommand | NonNullable<ReturnType<typeof rawBarcode>>;
   commands: number[];
 };
 
@@ -178,26 +179,35 @@ const decodeFieldData = (
     : String.fromCharCode(...bytes);
 };
 
-/** Barcodes we can draw */
-const drawn = new Set<Command["type"]>([
-  "Code11",
-  "Code128",
-  "Code39",
-  "Interleaved2of5",
-  "Pdf417",
-  "Ean13",
-  "DataMatrix",
-  "QrCode",
+/** Barcode commands with a typed node, all of which we draw */
+const drawnCodes = new Set([
+  "^B1",
+  "^B2",
+  "^B3",
+  "^B7",
+  "^BC",
+  "^BE",
+  "^BQ",
+  "^BX",
 ]);
 
-/** ^Bx commands without a typed node, apart from ^BY, are barcodes */
-const unsupportedBarcode = (command: Command) =>
-  command.type === "Raw" && /^\^B[0-9A-XZ]/.test(command.zpl)
-    ? command.zpl.slice(0, 3)
-    : undefined;
-
-/** So a placeholder for a barcode with ^BY's default height is legible */
-const MIN_PLACEHOLDER_HEIGHT = 40;
+/**
+ * ^Bx commands left as Raw, apart from ^BY, are barcodes we can't draw:
+ * either unsupported, or a supported one whose parameters didn't parse
+ */
+const rawBarcode = (command: Command) => {
+  if (command.type !== "Raw" || !/^\^B[0-9A-XZ]/.test(command.zpl)) {
+    return undefined;
+  }
+  const code = command.zpl.slice(0, 3);
+  return {
+    type: "Unsupported" as const,
+    code,
+    reason: drawnCodes.has(code)
+      ? ("invalid" as const)
+      : ("unsupported" as const),
+  };
+};
 
 /** ^BY settings at power-up */
 const initialBarcodeDefaults = { moduleWidth: 2, ratio: 3, height: 10 };
@@ -338,20 +348,14 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
         const data = decodeFieldData(command.data, field.hexIndicator, utf8);
         const { barcode } = field;
         if (barcode) {
-          if (barcode.type === "Unsupported" || !drawn.has(barcode.type)) {
+          if (barcode.type === "Unsupported") {
             label.unsupported.push(index);
-            const height = Math.max(
-              barcodeDefaults.height,
-              MIN_PLACEHOLDER_HEIGHT
-            );
             label.elements.push({
               ...common(),
               kind: "placeholder",
-              code:
-                barcode.type === "Unsupported"
-                  ? barcode.code
-                  : serializeCommand(barcode).slice(0, 3),
-              height,
+              code: barcode.code,
+              reason: barcode.reason,
+              height: barcodeDefaults.height,
               orientation,
               fromBottom: field.fromBottom,
             });
@@ -487,12 +491,11 @@ const layout = (commands: readonly Command[]): LabelLayout[] => {
       case "DataMatrix":
       case "QrCode":
         field.barcode = command;
-        if (!drawn.has(command.type)) label.unsupported.push(index);
         break;
       case "Raw": {
-        const code = unsupportedBarcode(command);
-        if (code) {
-          field.barcode = { type: "Unsupported", code };
+        const barcode = rawBarcode(command);
+        if (barcode) {
+          field.barcode = barcode;
           label.unsupported.push(index);
         }
         break;
