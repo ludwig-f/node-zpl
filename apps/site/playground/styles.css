@@ -1,10 +1,10 @@
 /*
- * A workbench for thermal labels: quiet workshop grays around one physical
- * object, the label on its backing paper under a millimeter ruler.
- * Everything is scoped to .playground so it doesn't affect the docs.
+ * The playground: a toolbar, the editor with its problems on the left, and
+ * the label on the printer's platen on the right. On phones, tabs switch
+ * between the editor, the preview and the problems. Scoped to .playground.
  */
 .playground {
-  --panel: var(--zk-surface);
+  --panel: var(--zk-code);
   --ink: var(--zk-ink);
   --muted: var(--zk-muted);
   --line: var(--zk-rule);
@@ -22,38 +22,35 @@
   --font-code: var(--font-plex-mono), ui-monospace, "SF Mono", Menlo, monospace;
 
   display: grid;
-  grid-template-rows: auto 1fr;
+  /* The toolbar, then the workspace; phones add a row of tabs between */
+  grid-template-rows: auto minmax(0, 1fr);
   height: calc(100dvh - var(--fd-header-height, 56px));
   min-height: 560px;
-  background: var(--color-fd-background);
+  background: var(--zk-bg);
   color: var(--ink);
-  font: 15px/1.45 var(--font-ui);
-}
-
-.playground :focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  font: 15px/1.5 var(--font-ui);
 }
 
 .playground button,
 .playground select,
-.playground input:not([type="range"]) {
-  height: 34px;
+.playground input:not([type="checkbox"]) {
+  height: 36px;
   padding: 0 12px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: var(--panel);
-  color: inherit;
-  font: inherit;
+  border: 1px solid var(--zk-rule-strong);
+  border-radius: 4px;
+  background: var(--zk-raised);
+  color: var(--ink);
+  font: 600 13px var(--font-ui);
+}
+
+.playground select,
+.playground input:not([type="checkbox"]) {
+  padding: 0 8px;
+  font: 500 13px var(--font-code);
 }
 
 .playground button {
   cursor: pointer;
-  font-weight: 550;
-}
-
-.playground button:hover:not(:disabled) {
-  border-color: var(--muted);
 }
 
 .playground button:disabled {
@@ -61,51 +58,106 @@
   cursor: default;
 }
 
+.playground button.primary {
+  border-color: transparent;
+  background: var(--accent);
+  color: var(--zk-on-accent);
+  font-weight: 700;
+}
+
 /* Toolbar */
 
-.playground .topbar {
+.playground .toolbar {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px 24px;
-  padding: 10px max(16px, env(safe-area-inset-right, 0px)) 10px
+  gap: 12px;
+  padding: 8px max(16px, env(safe-area-inset-right, 0px)) 8px
     max(16px, env(safe-area-inset-left, 0px));
+  overflow-x: auto;
   border-bottom: 1px solid var(--line);
+  background: var(--zk-surface);
 }
 
-.playground .topbar h1 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-  font-stretch: 85%;
+.playground .filename {
+  padding-right: 8px;
+  font: 600 13px var(--font-code);
+  white-space: nowrap;
 }
 
-.playground .actions {
+.playground .divider {
+  flex: none;
+  width: 1px;
+  height: 24px;
+  background: var(--line);
+}
+
+.playground .field,
+.playground .toggle,
+.playground .custom-size {
   display: flex;
-  flex-wrap: wrap;
-  align-items: end;
-  gap: 8px;
-}
-
-.playground .field {
-  display: grid;
-  gap: 2px;
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.playground .topbar .field {
-  grid-template-columns: auto auto;
+  flex: none;
   align-items: center;
   gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
 }
 
-/* Workspace: editor on the left, bench on the right */
+.playground .custom-size input {
+  width: 72px;
+  font-variant-numeric: tabular-nums;
+}
+
+.playground .toggle input {
+  accent-color: var(--accent);
+}
+
+.playground .segmented {
+  display: flex;
+  flex: none;
+  overflow: hidden;
+  border: 1px solid var(--zk-rule-strong);
+  border-radius: 4px;
+}
+
+.playground .segmented button {
+  height: 34px;
+  padding: 0 10px;
+  border: none;
+  border-right: 1px solid var(--line);
+  border-radius: 0;
+  font: 600 12.5px var(--font-code);
+  outline-offset: -2px;
+}
+
+.playground .segmented button:last-child {
+  border-right: none;
+}
+
+.playground .segmented button[aria-checked="true"] {
+  background: var(--ink);
+  color: var(--zk-bg);
+}
+
+.playground .unit {
+  margin-left: -4px;
+  color: var(--muted);
+  font: 500 12.5px var(--font-code);
+}
+
+.playground .spacer {
+  flex: 1;
+}
+
+/* Workspace */
+
+.playground .tabs {
+  display: none;
+}
 
 .playground .workspace {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
   min-height: 0;
 }
 
@@ -123,112 +175,168 @@
 }
 
 .playground .problems {
-  max-height: 30vh;
-  min-height: 0;
+  max-height: 260px;
   overflow: auto;
-  border-top: 1px solid var(--line);
+  border-top: 1px solid var(--zk-rule-strong);
+  background: var(--zk-surface);
 }
 
-.playground .problems h2 {
+.playground .problems-header {
   position: sticky;
   top: 0;
-  margin: 0;
-  padding: 10px 16px;
-  background: var(--panel);
-  font-size: 14px;
-  font-weight: 650;
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--zk-surface);
+  color: var(--muted);
+  font: 600 11.5px var(--font-code);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
-.playground .problems ul {
+.playground .problems-header .hint {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.playground ul {
   margin: 0;
-  padding: 0 8px 8px;
+  padding: 0;
   list-style: none;
 }
 
 .playground .problem {
   display: grid;
-  grid-template-columns: 64px 1fr;
-  gap: 12px;
-  width: 100%;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.playground .problem .line {
   height: auto;
-  padding: 6px 8px 6px 10px;
+  padding: 0;
   border: none;
-  border-left: 3px solid var(--warn);
-  border-radius: 0;
-  background: none;
-  text-align: left;
-  font-weight: 400;
-}
-
-.playground .problem.error {
-  border-left-color: var(--error);
-}
-
-.playground .problem:hover:not(:disabled) {
-  background: var(--active-line);
-}
-
-.playground .problem .where {
+  background: transparent;
   color: var(--muted);
-  font-variant-numeric: tabular-nums;
+  font: 600 12.5px/1.6 var(--font-code);
+  text-align: left;
 }
 
-/* Bench */
+.playground .problem .line:hover {
+  color: var(--accent);
+}
 
-.playground .bench-panel {
-  display: grid;
-  grid-template-rows: auto 1fr;
+.playground .problem div {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.playground .problem .rule {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--warn);
+  font: 600 12.5px var(--font-code);
+}
+
+.playground .problem.error .rule {
+  color: var(--error);
+}
+
+/* Diamonds for warnings, squares for errors, so color isn't the only cue */
+.playground .problem .marker {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  background: currentColor;
+  transform: rotate(45deg) scale(0.85);
+}
+
+.playground .problem.error .marker {
+  transform: none;
+}
+
+.playground .problem .message {
+  font-size: 14px;
+}
+
+.playground .clean {
+  margin: 0;
+  padding: 14px 16px;
+  color: var(--zk-ok);
+  font-weight: 600;
+}
+
+.playground .problems-tab {
+  display: none;
+}
+
+/* Preview */
+
+.playground .preview {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background-color: var(--zk-platen);
+  background-image: radial-gradient(var(--zk-dot) 1px, transparent 1.3px);
+  background-size: 8px 8px;
+}
+
+.playground .status {
+  display: flex;
+  flex: none;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--zk-surface);
+  color: var(--muted);
+  font: 500 12.5px var(--font-code);
+}
+
+.playground .status .busy {
+  color: var(--accent);
+}
+
+.playground .blocked {
+  flex: none;
+  margin: 14px 16px 0;
+  padding: 10px 14px;
+  border: 1px solid var(--zk-err-line);
+  border-radius: 6px;
+  background: var(--zk-err-soft);
+  color: var(--error);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.playground .bench-area {
+  flex: 1;
   min-height: 0;
   overflow: auto;
 }
 
-.playground .settings {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: end;
-  gap: 12px 16px;
-  padding: 12px 20px;
-  border-bottom: 1px solid var(--line);
-}
-
-.playground .settings .field {
-  grid-template-columns: auto auto;
-  grid-template-areas: "label label" "input unit";
-  column-gap: 6px;
-}
-
-.playground .settings .field > span:first-child {
-  grid-area: label;
-}
-
-.playground .settings input:not([type="range"]) {
-  width: 84px;
-  font-variant-numeric: tabular-nums;
-}
-
-.playground .settings .unit {
-  align-self: center;
-}
-
-.playground .settings .smoothing {
-  grid-template-columns: 140px auto;
-}
-
-.playground .settings input[type="range"] {
-  width: 140px;
-  height: 34px;
-  accent-color: var(--accent);
-}
-
-.playground .settings output {
-  align-self: center;
-  min-width: 7ch;
-  color: var(--ink);
-  font-variant-numeric: tabular-nums;
-}
-
 .playground .bench {
-  padding: 28px 20px 40px;
+  padding: 24px 20px 40px;
+}
+
+/* A label that wouldn't print is shown dimmed behind a dashed outline */
+.playground .bench-area.dimmed .liner {
+  opacity: 0.45;
+  outline: 2px dashed var(--error);
+  outline-offset: 6px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .playground .bench zpl-preview::part(label) {
+    transition: opacity 120ms;
+  }
 }
 
 .playground .notice {
@@ -239,7 +347,7 @@
   padding: 8px 14px;
   border-radius: 6px;
   background: var(--ink);
-  color: var(--panel);
+  color: var(--zk-bg);
   font-size: 14px;
   pointer-events: none;
   z-index: 50;
@@ -249,26 +357,72 @@
   display: none;
 }
 
+/* Phones: one panel at a time, picked with tabs */
 @media (max-width: 860px) {
+  .playground .filename,
+  .playground .divider,
+  .playground .toggle,
+  .playground .spacer {
+    display: none;
+  }
+
   .playground {
-    height: auto;
+    grid-template-rows: auto auto minmax(0, 1fr);
+  }
+
+  .playground .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .playground .tabs button {
+    flex: 1;
+    height: 46px;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .playground .tabs button[aria-selected="true"] {
+    color: var(--ink);
+    box-shadow: inset 0 -2px 0 var(--accent);
   }
 
   .playground .workspace {
     grid-template-columns: minmax(0, 1fr);
   }
 
+  .playground .workspace > section {
+    display: none;
+  }
+
+  .playground[data-tab="Editor"] .code,
+  .playground[data-tab="Problems"] .problems-tab {
+    display: grid;
+  }
+
+  .playground[data-tab="Preview"] .preview {
+    display: flex;
+  }
+
   .playground .code {
-    grid-template-rows: 55vh auto;
     border-right: none;
-    border-bottom: 1px solid var(--line);
+    grid-template-rows: minmax(0, 1fr);
   }
 
-  .playground .problems {
-    max-height: none;
+  .playground .code .problems {
+    display: none;
   }
 
-  .playground .bench-panel {
-    overflow: visible;
+  .playground .problems-tab {
+    align-content: start;
+    overflow: auto;
+    background: var(--zk-surface);
+  }
+
+  .playground .problems-tab button.line {
+    min-height: 44px;
   }
 }
