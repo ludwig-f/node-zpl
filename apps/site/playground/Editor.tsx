@@ -51,6 +51,22 @@ const theme = EditorView.theme({
     textDecoration: "underline wavy var(--error) 1.5px",
     textUnderlineOffset: "4px",
   },
+  // Diamonds for warnings and squares for errors, as in the problems list
+  ".cm-lint-marker": {
+    width: "8px",
+    height: "8px",
+    margin: "0 4px",
+    content: "''",
+  },
+  ".cm-lint-marker-warning": {
+    content: "''",
+    backgroundColor: "var(--warn)",
+    transform: "rotate(45deg) scale(0.85)",
+  },
+  ".cm-lint-marker-error": {
+    content: "''",
+    backgroundColor: "var(--error)",
+  },
   ".cm-tooltip": {
     background: "var(--panel)",
     border: "1px solid var(--line)",

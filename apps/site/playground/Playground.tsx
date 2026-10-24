@@ -9,15 +9,22 @@ import examples from "./examples";
 import { analyze } from "./analyze";
 import { decodeShare, encodeShare } from "./share";
 import type { EditorHandle } from "./Editor";
+import type { Problem } from "./analyze";
 import type { ShareState } from "./share";
 
 // Kept from before the rename, so saved labels stay
 const STORAGE_KEY = "node-zpl-playground";
 
-const fromExample = (index: number): ShareState => ({
-  ...examples[index],
-  smoothing: 0.4,
-});
+/** Smoothing when "Smooth edges" is on; off shows the printer's exact dots */
+const SMOOTHING = 0.4;
+
+const fileName = (name: string) =>
+  `${name.toLowerCase().replace(/\s+/g, "-")}.zpl`;
+
+const fromExample = (index: number): ShareState => {
+  const { zpl, widthMm, heightMm, dpmm } = examples[index];
+  return { zpl, widthMm, heightMm, dpmm, smoothing: SMOOTHING };
+};
 
 const loadSaved = (): ShareState | undefined => {
   try {
@@ -27,6 +34,23 @@ const loadSaved = (): ShareState | undefined => {
     return undefined;
   }
 };
+
+/** Common label sizes in millimeters */
+const sizes = [
+  { id: "4x6", label: "4 × 6 in", width: 101.6, height: 152.4 },
+  { id: "4x4", label: "4 × 4 in", width: 101.6, height: 101.6 },
+  { id: "4x2", label: "4 × 2 in", width: 101.6, height: 50.8 },
+  { id: "2x1", label: "2 × 1 in", width: 50.8, height: 25.4 },
+  { id: "100x150", label: "100 × 150 mm", width: 100, height: 150 },
+  { id: "57x32", label: "57 × 32 mm", width: 57, height: 32 },
+];
+
+const resolutions = [
+  { dpmm: 6, dpi: 152 },
+  { dpmm: 8, dpi: 203 },
+  { dpmm: 12, dpi: 300 },
+  { dpmm: 24, dpi: 600 },
+];
 
 /** The last value of a command like ^PW800 in the ZPL, if any */
 const lastValue = (zpl: string, command: string): number | undefined => {
@@ -40,12 +64,67 @@ const parseMm = (text: string): number | undefined => {
   return text.trim() && Number.isFinite(value) && value > 0 ? value : undefined;
 };
 
+/** Why the label wouldn't print at all, if it wouldn't */
+const blockingReason = (problems: Problem[]) => {
+  const rules = new Set(problems.map((problem) => problem.rule));
+  if (rules.has("missing-end-format")) {
+    return "the format is never closed with ^XZ";
+  }
+  if (rules.has("missing-start-format")) {
+    return "commands come before the format starts with ^XA";
+  }
+  return undefined;
+};
+
+type Tab = "Editor" | "Preview" | "Problems";
+
+function ProblemList({
+  problems,
+  onSelect,
+}: {
+  problems: Problem[];
+  onSelect: (problem: Problem) => void;
+}) {
+  if (problems.length === 0) {
+    return <p className="clean">No problems. This label prints as shown.</p>;
+  }
+  return (
+    <ul>
+      {problems.map((problem, index) => (
+        <li key={index} className={`problem ${problem.severity}`}>
+          <button
+            type="button"
+            className="line"
+            onClick={() => onSelect(problem)}
+            aria-label={`Go to line ${problem.line}`}
+          >
+            L{problem.line}
+          </button>
+          <div>
+            <span className="rule">
+              <span className="marker" aria-hidden="true" />
+              {problem.severity} · {problem.rule}
+            </span>
+            <span className="message">{problem.message}</span>
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default function Playground() {
   const [state, setState] = useState<ShareState>(
     () => loadSaved() ?? fromExample(0)
   );
+  const [name, setName] = useState("label.zpl");
   const [images, setImages] = useState<string[]>([]);
   const [notice, setNotice] = useState<string>();
+  const [tab, setTab] = useState<Tab>("Editor");
+  const [render, setRender] = useState<{ busy: boolean; ms?: number }>({
+    busy: true,
+  });
+  const started = useRef(0);
   const editor = useRef<EditorHandle>(null);
   const { zpl, widthMm, heightMm, dpmm, smoothing } = state;
   const update = (changes: Partial<ShareState>) =>
@@ -75,16 +154,31 @@ export default function Playground() {
     return () => clearTimeout(timeout);
   }, [notice]);
 
+  // Time each render, from the change to the preview's zpl-render event
+  useEffect(() => {
+    started.current = performance.now();
+    setRender((current) => ({ ...current, busy: true }));
+  }, [zpl, widthMm, heightMm, dpmm, smoothing]);
+
   const problems = useMemo(
     () => analyze(zpl, { dpmm, widthMm, heightMm }),
     [zpl, dpmm, widthMm, heightMm]
   );
+  const blocked = blockingReason(problems);
 
-  // The size the preview uses, for the ruler: settings, then ^PW/^LL, then 4 × 6 in
+  // The size the preview uses: settings, then ^PW/^LL, then 4 × 6 in
   const labelSize = {
     width: widthMm ?? ((lastValue(zpl, "PW") ?? 0) / dpmm || 101.6),
     height: heightMm ?? ((lastValue(zpl, "LL") ?? 0) / dpmm || 152.4),
   };
+  const size =
+    widthMm === undefined && heightMm === undefined
+      ? "auto"
+      : sizes.find(
+          (preset) => preset.width === widthMm && preset.height === heightMm
+        )?.id ?? "custom";
+  const [custom, setCustom] = useState(size === "custom");
+  const sizeValue = custom ? "custom" : size;
 
   const share = async () => {
     const link = `${location.origin}${location.pathname}#${await encodeShare(
@@ -104,50 +198,146 @@ export default function Playground() {
       const link = document.createElement("a");
       link.href = src;
       link.download =
-        images.length === 1 ? "label.png" : `label-${index + 1}.png`;
+        images.length === 1
+          ? name.replace(/\.zpl$/, ".png")
+          : name.replace(/\.zpl$/, `-${index + 1}.png`);
       link.click();
     });
   };
 
-  const errors = problems.filter((p) => p.severity === "error").length;
-  const warnings = problems.length - errors;
+  const selectProblem = (problem: Problem) => {
+    setTab("Editor");
+    // Let the editor show again on phones before selecting
+    requestAnimationFrame(() =>
+      editor.current?.select(problem.from, problem.to)
+    );
+  };
 
   return (
-    <div className="playground">
-      <header className="topbar">
-        <h1>Playground</h1>
-        <div className="actions">
-          <label className="field">
-            <span>Example</span>
-            <select
-              id="example"
-              value=""
-              onChange={(event) => {
-                const index = Number(event.target.value);
-                setState(fromExample(index));
-                history.replaceState(null, "", location.pathname);
-              }}
-            >
-              <option value="" disabled>
-                Open an example
+    <div className="playground" data-tab={tab}>
+      <div className="toolbar">
+        <span className="filename">{name}</span>
+        <span className="divider" aria-hidden="true" />
+        <label className="field">
+          Size
+          <select
+            value={sizeValue}
+            onChange={(event) => {
+              const id = event.target.value;
+              setCustom(id === "custom");
+              if (id === "auto") {
+                update({ widthMm: undefined, heightMm: undefined });
+              } else if (id !== "custom") {
+                const preset = sizes.find((s) => s.id === id)!;
+                update({ widthMm: preset.width, heightMm: preset.height });
+              }
+            }}
+          >
+            <option value="auto">From ^PW and ^LL</option>
+            {sizes.map((preset) => (
+              <option key={preset.id} value={preset.id}>
+                {preset.label}
               </option>
-              {examples.map((example, index) => (
-                <option key={example.name} value={index}>
-                  {example.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button type="button" onClick={share}>
-            Copy share link
-          </button>
-          <button type="button" onClick={download} disabled={!images.length}>
-            Download PNG
-          </button>
+            ))}
+            <option value="custom">Custom</option>
+          </select>
+        </label>
+        {sizeValue === "custom" && (
+          <span className="custom-size">
+            <input
+              aria-label="Width in millimeters"
+              inputMode="decimal"
+              placeholder={labelSize.width.toFixed(1)}
+              value={widthMm ?? ""}
+              onChange={(event) =>
+                update({ widthMm: parseMm(event.target.value) })
+              }
+            />
+            ×
+            <input
+              aria-label="Height in millimeters"
+              inputMode="decimal"
+              placeholder={labelSize.height.toFixed(1)}
+              value={heightMm ?? ""}
+              onChange={(event) =>
+                update({ heightMm: parseMm(event.target.value) })
+              }
+            />
+            mm
+          </span>
+        )}
+        <div role="radiogroup" aria-label="Resolution" className="segmented">
+          {resolutions.map((resolution) => (
+            <button
+              key={resolution.dpmm}
+              type="button"
+              role="radio"
+              aria-checked={resolution.dpmm === dpmm}
+              onClick={() => update({ dpmm: resolution.dpmm })}
+            >
+              {resolution.dpi}
+            </button>
+          ))}
         </div>
-      </header>
+        <span className="unit">dpi</span>
+        <label className="toggle">
+          <input
+            type="checkbox"
+            checked={smoothing > 0}
+            onChange={(event) =>
+              update({ smoothing: event.target.checked ? SMOOTHING : 0 })
+            }
+          />
+          Smooth edges
+        </label>
+        <div className="spacer" />
+        <select
+          aria-label="Open an example"
+          value=""
+          onChange={(event) => {
+            const index = Number(event.target.value);
+            setState(fromExample(index));
+            setName(fileName(examples[index].name));
+            setCustom(false);
+            history.replaceState(null, "", location.pathname);
+          }}
+        >
+          <option value="" disabled>
+            Examples
+          </option>
+          {examples.map((example, index) => (
+            <option key={example.name} value={index}>
+              {example.name}
+            </option>
+          ))}
+        </select>
+        <button type="button" onClick={share}>
+          Share link
+        </button>
+        <button
+          type="button"
+          className="primary"
+          onClick={download}
+          disabled={!images.length}
+        >
+          Download PNG
+        </button>
+      </div>
 
-      <main className="workspace">
+      <div role="tablist" className="tabs">
+        {(["Editor", "Preview", "Problems"] as const).map((id) => (
+          <button
+            key={id}
+            role="tab"
+            aria-selected={id === tab}
+            onClick={() => setTab(id)}
+          >
+            {id === "Problems" ? `Problems (${problems.length})` : id}
+          </button>
+        ))}
+      </div>
+
+      <div className="workspace">
         <section className="code" aria-label="ZPL editor">
           <Editor
             ref={editor}
@@ -156,115 +346,59 @@ export default function Playground() {
             onChange={(value) => update({ zpl: value })}
           />
           <div className="problems">
-            <h2>
-              {problems.length === 0
-                ? "No problems found"
-                : [
-                    errors && `${errors} error${errors === 1 ? "" : "s"}`,
-                    warnings &&
-                      `${warnings} warning${warnings === 1 ? "" : "s"}`,
-                  ]
-                    .filter(Boolean)
-                    .join(", ")}
-            </h2>
-            {problems.length > 0 && (
-              <ul>
-                {problems.map((problem, index) => (
-                  <li key={index}>
-                    <button
-                      type="button"
-                      className={`problem ${problem.severity}`}
-                      onClick={() =>
-                        editor.current?.select(problem.from, problem.to)
-                      }
-                    >
-                      <span className="where">Line {problem.line}</span>
-                      <span className="what">{problem.message}</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <div className="problems-header">
+              <span>Problems · {problems.length}</span>
+              <span className="hint">lint updates as you type</span>
+            </div>
+            <ProblemList problems={problems} onSelect={selectProblem} />
           </div>
         </section>
 
-        <section className="bench-panel" aria-label="Label preview">
-          <div className="settings">
-            <label className="field">
-              <span>Width</span>
-              <input
-                id="width"
-                inputMode="decimal"
-                placeholder={labelSize.width.toFixed(1)}
-                value={widthMm ?? ""}
-                onChange={(event) =>
-                  update({ widthMm: parseMm(event.target.value) })
-                }
-              />
-              <span className="unit">mm</span>
-            </label>
-            <label className="field">
-              <span>Height</span>
-              <input
-                id="height"
-                inputMode="decimal"
-                placeholder={labelSize.height.toFixed(1)}
-                value={heightMm ?? ""}
-                onChange={(event) =>
-                  update({ heightMm: parseMm(event.target.value) })
-                }
-              />
-              <span className="unit">mm</span>
-            </label>
-            <label className="field">
-              <span>Resolution</span>
-              <select
-                id="dpmm"
-                value={dpmm}
-                onChange={(event) =>
-                  update({ dpmm: Number(event.target.value) })
-                }
-              >
-                <option value={6}>152 dpi</option>
-                <option value={8}>203 dpi</option>
-                <option value={12}>300 dpi</option>
-                <option value={24}>600 dpi</option>
-              </select>
-            </label>
-            <label className="field smoothing">
-              <span>Smoothing</span>
-              <input
-                id="smoothing"
-                type="range"
-                min={0}
-                max={1}
-                step={0.05}
-                value={smoothing}
-                onChange={(event) =>
-                  update({ smoothing: Number(event.target.value) })
-                }
-              />
-              <output htmlFor="smoothing">
-                {smoothing === 0
-                  ? "Printer dots"
-                  : `${Math.round(smoothing * 100)}%`}
-              </output>
-            </label>
-          </div>
-
-          <Bench widthMm={labelSize.width} heightMm={labelSize.height}>
-            <zpl-preview
-              zpl={zpl}
-              width={widthMm}
-              height={heightMm}
-              dpmm={dpmm}
-              smoothing={smoothing}
-              onzpl-render={(event) => setImages(event.detail.images)}
-              onzpl-error={() => setImages([])}
-            />
-          </Bench>
+        <section className="problems-tab" aria-label="Problems">
+          <ProblemList problems={problems} onSelect={selectProblem} />
         </section>
-      </main>
+
+        <section className="preview" aria-label="Label preview">
+          <div className="status" aria-live="polite">
+            <span className={render.busy ? "busy" : undefined}>
+              {render.busy || render.ms === undefined
+                ? "Rendering…"
+                : `Rendered in ${render.ms} ms`}
+            </span>
+            <span>
+              {Math.round(labelSize.width * dpmm)} ×{" "}
+              {Math.round(labelSize.height * dpmm)} dots
+            </span>
+          </div>
+          {blocked && (
+            <p className="blocked">
+              This label would not print: {blocked}. Shown for reference.
+            </p>
+          )}
+          <div className={`bench-area${blocked ? " dimmed" : ""}`}>
+            <Bench widthMm={labelSize.width} heightMm={labelSize.height}>
+              <zpl-preview
+                zpl={zpl}
+                width={widthMm}
+                height={heightMm}
+                dpmm={dpmm}
+                smoothing={smoothing}
+                onzpl-render={(event) => {
+                  setImages(event.detail.images);
+                  setRender({
+                    busy: false,
+                    ms: Math.round(performance.now() - started.current),
+                  });
+                }}
+                onzpl-error={() => {
+                  setImages([]);
+                  setRender({ busy: false });
+                }}
+              />
+            </Bench>
+          </div>
+        </section>
+      </div>
 
       <div className="notice" role="status" aria-live="polite">
         {notice}

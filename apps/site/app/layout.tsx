@@ -1,6 +1,6 @@
 import { RootProvider } from "fumadocs-ui/provider/next";
 import type { Metadata } from "next";
-import { Archivo, Spline_Sans_Mono } from "next/font/google";
+import { Archivo, IBM_Plex_Mono } from "next/font/google";
 import { siteUrl } from "@/lib/shared";
 import "./global.css";
 
@@ -10,9 +10,11 @@ const archivo = Archivo({
   variable: "--font-archivo",
 });
 
-const splineSansMono = Spline_Sans_Mono({
+// Unambiguous zero, O and l, which matter in ZPL like ^FO0,0
+const plexMono = IBM_Plex_Mono({
   subsets: ["latin", "latin-ext"],
-  variable: "--font-spline-mono",
+  weight: ["400", "500", "600"],
+  variable: "--font-plex-mono",
 });
 
 export const metadata: Metadata = {
@@ -26,7 +28,7 @@ export default function Layout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${archivo.variable} ${splineSansMono.variable}`}
+      className={`${archivo.variable} ${plexMono.variable}`}
       suppressHydrationWarning
     >
       <body className="flex flex-col min-h-screen">
