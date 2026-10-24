@@ -144,6 +144,23 @@ serialize(commands); // "^XA^FO50,50^A0N,30^FDHello^FS^XZ"
 - Commands with invalid parameters are kept as `Raw` nodes and reported in `diagnostics`. Text the printer skips, like the `G` in `^FSG`, is reported too.
 - Prefix and delimiter changes (`^CC`, `^CT`, `^CD`) are applied while parsing, so `serialize` always writes standard `^`, `~` and `,`.
 
+### Converting ZPL to code
+
+`convert` turns existing ZPL into code that builds the same labels, as JSX or, with `{ style: "builder" }`, Label method calls:
+
+```typescript
+import { convert } from "@zplkit/core/convert";
+
+convert("^XA^PW400^LL200^FO40,40^A0N,32^FDHello^FS^XZ");
+// const label = build(
+//   <Label width={mm(50)} height={mm(25)} dpmm={8}>
+//     <Text x={mm(5)} y={mm(5)} font="0" height={mm(4)} orientation={Orientation.Normal}>Hello</Text>
+//   </Label>
+// );
+```
+
+Each field is checked by building it again, and anything without a matching element is kept as raw ZPL, so the converted label prints the same. Lengths are in millimeters when they convert back to exactly the same dots, and in dots otherwise.
+
 ### Linting
 
 Printers don't report mistakes. They quietly clamp values, ignore commands or never print a label. `lint` finds these problems before you print:

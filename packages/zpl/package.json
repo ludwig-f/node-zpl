@@ -23,6 +23,10 @@
     "./jsx-dev-runtime": {
       "types": "./build/jsx-dev-runtime.d.ts",
       "default": "./build/jsx-dev-runtime.js"
+    },
+    "./convert": {
+      "types": "./build/convert.d.ts",
+      "default": "./build/convert.js"
     }
   },
   "repository": {

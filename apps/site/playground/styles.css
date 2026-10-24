@@ -446,3 +446,77 @@
     min-height: 44px;
   }
 }
+
+/* Show as code */
+
+.playground .code-panel {
+  width: min(880px, calc(100vw - 32px));
+  max-height: calc(100dvh - 64px);
+  /* Tailwind's reset clears the margin that centers dialogs */
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--zk-rule-strong);
+  border-radius: 6px;
+  background: var(--zk-bg);
+  color: var(--ink);
+}
+
+.playground .code-panel[open] {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.playground .code-panel::backdrop {
+  background: color-mix(in srgb, var(--zk-ink) 35%, transparent);
+}
+
+.playground .code-panel-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--zk-surface);
+}
+
+.playground .code-panel-header h2 {
+  margin: 0 8px 0 0;
+  font: 700 15px var(--font-ui);
+}
+
+.playground .code-panel-header .spacer {
+  flex: 1;
+}
+
+.playground .code-panel-body {
+  overflow: auto;
+  background: var(--panel);
+}
+
+.playground .code-panel-body pre {
+  margin: 0;
+  padding: 16px;
+  font: 13px/1.6 var(--font-code);
+  white-space: pre;
+}
+
+.playground .code-panel-error {
+  margin: 0;
+  padding: 16px;
+  color: var(--error);
+}
+
+.playground .code-panel-note {
+  margin: 0;
+  padding: 10px 16px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.playground .code-panel-note a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
