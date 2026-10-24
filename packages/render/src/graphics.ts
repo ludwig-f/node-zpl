@@ -1,7 +1,9 @@
 /**
- * Decoding of ASCII hex graphic data (^GF A and ~DG), including Zebra's
- * compression scheme. Based on zebrash (MIT, https://github.com/ingridhq/zebrash).
+ * Decoding of ASCII graphic data (^GF A and ~DG): hex, including Zebra's
+ * compression scheme, or base64 as :B64: and :Z64:. Based on zebrash (MIT,
+ * https://github.com/ingridhq/zebrash).
  */
+import { decodeObjectData } from "./data.js";
 
 /** Repeat counts: G to Y are 1 to 19, g to z are 20 to 400 in steps of 20 */
 const repeatCount = (char: string): number | undefined => {
@@ -22,6 +24,15 @@ const decodeGraphicData = (
   bytesPerRow: number,
   totalBytes: number
 ): Uint8Array => {
+  if (/^:[BZ]64:/.test(data)) {
+    // Short data leaves the rest of the graphic blank
+    const bytes = new Uint8Array(totalBytes);
+    bytes.set(
+      (decodeObjectData(data) ?? new Uint8Array()).subarray(0, totalBytes)
+    );
+    return bytes;
+  }
+
   const rowHex = bytesPerRow * 2;
   let hex = "";
   let row = "";

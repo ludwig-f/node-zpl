@@ -1,6 +1,7 @@
 // Expected dots were measured from Labelary renders at 8 dpmm, which match
 // Zebra printers closely
 import { describe, test, expect } from "vitest";
+import { deflateSync } from "node:zlib";
 import { renderLabels } from "./render.js";
 import type { Raster } from "./raster.js";
 
@@ -209,6 +210,36 @@ describe("renderLabels", () => {
         "................",
         "................",
       ]);
+    });
+
+    describe("base64 data, as design tools export it", () => {
+      const bits = Buffer.from("F00F0FF0", "hex");
+      const b64 = `:B64:${bits.toString("base64")}:1234`;
+      const z64 = `:Z64:${deflateSync(bits).toString("base64")}:1234`;
+      const expected = ["####........####", "....########...."];
+
+      test.each([b64, z64])("^GF with %s", (data) => {
+        expect(
+          art(render(`^FO10,10^GFA,4,4,2,${data}^FS`), 10, 10, 25, 11)
+        ).toStrictEqual(expected);
+      });
+
+      test.each([b64, z64])("~DG with %s", (data) => {
+        const raster = renderLabels(
+          `~DGR:LOGO.GRF,4,2,${data}^XA^PW203^FO10,10^XGR:LOGO.GRF^FS^XZ`,
+          size
+        )[0];
+        expect(art(raster, 10, 10, 25, 11)).toStrictEqual(expected);
+      });
+
+      test("pads data shorter than the graphic with blank rows", () => {
+        const short = `:Z64:${deflateSync(bits.subarray(0, 2)).toString(
+          "base64"
+        )}:0`;
+        expect(
+          art(render(`^FO10,10^GFA,4,4,2,${short}^FS`), 10, 10, 25, 11)
+        ).toStrictEqual(["####........####", "................"]);
+      });
     });
 
     test("graphics stored with ~DG can be recalled with ^XG", () => {
