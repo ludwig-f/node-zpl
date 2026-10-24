@@ -27,8 +27,6 @@ const zpl = build(
 | [`@zplkit/render`](./packages/render) | Render ZPL to images the way a printer draws it, in Node or the browser, in plain TypeScript |
 | [`@zplkit/preview`](./packages/preview) | `<zpl-preview>`, a web component that shows ZPL as images in any framework |
 
-zplkit was called `node-zpl` before version 2. To upgrade, install `@zplkit/core` and change imports from `node-zpl` to `@zplkit/core`.
-
 ## Contributing
 
 Bug reports, ideas and pull requests are welcome. [CONTRIBUTING.md](./CONTRIBUTING.md) explains how to set up the repository and run the tests.

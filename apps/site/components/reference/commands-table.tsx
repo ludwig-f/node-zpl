@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import data from "@/content/commands.json";
+import { categoryAnchor } from "./anchor";
 
 type Command = (typeof data.commands)[number];
 type Mode = "All" | "Drawn" | "Gaps";
@@ -132,7 +133,10 @@ export function CommandsTable() {
       <div className="flex flex-col gap-7 pb-16 pt-2">
         {groups.map((group) => (
           <section key={group.category} className="flex flex-col gap-2.5">
-            <h2 className="mt-4 flex items-baseline gap-2.5 text-[22px] font-extrabold [font-stretch:108%]">
+            <h2
+              id={categoryAnchor(group.category)}
+              className="mt-4 flex scroll-mt-40 items-baseline gap-2.5 text-[22px] font-extrabold [font-stretch:108%]"
+            >
               {group.category}
               <span className="font-mono text-[12.5px] font-medium text-muted">
                 {group.rows.length} of {group.total}

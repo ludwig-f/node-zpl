@@ -21,7 +21,7 @@ export function baseOptions(): BaseLayoutProps {
     links: [
       { text: "Docs", url: "/docs", active: "nested-url" },
       { text: "Playground", url: "/playground" },
-      { text: "Reference", url: "/docs/commands" },
+      { text: "Reference", url: "/reference" },
       { text: "Releases", url: "/releases" },
     ],
     githubUrl: `https://github.com/${gitConfig.user}/${gitConfig.repo}`,

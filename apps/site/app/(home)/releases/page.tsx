@@ -18,7 +18,6 @@ export default async function ReleasesPage() {
         </h1>
         <p className="text-lede text-muted">
           What changed in each version of the zplkit packages, newest first.
-          Versions before 2.0 were published as node-zpl.
         </p>
         <a
           href="/releases.xml"
