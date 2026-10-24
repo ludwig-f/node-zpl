@@ -102,6 +102,54 @@ const commandCases: [Command, string][] = [
   [{ type: "Ean13", orientation: "R", height: 50 }, "^BER,50"],
   [
     {
+      type: "Ean8",
+      orientation: "N",
+      height: 100,
+      interpretationLine: true,
+      interpretationLineAbove: false,
+    },
+    "^B8N,100,Y,N",
+  ],
+  [
+    { type: "UpcA", orientation: "N", height: 137, printCheckDigit: false },
+    "^BUN,137,,,N",
+  ],
+  [
+    {
+      type: "UpcE",
+      height: 100,
+      interpretationLine: true,
+      interpretationLineAbove: false,
+      printCheckDigit: true,
+    },
+    "^B9,100,Y,N,Y",
+  ],
+  [{ type: "UpcEanExtension", orientation: "N", height: 117 }, "^BSN,117"],
+  [
+    {
+      type: "Code93",
+      orientation: "N",
+      height: 100,
+      interpretationLine: true,
+      interpretationLineAbove: false,
+      printCheckDigit: false,
+    },
+    "^BAN,100,Y,N,N",
+  ],
+  [
+    {
+      type: "Codabar",
+      orientation: "N",
+      height: 150,
+      interpretationLine: true,
+      interpretationLineAbove: false,
+      start: "A",
+      stop: "D",
+    },
+    "^BKN,,150,Y,N,A,D",
+  ],
+  [
+    {
       type: "Code39",
       orientation: "N",
       checkDigit: false,

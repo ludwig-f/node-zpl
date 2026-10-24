@@ -9,6 +9,14 @@ import { encodeCode11 } from "./barcodes/code11.js";
 import { encodeCode128 } from "./barcodes/code128.js";
 import { encodeCode39 } from "./barcodes/code39.js";
 import { encodeEan13 } from "./barcodes/ean13.js";
+import { encodeCodabar } from "./barcodes/codabar.js";
+import { encodeCode93 } from "./barcodes/code93.js";
+import {
+  encodeEan8,
+  encodeUpcA,
+  encodeUpcE,
+  encodeUpcEanExtension,
+} from "./barcodes/upc-ean.js";
 import { encodeInterleaved2of5 } from "./barcodes/interleaved2of5.js";
 import { fillPath } from "./raster.js";
 import {
@@ -32,8 +40,14 @@ const GAP_ABOVE = 8;
 /** How far EAN-13 guard bars reach below the others */
 const GUARD_EXTENSION = 13;
 
-/** Text under part of the bars, centered on the span from `from` to `to` */
-type TextPart = { text: string; from: number; to: number };
+/**
+ * Text under part of the bars, centered on the span from `from` to `to`,
+ * starting at `from` when they're equal, or ending at `to` with align "end"
+ */
+type TextPart = { text: string; from: number; to: number; align?: "end" };
+
+/** Gap in modules between UPC's outside digits and the bars */
+const OUTSIDE_GAP = 4;
 
 type Linear = {
   kind: "linear";
@@ -187,6 +201,130 @@ const encode = (barcode: Barcode, dpmm: number): Linear | Matrix => {
         ],
       };
     }
+    case "Ean8": {
+      const { widths, guards, text } = encodeEan8(data);
+      const m = moduleWidth;
+      return {
+        kind: "linear",
+        widths: widths.map((w) => w * m),
+        guards,
+        height: symbology.height ?? barcode.height,
+        line: interpretation(
+          symbology.interpretationLine,
+          symbology.interpretationLineAbove
+        ),
+        text,
+        // Four digits under each half, between the guards
+        below: [
+          { text: text.slice(0, 4), from: 3 * m, to: 31 * m },
+          { text: text.slice(4), from: 36 * m, to: 64 * m },
+        ],
+      };
+    }
+    case "UpcA": {
+      const { widths, guards, text } = encodeUpcA(data);
+      const m = moduleWidth;
+      const check = symbology.printCheckDigit === false ? "" : text[11];
+      return {
+        kind: "linear",
+        widths: widths.map((w) => w * m),
+        guards,
+        height: symbology.height ?? barcode.height,
+        line: interpretation(
+          symbology.interpretationLine,
+          symbology.interpretationLineAbove
+        ),
+        text: text.slice(0, 11) + check,
+        // The first and last digits sit outside the bars, five under each half
+        below: [
+          { text: text[0], from: 0, to: -OUTSIDE_GAP * m, align: "end" },
+          { text: text.slice(1, 6), from: 10 * m, to: 45 * m },
+          { text: text.slice(6, 11), from: 50 * m, to: 85 * m },
+          {
+            text: check,
+            from: (95 + OUTSIDE_GAP) * m,
+            to: (95 + OUTSIDE_GAP) * m,
+          },
+        ],
+      };
+    }
+    case "UpcE": {
+      const { widths, guards, text } = encodeUpcE(data);
+      const m = moduleWidth;
+      const check = symbology.printCheckDigit === false ? "" : text[7];
+      return {
+        kind: "linear",
+        widths: widths.map((w) => w * m),
+        guards,
+        height: symbology.height ?? barcode.height,
+        line: interpretation(
+          symbology.interpretationLine,
+          symbology.interpretationLineAbove
+        ),
+        text: text.slice(0, 7) + check,
+        // The number system and check digit sit outside the bars
+        below: [
+          { text: text[0], from: 0, to: -OUTSIDE_GAP * m, align: "end" },
+          { text: text.slice(1, 7), from: 3 * m, to: 45 * m },
+          {
+            text: check,
+            from: (51 + OUTSIDE_GAP) * m,
+            to: (51 + OUTSIDE_GAP) * m,
+          },
+        ],
+      };
+    }
+    case "UpcEanExtension": {
+      const { widths, text } = encodeUpcEanExtension(data);
+      return {
+        kind: "linear",
+        widths: widths.map((w) => w * moduleWidth),
+        height: symbology.height ?? barcode.height,
+        // Unlike other barcodes, the digits print above the bars by default
+        line: interpretation(
+          symbology.interpretationLine,
+          symbology.interpretationLineAbove ?? true
+        ),
+        text,
+      };
+    }
+    case "Code93": {
+      const { widths, text } = encodeCode93(
+        data,
+        symbology.printCheckDigit ?? false
+      );
+      return {
+        kind: "linear",
+        widths: widths.map((w) => w * moduleWidth),
+        height: symbology.height ?? barcode.height,
+        line: interpretation(
+          symbology.interpretationLine,
+          symbology.interpretationLineAbove
+        ),
+        // Printers show the start and stop characters as boxes; we leave
+        // their places blank
+        text: ` ${text} `,
+      };
+    }
+    case "Codabar": {
+      const { widths, text } = encodeCodabar(
+        data,
+        symbology.start ?? "A",
+        symbology.stop ?? "A",
+        moduleWidth,
+        Math.round(moduleWidth * barcode.ratio)
+      );
+      return {
+        kind: "linear",
+        widths,
+        height: symbology.height ?? barcode.height,
+        line: interpretation(
+          symbology.interpretationLine,
+          symbology.interpretationLineAbove
+        ),
+        text,
+      };
+    }
     case "Pdf417": {
       const options = [`eclevel=${symbology.securityLevel ?? 0}`, "rowmult=1"];
       if (symbology.truncate) options.push("compact");
@@ -329,9 +467,15 @@ const drawLinear = (
   if (line === "below" && symbol.below) {
     // Laid out under the bars, between the guards
     const top = barcode.moduleWidth > 2 ? 2 * barcode.moduleWidth : 4;
-    for (const { text, from, to } of symbol.below) {
+    for (const part of symbol.below) {
+      const { text, from, to } = part;
       const advance = advanceOf(face, text);
-      const start = from === to ? from : (from + to - advance) / 2;
+      const start =
+        part.align === "end"
+          ? to - advance
+          : from === to
+          ? from
+          : (from + to - advance) / 2;
       const glyphs = placeLine(face, text, start, top + face.ascent);
       drawGlyphs(raster, glyphs, place, color);
     }

@@ -9,7 +9,9 @@ It draws:
 - Boxes, circles and diagonal lines (`^GB`, `^GC`, `^GD`) and images (`^GF`, `~DG` or `~DY` with `^XG`), in hex or base64 (`:B64:`, `:Z64:`)
 - Text in font 0 and the bitmap fonts A to H (`^A`, `^CF`), rotated (`^FW`) and wrapped in blocks (`^FB`)
 - Text in TrueType fonts, downloaded (`~DU`, `~DY`) or passed in, and called by name (`^A@`) or letter (`^CW`)
-- Code 128, Code 39, Interleaved 2 of 5, EAN-13, Code 11, PDF417, QR codes, Data Matrix, Aztec and MaxiCode (`^BC`, `^B3`, `^B2`, `^BE`, `^B1`, `^B7`, `^BQ`, `^BX`, `^BO`, `^BD`, `^BY`)
+- Code 128, Code 39, Code 93, Interleaved 2 of 5, Code 11 and Codabar (`^BC`, `^B3`, `^BA`, `^B2`, `^B1`, `^BK`)
+- EAN-13, EAN-8, UPC-A, UPC-E and their 2 and 5 digit add-ons (`^BE`, `^B8`, `^BU`, `^B9`, `^BS`)
+- PDF417, QR codes, Data Matrix, Aztec and MaxiCode (`^B7`, `^BQ`, `^BX`, `^BO`, `^B0`, `^BD`), all with `^BY`
 - Graphic symbols (`^GS`), stored formats (`^DF`, `^XF`, `^FN`), labels printed upside down (`^PO`) and stored images as backgrounds (`^IL`)
 - Reverse printing (`^FR`, `^LR`), label home (`^LH`), print width (`^PW`) and UTF-8 text (`^CI28`)
 
@@ -52,6 +54,6 @@ A font that isn't there prints in font 0, and its command is listed in `layout()
 
 ## Accuracy
 
-Geometry follows Zebra's ZPL II Programming Guide, and every element is tested dot for dot against how Zebra printers draw it. Boxes, circles, diagonals, images and barcode bars come out exactly as printed. Data Matrix and PDF417 symbols have the same size as a printer's but can encode the data differently, which scanners read the same; long runs of digits can make a PDF417 symbol a row shorter.
+Geometry follows Zebra's ZPL II Programming Guide, and every element is tested dot for dot against how Zebra printers draw it. Boxes, circles, diagonals, images and barcode bars come out exactly as printed. The newest barcodes (Code 93, Codabar, EAN-8, UPC-A, UPC-E and the add-ons) have their bars checked against a reference encoder and their interpretation lines laid out from the examples in Zebra's guide, so their text can sit a dot or two from where a printer puts it. Data Matrix and PDF417 symbols have the same size as a printer's but can encode the data differently, which scanners read the same; long runs of digits can make a PDF417 symbol a row shorter.
 
 Zebra's fonts can't be redistributed, so open-licensed fonts stand in for them (see [fonts/README.md](fonts/README.md)): text takes the same space as on a printer, but letters look slightly different.

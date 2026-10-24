@@ -405,6 +405,57 @@ const parsers: Record<string, CommandParser> = {
     interpretationLine: p.yesNo(2, "interpretationLine"),
     interpretationLineAbove: p.yesNo(3, "interpretationLineAbove"),
   })),
+  "^B8": withParams("^B8", (p) => ({
+    type: "Ean8",
+    orientation: p.oneOf(0, "orientation", orientations),
+    height: p.number(1, "height"),
+    interpretationLine: p.yesNo(2, "interpretationLine"),
+    interpretationLineAbove: p.yesNo(3, "interpretationLineAbove"),
+  })),
+  "^BU": withParams("^BU", (p) => ({
+    type: "UpcA",
+    orientation: p.oneOf(0, "orientation", orientations),
+    height: p.number(1, "height"),
+    interpretationLine: p.yesNo(2, "interpretationLine"),
+    interpretationLineAbove: p.yesNo(3, "interpretationLineAbove"),
+    printCheckDigit: p.yesNo(4, "printCheckDigit"),
+  })),
+  "^B9": withParams("^B9", (p) => ({
+    type: "UpcE",
+    orientation: p.oneOf(0, "orientation", orientations),
+    height: p.number(1, "height"),
+    interpretationLine: p.yesNo(2, "interpretationLine"),
+    interpretationLineAbove: p.yesNo(3, "interpretationLineAbove"),
+    printCheckDigit: p.yesNo(4, "printCheckDigit"),
+  })),
+  "^BS": withParams("^BS", (p) => ({
+    type: "UpcEanExtension",
+    orientation: p.oneOf(0, "orientation", orientations),
+    height: p.number(1, "height"),
+    interpretationLine: p.yesNo(2, "interpretationLine"),
+    interpretationLineAbove: p.yesNo(3, "interpretationLineAbove"),
+  })),
+  "^BA": withParams("^BA", (p) => ({
+    type: "Code93",
+    orientation: p.oneOf(0, "orientation", orientations),
+    height: p.number(1, "height"),
+    interpretationLine: p.yesNo(2, "interpretationLine"),
+    interpretationLineAbove: p.yesNo(3, "interpretationLineAbove"),
+    printCheckDigit: p.yesNo(4, "printCheckDigit"),
+  })),
+  "^BK": withParams("^BK", (p) => {
+    // The check digit parameter is fixed at N
+    p.oneOf(1, "checkDigit", ["N"] as const);
+    return {
+      type: "Codabar",
+      orientation: p.oneOf(0, "orientation", orientations),
+      height: p.number(2, "height"),
+      interpretationLine: p.yesNo(3, "interpretationLine"),
+      interpretationLineAbove: p.yesNo(4, "interpretationLineAbove"),
+      start: p.oneOf(5, "start", ["A", "B", "C", "D"] as const),
+      stop: p.oneOf(6, "stop", ["A", "B", "C", "D"] as const),
+    };
+  }),
   "^BX": withParams("^BX", (p) =>
     // The aspect ratio parameter has no typed node
     p.string(7) !== undefined
@@ -508,6 +559,17 @@ const parsers: Record<string, CommandParser> = {
     ...storedObject("^IL", p.requiredString(0, "object")),
   })),
   "^BO": withParams("^BO", (p) => ({
+    type: "Aztec",
+    orientation: p.oneOf(0, "orientation", orientations),
+    magnification: p.number(1, "magnification"),
+    extendedChannel: p.yesNo(2, "extendedChannel"),
+    errorControl: p.number(3, "errorControl"),
+    menu: p.yesNo(4, "menu"),
+    symbolCount: p.number(5, "symbolCount"),
+    structuredAppendId: p.string(6),
+  })),
+  // ^B0 is the same as ^BO, and is written back as ^BO
+  "^B0": withParams("^B0", (p) => ({
     type: "Aztec",
     orientation: p.oneOf(0, "orientation", orientations),
     magnification: p.number(1, "magnification"),

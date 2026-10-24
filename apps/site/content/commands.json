@@ -28,8 +28,8 @@
       "code": "^B0",
       "name": "Aztec bar code parameters",
       "category": "Barcodes",
-      "support": "no",
-      "drawn": false,
+      "support": "yes",
+      "drawn": true,
       "note": ""
     },
     {
@@ -84,24 +84,24 @@
       "code": "^B8",
       "name": "EAN-8 bar code",
       "category": "Barcodes",
-      "support": "no",
-      "drawn": false,
+      "support": "yes",
+      "drawn": true,
       "note": ""
     },
     {
       "code": "^B9",
       "name": "UPC-E bar code",
       "category": "Barcodes",
-      "support": "no",
-      "drawn": false,
+      "support": "yes",
+      "drawn": true,
       "note": ""
     },
     {
       "code": "^BA",
       "name": "Code 93 bar code",
       "category": "Barcodes",
-      "support": "no",
-      "drawn": false,
+      "support": "yes",
+      "drawn": true,
       "note": ""
     },
     {
@@ -164,8 +164,8 @@
       "code": "^BK",
       "name": "ANSI Codabar bar code",
       "category": "Barcodes",
-      "support": "no",
-      "drawn": false,
+      "support": "yes",
+      "drawn": true,
       "note": ""
     },
     {
@@ -220,8 +220,8 @@
       "code": "^BS",
       "name": "UPC/EAN bar code",
       "category": "Barcodes",
-      "support": "no",
-      "drawn": false,
+      "support": "yes",
+      "drawn": true,
       "note": ""
     },
     {
@@ -236,8 +236,8 @@
       "code": "^BU",
       "name": "UPC-A bar code",
       "category": "Barcodes",
-      "support": "no",
-      "drawn": false,
+      "support": "yes",
+      "drawn": true,
       "note": ""
     },
     {

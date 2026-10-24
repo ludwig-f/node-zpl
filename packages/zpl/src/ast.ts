@@ -237,6 +237,76 @@ type Ean13 = Node<
     interpretationLineAbove?: boolean;
   }
 >;
+/** `^B8o,h,f,g`: 7 digits, and the printer adds the check digit */
+type Ean8 = Node<
+  "Ean8",
+  {
+    orientation?: Orientation;
+    height?: number;
+    interpretationLine?: boolean;
+    interpretationLineAbove?: boolean;
+  }
+>;
+/** `^BUo,h,f,g,e`: 11 digits, and the printer adds the check digit */
+type UpcA = Node<
+  "UpcA",
+  {
+    orientation?: Orientation;
+    height?: number;
+    interpretationLine?: boolean;
+    interpretationLineAbove?: boolean;
+    /** Prints the check digit in the interpretation line */
+    printCheckDigit?: boolean;
+  }
+>;
+/** `^B9o,h,f,g,e`: a UPC-A number, compressed to 6 digits */
+type UpcE = Node<
+  "UpcE",
+  {
+    orientation?: Orientation;
+    height?: number;
+    interpretationLine?: boolean;
+    interpretationLineAbove?: boolean;
+    /** Prints the check digit in the interpretation line */
+    printCheckDigit?: boolean;
+  }
+>;
+/** `^BSo,h,f,g`: a 2 or 5 digit add-on for UPC and EAN codes */
+type UpcEanExtension = Node<
+  "UpcEanExtension",
+  {
+    orientation?: Orientation;
+    height?: number;
+    interpretationLine?: boolean;
+    interpretationLineAbove?: boolean;
+  }
+>;
+/** `^BAo,h,f,g,e` */
+type Code93 = Node<
+  "Code93",
+  {
+    orientation?: Orientation;
+    height?: number;
+    interpretationLine?: boolean;
+    interpretationLineAbove?: boolean;
+    /** Prints the check characters in the interpretation line */
+    printCheckDigit?: boolean;
+  }
+>;
+/** `^BKo,e,h,f,g,k,l`: ANSI Codabar */
+type Codabar = Node<
+  "Codabar",
+  {
+    orientation?: Orientation;
+    height?: number;
+    interpretationLine?: boolean;
+    interpretationLineAbove?: boolean;
+    /** Start character, A by default */
+    start?: "A" | "B" | "C" | "D";
+    /** Stop character, A by default */
+    stop?: "A" | "B" | "C" | "D";
+  }
+>;
 /** `^BXo,h,s,c,r,f,g,a` */
 type DataMatrix = Node<
   "DataMatrix",
@@ -411,6 +481,12 @@ type Command =
   | Interleaved2of5
   | Pdf417
   | Ean13
+  | Ean8
+  | UpcA
+  | UpcE
+  | UpcEanExtension
+  | Code93
+  | Codabar
   | DataMatrix
   | QrCode
   | Aztec
@@ -467,6 +543,12 @@ export type {
   Interleaved2of5,
   Pdf417,
   Ean13,
+  Ean8,
+  UpcA,
+  UpcE,
+  UpcEanExtension,
+  Code93,
+  Codabar,
   DataMatrix,
   QrCode,
   Aztec,

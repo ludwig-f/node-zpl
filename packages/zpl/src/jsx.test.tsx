@@ -11,6 +11,12 @@ import {
   Aztec,
   MaxiCode,
   EAN13,
+  EAN8,
+  UpcA,
+  UpcE,
+  UpcEanExtension,
+  Code93,
+  Codabar,
   DataMatrix,
   Graphic,
   StoredGraphic,
@@ -355,4 +361,39 @@ suite("jsx", () => {
       expect(at12.toZPL()).toContain("^FO12,12^GB120,60,2,B,0^FS");
     });
   });
+});
+
+test("retail and Code 93 elements match the builder", () => {
+  const label = build(
+    <Label width={mm(57)} height={mm(19)} dpmm={12}>
+      <EAN8 x={dots(10)} y={dots(10)} height={dots(100)}>
+        1234567
+      </EAN8>
+      <UpcA x={dots(10)} y={dots(10)} printCheckDigit={false}>
+        07000002198
+      </UpcA>
+      <UpcE x={dots(10)} y={dots(10)}>
+        1230000045
+      </UpcE>
+      <UpcEanExtension x={dots(10)} y={dots(10)}>
+        04414
+      </UpcEanExtension>
+      <Code93 x={dots(10)} y={dots(10)} printHri={false}>
+        ABC
+      </Code93>
+      <Codabar x={dots(10)} y={dots(10)} start="B" stop="C">
+        123
+      </Codabar>
+    </Label>
+  );
+  const at = { x: dots(10), y: dots(10) };
+  const expected = new LabelBuilder({ width: mm(57), height: mm(19), dpmm: 12 })
+    .ean8({ position: at, data: "1234567", height: dots(100) })
+    .upcA({ position: at, data: "07000002198", printCheckDigit: false })
+    .upcE({ position: at, data: "1230000045" })
+    .upcEanExtension({ position: at, data: "04414" })
+    .code93({ position: at, data: "ABC", printHri: false })
+    .codabar({ position: at, data: "123", start: "B", stop: "C" });
+
+  expect(label.toZPL()).toStrictEqual(expected.toZPL());
 });

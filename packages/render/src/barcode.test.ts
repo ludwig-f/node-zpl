@@ -188,6 +188,76 @@ describe("EAN-13", () => {
   });
 });
 
+describe("EAN-8, UPC and add-ons", () => {
+  test.each([
+    // Bars as wide as the symbol's modules, guards 13 dots longer
+    ["^FO100,100^BY2^B8N,100,N,N^FD1234567^FS", 100, 233, 100, 212],
+    ["^FO100,100^BY2^BUN,100,N,N^FD07000002198^FS", 100, 289, 100, 212],
+    ["^FO100,100^BY2^B9N,100,N,N^FD1230000045^FS", 100, 201, 100, 212],
+    // The add-on has no guards
+    ["^FO100,100^BY2^BSN,100,N,N^FD04414^FS", 100, 193, 100, 199],
+    ["^FO100,100^BY2^BSN,100,N,N^FD12^FS", 100, 139, 100, 199],
+  ])("%s", (body, left, right, top, bottom) => {
+    expect(bounds(body)).toStrictEqual({ left, right, top, bottom });
+  });
+
+  test("UPC-A prints its first and last digits outside the bars", () => {
+    const box = bounds("^FO100,100^BY2^BUN,100,Y,N^FD07000002198^FS");
+    expect(box.left).toBeLessThan(100);
+    expect(box.right).toBeGreaterThan(289);
+  });
+
+  test("UPC-A can leave out the check digit", () => {
+    const box = bounds("^FO100,100^BY2^BUN,100,Y,N,N^FD07000002198^FS");
+    expect(box.right).toBe(289);
+  });
+
+  test("the add-on prints its digits above the bars by default", () => {
+    const { bars, text } = parts("^FO100,100^BY2^BSN,100^FD04414^FS");
+    expect(text!.bottom).toBeLessThan(bars!.top);
+  });
+});
+
+describe("Code 93", () => {
+  test("is 9 modules per character with the check characters", () => {
+    // Start, 10 characters, 2 check characters, stop and the final bar
+    const box = bounds("^FO100,100^BY2^BAN,100,N,N^FD12345ABCDE^FS");
+    expect(box).toStrictEqual({
+      left: 100,
+      right: 100 + 127 * 2 - 1,
+      top: 100,
+      bottom: 199,
+    });
+  });
+
+  test("prints the data below the bars", () => {
+    const { bars, text } = parts("^FO100,100^BY2^BAN,100,Y,N^FD12345ABCDE^FS");
+    expect(text!.top).toBeGreaterThan(bars!.bottom);
+  });
+});
+
+describe("Codabar", () => {
+  test("uses ^BY's ratio for wide elements", () => {
+    const narrow = bounds("^FO100,100^BY2,2^BKN,N,100,N,N^FD123456^FS");
+    const wide = bounds("^FO100,100^BY2,3^BKN,N,100,N,N^FD123456^FS");
+    expect(narrow.left).toBe(100);
+    expect(wide.right).toBeGreaterThan(narrow.right);
+  });
+
+  test("prints the start and stop characters", () => {
+    const withText = parts("^FO100,100^BY2^BKN,N,100,Y,N,A,D^FD1^FS");
+    expect(withText.text).toBeDefined();
+  });
+});
+
+describe("^B0", () => {
+  test("draws the same as ^BO", () => {
+    expect(bounds("^FO100,100^B0N,4^FDhello^FS")).toStrictEqual(
+      bounds("^FO100,100^BON,4^FDhello^FS")
+    );
+  });
+});
+
 describe("Code 11", () => {
   test.each([
     // Two check digits unless asked for one; wide bars are ^BY's ratio wide
