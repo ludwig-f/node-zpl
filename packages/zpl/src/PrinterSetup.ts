@@ -1,7 +1,7 @@
 import ZplContent from "./ZplContent.js";
 import ZplError from "./ZplError.js";
 import type { StorageDevice } from "./ast.js";
-import type { Graphic } from "./types.js";
+import type { StoreFontOptions, StoreGraphicOptions } from "./options.js";
 
 class PrinterSetup extends ZplContent {
   /**
@@ -18,15 +18,8 @@ class PrinterSetup extends ZplContent {
 
   /**
    * Store a graphic on the printer, to be drawn with Label.storedGraphic
-   * @param options.name Name of the graphic, 1 to 8 characters
-   * @param options.graphic Graphic to store, e.g. from ImageConverter
-   * @param options.device Device to store the graphic on - defaults to "R" (DRAM)
    */
-  public storeGraphic(options: {
-    name: string;
-    graphic: Graphic;
-    device?: StorageDevice;
-  }): this {
+  public storeGraphic(options: StoreGraphicOptions): this {
     const { name, graphic, device = "R" } = options;
 
     if (name.length < 1 || name.length > 8) {
@@ -46,15 +39,8 @@ class PrinterSetup extends ZplContent {
   /**
    * Store a TrueType font on the printer, to be used with
    * `text({ font: { file: "R:NAME.TTF" } })`
-   * @param options.name Name of the font, 1 to 8 characters; it's stored as NAME.TTF
-   * @param options.data The .ttf file
-   * @param options.device Device to store the font on - defaults to "R" (DRAM)
    */
-  public storeFont(options: {
-    name: string;
-    data: Uint8Array;
-    device?: StorageDevice;
-  }): this {
+  public storeFont(options: StoreFontOptions): this {
     const { name, data, device = "R" } = options;
 
     if (name.length < 1 || name.length > 8) {

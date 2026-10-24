@@ -1,0 +1,160 @@
+---
+title: Label
+description: The Label builder from @zplkit/core, its methods and their options.
+---
+
+```ts
+import { Label, mm, dots, Orientation, ZebraFontFamily } from "@zplkit/core";
+```
+
+[Method calls](/docs/building-labels) shows how these fit together. Every method that draws returns the label, so calls can be chained.
+
+## new Label(options)
+
+<auto-type-table cwd path="../../packages/zpl/src/options.ts" name="LabelOptions" />
+
+## Drawing
+
+### text(options)
+
+Text in one of the printer's fonts or a font file. Characters ZPL would read as commands are escaped.
+
+<auto-type-table cwd path="../../packages/zpl/src/options.ts" name="TextOptions" />
+
+`font` takes:
+
+<auto-type-table cwd path="../../packages/zpl/src/options.ts" name="FontOptions" />
+
+### box(options)
+
+A box or line (`^GB`).
+
+<auto-type-table cwd path="../../packages/zpl/src/options.ts" name="BoxOptions" />
+
+### graphic(options)
+
+An image (`^GF`), for example from [ImageConverter](/docs/api/printer#imageconverter).
+
+<auto-type-table cwd path="../../packages/zpl/src/options.ts" name="GraphicOptions" />
+
+### storedGraphic(options)
+
+A graphic stored on the printer with [PrinterSetup](/docs/api/printer#printersetup) (`^XG`).
+
+<auto-type-table cwd path="../../packages/zpl/src/options.ts" name="StoredGraphicOptions" />
+
+### field(options)
+
+A field with any command, for elements without their own method. The command is added as written; the data is escaped.
+
+<auto-type-table cwd path="../../packages/zpl/src/options.ts" name="FieldOptions" />
+
+## Barcodes
+
+Every barcode takes a `position` and the `data` to encode, which is escaped for you. The linear ones also take a bar `height` and whether to print the data as text.
+
+### code11(options)
+
+Code 11 (`^B1`).
+
+<auto-type-table cwd path="../../packages/zpl/src/options.ts" name="Code11Options" />
+
+### code39(options)
+
+Code 39 (`^B3`). The data can be digits, capital letters, spaces and `- . $ / + %`.
+
+<auto-type-table cwd path="../../packages/zpl/src/options.ts" name="Code39Options" />
+
+### code128(options)
+
+Code 128 (`^BC`).
+
+<auto-type-table cwd path="../../packages/zpl/src/options.ts" name="Code128Options" />
+
+### interleaved2of5(options)
+
+Interleaved 2 of 5 (`^B2`). The data is digits; the printer adds a leading zero to an odd count.
+
+<auto-type-table cwd path="../../packages/zpl/src/options.ts" name="Interleaved2of5Options" />
+
+### ean13(options)
+
+EAN-13 (`^BE`). The data is 12 digits, and the printer adds the check digit.
+
+<auto-type-table cwd path="../../packages/zpl/src/options.ts" name="Ean13Options" />
+
+### pdf417(options)
+
+PDF417 (`^B7`).
+
+<auto-type-table cwd path="../../packages/zpl/src/options.ts" name="Pdf417Options" />
+
+### dataMatrix(options)
+
+Data Matrix (`^BX`).
+
+<auto-type-table cwd path="../../packages/zpl/src/options.ts" name="DataMatrixOptions" />
+
+### qrCode(options)
+
+QR code (`^BQ`). The error correction level is added to the data, as ZPL requires.
+
+<auto-type-table cwd path="../../packages/zpl/src/options.ts" name="QrCodeOptions" />
+
+### aztec(options)
+
+Aztec code (`^BO`).
+
+<auto-type-table cwd path="../../packages/zpl/src/options.ts" name="AztecOptions" />
+
+### maxiCode(options)
+
+MaxiCode (`^BD`), a fixed-size code used on parcels.
+
+<auto-type-table cwd path="../../packages/zpl/src/options.ts" name="MaxiCodeOptions" />
+
+## Settings
+
+### setDefaultFont(options)
+
+The font (`^CF`) for text that doesn't set one.
+
+<auto-type-table cwd path="../../packages/zpl/src/options.ts" name="DefaultFontOptions" />
+
+### setFieldOrientation(orientation)
+
+The orientation (`^FW`) of the fields that follow and don't give one.
+
+## Output
+
+| Method | Returns |
+| --- | --- |
+| `toZPL()` | The ZPL, closed with `^XZ` if it isn't already |
+| `lint()` | Problems the printer wouldn't report, as [`LintDiagnostic`](/docs/api/parsing#lintdiagnostic)s |
+| `validate(strict?)` | Nothing; throws a `ZplError` for unclosed fields, and with `strict` (the default) for unknown commands |
+| `commands` | The label's command nodes |
+
+## Lower level
+
+| Method | Adds |
+| --- | --- |
+| `add(...commands)` | Typed command nodes, as written. Nothing is escaped. |
+| `raw(zpl)` | Plain ZPL, as written. Nothing is escaped, so keep user input out. |
+| `open()`, `close()` | `^XA` and `^XZ`, for building several formats in one label |
+
+## Units
+
+Every length takes a unit, so millimeters and dots can't be mixed up.
+
+| Function | Returns |
+| --- | --- |
+| `mm(value)` | A length in millimeters, converted with the label's `dpmm` |
+| `dots(value)` | A length in printer dots, ZPL's own unit; whole numbers only |
+
+Both throw a `ZplError` for negative numbers.
+
+## Enums
+
+`Orientation` sets which way text and barcodes run: `Normal`, `Rotated90Degrees`, `Inverted180Degrees` or `BottomUp270Degrees`.
+
+`ZebraFontFamily` names the printer's fonts: `ZERO` for the scalable font 0, and `A` to `H` and `P` to `V` for the bitmap fonts.

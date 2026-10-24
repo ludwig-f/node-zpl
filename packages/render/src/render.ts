@@ -10,14 +10,15 @@ import type { Element } from "./layout.js";
 import type { Color } from "./raster.js";
 
 type RenderOptions = {
-  /** Label size in millimeters */
+  /** Label width in millimeters */
   widthMm: number;
+  /** Label height in millimeters */
   heightMm: number;
   /** Dots per millimeter: 6, 8, 12 or 24 */
   dpmm: number;
   /**
-   * Anti-alias edges instead of printing whole dots like a printer.
-   * Defaults to false.
+   * Anti-alias edges instead of printing whole dots like a printer
+   * @defaultValue false
    */
   antialias?: boolean;
   /**

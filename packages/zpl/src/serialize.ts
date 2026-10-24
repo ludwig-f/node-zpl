@@ -267,7 +267,7 @@ const serializeCommand = (command: Command): string => {
 /**
  * Serialize a list of command nodes to ZPL
  * @param commands Commands to serialize
- * @param options.minify Whether to put each command on its own line - defaults to true
+ * @param options.minify Leave out the line breaks between commands, true by default
  */
 const serialize = (
   commands: Command[],

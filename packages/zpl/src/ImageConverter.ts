@@ -4,8 +4,11 @@ import ZplError from "./ZplError.js";
 
 /** Decoded pixels, four bytes (red, green, blue, alpha) each, like ImageData */
 type Pixels = {
+  /** Width in pixels */
   width: number;
+  /** Height in pixels */
   height: number;
+  /** Red, green, blue and alpha for each pixel, row by row */
   data: ArrayLike<number>;
 };
 
@@ -65,10 +68,13 @@ const zplMapCodes = {
   400: "z",
 } as const;
 
+/** Converts PNG and JPEG images to ZPL graphics */
 class ImageConverter {
+  /** Compress the hex data with Zebra's run-length scheme, on by default */
   public compress = true;
   private blackLimit = 128;
 
+  /** How dark a pixel must be to print, in percent; 50 by default */
   public get blacknessLimitPercentage(): number {
     return (this.blackLimit * 100) / 255;
   }
@@ -184,11 +190,17 @@ class ImageConverter {
   }
 }
 
+/** A ZPL graphic, ready for `graphic()` or `PrinterSetup.storeGraphic()` */
 type ZplImage = {
+  /** Width in dots */
   width: number;
+  /** Height in dots */
   height: number;
+  /** Size of the graphic data in bytes */
   totalBytes: number;
+  /** Bytes in each row, 8 dots to a byte */
   bytesPerRow: number;
+  /** The graphic as hex, compressed when `compress` is on */
   data: string;
 };
 
